@@ -25,7 +25,10 @@ setup(
     install_requires=[
         'rdflib==6.1.1',
         'networkx==2.6.3',
-        'numpy==1.21.5'
+        'numpy==1.21.5',
+        'pandas==1.3.5',
+        'scipy==1.7.3',
+        'seaborn==0.11.2'
     ],
     setup_requires=['flake8']
 )
