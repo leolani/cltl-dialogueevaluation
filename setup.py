@@ -28,7 +28,10 @@ setup(
         'numpy==1.21.5',
         'pandas==1.3.5',
         'scipy==1.7.3',
-        'seaborn==0.11.2'
+        'seaborn==0.11.2',
+        'transformers=4.19.4',
+        'emissor=0.0.dev5',
+        'torch==1.11.0'
     ],
     setup_requires=['flake8']
 )

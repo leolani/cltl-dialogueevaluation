@@ -5,4 +5,5 @@ RDF_FOLDER = SCENARIO_FOLDER + f'rdf/2022-05-03-14-35/'
 
 evaluator = GraphEvaluator()
 
-evaluator.evaluate_conversation(SCENARIO_FOLDER, RDF_FOLDER, metrics_to_plot=['GROUP A - Average degree'])
+evaluator.evaluate_conversation(SCENARIO_FOLDER, RDF_FOLDER,
+                                metrics_to_plot=['GROUP A - Average degree', 'GROUP A - Sparsity'])

@@ -1,7 +1,7 @@
-
+import re
 
 from transformers import pipeline, AutoTokenizer
-import re
+
 
 ## USR Masked Language Model scoring
 
@@ -39,20 +39,18 @@ class USR_MLM:
         self.__model = pipeline("fill-mask", model=self.__model_name)
         self.__model.top_k = top_results  ### we check against the top results
 
-
     def mask_target_sentence(self, context, target):
         masked_targets = []
         target_tokens = re.split(' ', target)
         for index, token in enumerate(target_tokens):
-            sequence = context+" "
+            sequence = context + " "
             for token in target_tokens[:index]:
-                sequence+= token+" "
+                sequence += token + " "
             sequence += self.__tokenizer.mask_token
-            for token in target_tokens[index+1:]:
-                sequence+= " "+token
+            for token in target_tokens[index + 1:]:
+                sequence += " " + token
             masked_targets.append(sequence)
         return masked_targets, target_tokens
-
 
     def sentence_likelihood(self, context, target):
         masked_targets, target_tokens = self.mask_target_sentence(context, target)
@@ -77,11 +75,11 @@ class USR_MLM:
 
         return likelihood, expected_target, max_likelihood
 
-    def score_pairs_for_likelihood(self, turns:[]):
+    def score_pairs_for_likelihood(self, turns: []):
         for context, target in turns:
-            llh, best_sentence, max_score = self.sentence_likelihood(self, context, target)
-            print(turn)
+            llh, best_sentence, max_score = self.sentence_likelihood(context, target)
             print('Likelihood:', llh, 'Max score:', max_score, 'Best sentence:', best_sentence)
+
 
 if __name__ == "__main__":
     turns = [('Do you have a cat?', 'I do not have a cat'),  # good
@@ -90,12 +88,11 @@ if __name__ == "__main__":
              ('Do you have a cat?', 'I want a turtle')]  # what are we even saying
     ###### Likelihood
     top_results = 20
-    model_path = 'adamlin/usr-topicalchat-roberta_ft'
-    model_path = 'xlm-roberta-base'
+    # model_path = 'adamlin/usr-topicalchat-roberta_ft'
+    # model_path = 'xlm-roberta-base'
     model_path = 'roberta-base'
     model_mlm = USR_MLM(model_path, top_results)
     for context, target in turns:
         llh, best_sentence, max_score = model_mlm.sentence_likelihood(context, target)
         print(target)
         print('Likelihood:', llh, 'Max score:', max_score, 'Best sentence:', best_sentence)
-
