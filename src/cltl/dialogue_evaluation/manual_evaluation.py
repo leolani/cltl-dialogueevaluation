@@ -9,27 +9,25 @@ from cltl.dialogue_evaluation.api import BasicEvaluator
 
 
 class ManualEvaluator(BasicEvaluator):
-    def __init__(self, max_context=300):
+    def __init__(self):
         """Creates an evaluator that will create placeholders for manual evaluation
         params
         returns: None
         """
         super(ManualEvaluator, self).__init__()
-        self.max_context = max_context
 
-        self._log.debug(f"Likelihood Evaluator ready")
+        self._log.debug(f"Manual Evaluator ready")
 
     def evaluate_conversation(self, scenario_folder, scenario_id, metrics_to_plot=None):
         ### Create the scenario folder, the json files and a scenarioStorage and scenario in memory
         scenario_storage = ScenarioStorage(scenario_folder)
         scenario_ctrl = scenario_storage.load_scenario(scenario_id)
         signals = scenario_ctrl.get_signals(Modality.TEXT)
-        turns, speakers = text_util.get_turns_with_context_from_signals(signals, self.max_context)
+        turns, speakers = text_util.get_turns_with_context_from_signals(signals)
 
         print('SCENARIO_FOLDER:', scenario_folder)
         print('Nr of turns:', len(turns), ' extracted from scenario: ', scenario_id)
         print('Speakers:', speakers)
-        print('Max context:', self.max_context)
 
         # Get likelihood scored
         speaker_turns = {k: [] for k in speakers}
@@ -64,8 +62,7 @@ class ManualEvaluator(BasicEvaluator):
         return pd.DataFrame(rows)
 
     def _save(self, df, evaluation_folder):
-        file = "manual_evaluation.csv"
-        df.to_csv(evaluation_folder / file, index=False)
+        df.to_csv(evaluation_folder / "manual_evaluation.csv", index=False)
 
     # def plot_metrics_progression(self, metrics, convo_dfs, evaluation_folder):
     #     # Plot metrics progression per conversation
