@@ -48,6 +48,7 @@ class StatisticalEvaluator(BasicEvaluator):
         # speaker_turns = {k: [] for k in speakers}
         #df = self._calculate_metrics(turns, speaker_turns)
 
+        #@TODO make a nicer table
         df = pd.DataFrame(rows)
         # Save
         evaluation_folder = Path(scenario_folder + '/' + scenario_id + '/evaluation/')
