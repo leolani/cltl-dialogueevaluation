@@ -1,0 +1,53 @@
+{
+  "@type": "Scenario",
+  "id": "d0fc872d-8199-46a2-94e1-aa739bc9ed7c",
+  "signals": {
+    "image": "./image.json",
+    "text": "./text.json",
+    "audio": "./audio.json"
+  },
+  "context": {
+    "speaker": {
+      "uri": "http://cltl.nl/leolani/world/Piek",
+      "name": "piek"
+    },
+    "@type": "ScenarioContext",
+    "agent": {
+      "uri": "http://cltl.nl/leolani/world/leolani",
+      "name": "Leolani"
+    },
+    "location": "{'ip': '92.108.87.43', 'hostname': '92-108-87-43.cable.dynamic.v4.ziggo.nl', 'city': 'Amsterdam', 'region': 'North Holland', 'country': 'NL', 'loc': '52.3059,5.0163', 'org': 'AS33915 Vodafone Libertel B.V.', 'postal': '1109', 'timezone': 'Europe/Amsterdam', 'readme': 'https://ipinfo.io/missingauth'}",
+    "location_id": "16e294dc-20bc-4a55-8d95-413f6dbd1fe5",
+    "objects": [
+      "person",
+      "tie",
+      "vase",
+      "bottle",
+      "cell phone"
+    ],
+    "@context": {
+      "ScenarioContext": "https://emissor.org#ScenarioContext",
+      "id": "@id",
+      "agent": "https://emissor.org#agent"
+    },
+    "persons": [
+      {
+        "uri": "http://cltl.nl/leolani/world/Piek",
+        "name": "piek"
+      }
+    ],
+    "_py_type": "cltl.combot.event.emissor-LeolaniContext"
+  },
+  "ruler": {
+    "container_id": "d0fc872d-8199-46a2-94e1-aa739bc9ed7c",
+    "end": null,
+    "start": "2022-10-17"
+  },
+  "@context": {
+    "Scenario": "https://emissor.org#Scenario",
+    "id": "@id",
+    "context": "https://emissor.org#context",
+    "signals": "https://emissor.org#signals",
+    "ruler": "https://emissor.org#ruler"
+  }
+}
