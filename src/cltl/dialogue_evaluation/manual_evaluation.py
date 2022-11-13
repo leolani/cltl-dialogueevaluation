@@ -23,7 +23,7 @@ class ManualEvaluator(BasicEvaluator):
         scenario_storage = ScenarioStorage(scenario_folder)
         scenario_ctrl = scenario_storage.load_scenario(scenario_id)
         signals = scenario_ctrl.get_signals(Modality.TEXT)
-        turns, speakers = text_util.get_turns_with_context_from_signals(signals)
+        ids, turns, speakers = text_util.get_turns_with_context_from_signals(signals)
 
         print('SCENARIO_FOLDER:', scenario_folder)
         print('Nr of turns:', len(turns), ' extracted from scenario: ', scenario_id)
@@ -37,7 +37,8 @@ class ManualEvaluator(BasicEvaluator):
         # Save
         evaluation_folder = Path(scenario_folder + '/' + scenario_id + '/evaluation/')
         evaluation_folder.mkdir(parents=True, exist_ok=True)
-        self._save(df, evaluation_folder)
+        self._save(df, evaluation_folder, scenario_id)
+        self._create_dialogue_summary_file(evaluation_folder, scenario_id)
         #
         # if metrics_to_plot:
         #     self.plot_metrics_progression(metrics_to_plot, [full_df], evaluation_folder)
@@ -52,7 +53,7 @@ class ManualEvaluator(BasicEvaluator):
             target = turn[1]
             cue = turn[2]
             speaker = turn[3]
-            rows.append({"Turn": index, "Speaker": speaker, "Cue": cue, "Response": target, "Context": context,
+            rows.append({"Turn": index, "Speaker": speaker, "Cue": cue, "Response": target, "Reference Response": "", "Context": context,
                          "Overall Human Rating": '', "Interesting": '', "Engaging": '', "Specific": '', "Relevant": '',
                          "Correct": '', "Semantically Appropriate": '', "Understandable": '', "Fluent": ''})
 
@@ -61,8 +62,15 @@ class ManualEvaluator(BasicEvaluator):
 
         return pd.DataFrame(rows)
 
-    def _save(self, df, evaluation_folder):
-        df.to_csv(evaluation_folder / "manual_evaluation.csv", index=False)
+    def _save(self, df, evaluation_folder, scenario_id):
+        file_name =  scenario_id+"_manual_evaluation.csv"
+        df.to_csv(evaluation_folder / file_name, index=False)
+
+    def _create_dialogue_summary_file(self, evaluation_folder, scenario_id):
+        file_name =  scenario_id+"_dialogue_summary.txt"
+       # Create an empty file for the dialogue summary
+        with open(evaluation_folder / file_name, 'w') as fp:
+            pass
 
     # def plot_metrics_progression(self, metrics, convo_dfs, evaluation_folder):
     #     # Plot metrics progression per conversation

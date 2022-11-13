@@ -21,35 +21,47 @@ class StatisticalEvaluator(BasicEvaluator):
 
         self._log.debug(f"Statistical Evaluator ready")
 
-    def evaluate_conversation(self, scenario_folder, scenario_id, metrics_to_plot=None):
-        ### Create the scenario folder, the json files and a scenarioStorage and scenario in memory
-        scenario_storage = ScenarioStorage(scenario_folder)
-        scenario_ctrl = scenario_storage.load_scenario(scenario_id)
+    def get_statistics_from_text_annotation(self, scenario_ctrl, scenario_id):
+
         # TODO: fix next line, it's broken
         text_signals = scenario_ctrl.get_signals(Modality.TEXT)
         ids, turns, speakers = text_util.get_turns_with_context_from_signals(text_signals)
 
-        print('SCENARIO_FOLDER:', scenario_folder)
         print('Nr of turns:', len(turns), ' extracted from scenario: ', scenario_id)
         print('Speakers:', speakers)
 
         type_dict_text, id_dict_text = self._get_annotation_dict(text_signals)
 
-        rows = self._get_stats_from_text_dict(type_dict_text)
+        type_rows = self._get_stats_from_text_dict(type_dict_text)
+        value_rows = self._get_stats_from_text_dict(id_dict_text)
+        return type_rows, value_rows
 
+    def get_statistics_from_image_annotation(self, scenario_ctrl, scenario_id):
 
         image_signals = scenario_ctrl.get_signals(Modality.IMAGE)
         print('Nr of perceptions:', len(image_signals), ' extracted from scenarion: ', scenario_id)
 
         type_dict_image, id_dict_text = self._get_annotation_dict(image_signals)
-        rows.extend(self._get_stats_from_image_dict(type_dict_image))
+        type_rows = self._get_stats_from_text_dict(type_dict_image)
+        value_rows = self._get_stats_from_text_dict(id_dict_text)
+        return type_rows, value_rows
+
+    def analyse_interaction(self, scenario_folder, scenario_id, metrics_to_plot=None):
+        ### Create the scenario folder, the json files and a scenarioStorage and scenario in memory
+        scenario_storage = ScenarioStorage(scenario_folder)
+        scenario_ctrl = scenario_storage.load_scenario(scenario_id)
+        print('SCENARIO_FOLDER:', scenario_folder)
+        print('SCENARIO_ID:', scenario_id)
+
+        text_type_rows, text_id_rows = self.get_statistics_from_text_annotation(scenario_ctrl, scenario_id)
+       # rows.extend(self.get_statistics_from_image_annotation(scenario_ctrl, scenario_id))
 
         # Get likelihood scored
         # speaker_turns = {k: [] for k in speakers}
         #df = self._calculate_metrics(turns, speaker_turns)
 
         #@TODO make a nicer table
-        df = pd.DataFrame(rows)
+        df = pd.DataFrame(text_id_rows)
         # Save
         evaluation_folder = Path(scenario_folder + '/' + scenario_id + '/evaluation/')
         evaluation_folder.mkdir(parents=True, exist_ok=True)
@@ -60,14 +72,18 @@ class StatisticalEvaluator(BasicEvaluator):
             all_annotations = []
             type_dict = {}
             id_dict = {}
+            time_dict = {}
             for signal in signals:
                 mentions = signal.mentions
                 id = signal.id
+                timestamp = signal.time.start
                 for mention in mentions:
                     annotations = mention.annotations
-                    all_annotations.append((id, annotations))
+                    all_annotations.append((timestamp, annotations))
 
             print('Annotations:', len(all_annotations))
+            # for a in all_annotations:
+            #     print(a)
             for pair in all_annotations:
                 id_key = pair[0]
                 anno = pair[1]
@@ -89,27 +105,31 @@ class StatisticalEvaluator(BasicEvaluator):
         # Iterate turns
         rows = []
         for key in dict:
+         #   print('key', key)
             if not key=='python-type:builtins.NoneType':
-                values = dict.get(key)
+                annotations = dict.get(key)
                 value_list = []
-                for value_pair in values:
-                    # pair1 = value_pair[0]
-                    pair2 = value_pair[1]
-                    if isinstance(pair2, str):
-                        value_list.append(pair2)
+                for key, annotation in annotations:
+                    # if isinstance(value, [str, int, bool]):
+                    if isinstance(annotation, str):
+                        value_list.append(annotation)
                     else:
-                        if key == 'python-type:cltl.object_recognition.api.Object':
-                            value_list.append(pair2.type)
-                        elif key == 'python-type:cltl.emotion_extraction.api.Emotion':
-                            value_list.append(pair2.value)
-                        elif key == 'VectorIdentity':
-                            value_list.append(pair2.value)
-                        else:
-                            print('Unknown type', pair2)
-
-                counts = Counter(value_list)
-                print(key, counts)
-                rows.append([key, value_list])
+                        try:
+                            # value is the correct python object
+                            value_dict = vars(annotation)
+                            print('value_dict', value_dict)
+                        except:
+                            # value is a namedtuple
+                            value_dict = annotation._asdict()
+                            if "value" in value_dict:
+                                value_list.append(value_dict['value'])
+                            elif "type" in value_dict:
+                                value_list.append(value_dict['type'])
+                            elif "pos" in value_dict:
+                                value_list.append(value_dict['pos'])
+                    counts = Counter(value_list)
+                    print(key, counts)
+                    rows.append([key, value_list])
 
         return rows
 
@@ -117,22 +137,29 @@ class StatisticalEvaluator(BasicEvaluator):
         # Iterate turns
         rows = []
         for key in dict:
-            values = dict.get(key)
+            annotations = dict.get(key)
             value_list = []
-            for value_pair in values:
-                # pair1 = value_pair[0]
-                pair2 = value_pair[1]
-                if isinstance(pair2, str):
-                    value_list.append(pair2)
+            for key, annotation in annotations:
+                #if isinstance(value, [str, int, bool]):
+                if isinstance(annotation, str):
+                    value_list.append(annotation)
                 else:
-                    if not pair2.value:
-                        value_list.append(pair2.type)
-                    else:
-                        value_list.append(pair2.type+":"+pair2.value)
-
-            counts = Counter(value_list)
-            print(key, counts)
-            rows.append([key, counts.items()])
+                    try:
+                        # value is the correct python object
+                        value_dict = vars(annotation)
+                        print('value_dict', value_dict)
+                    except:
+                        # value is a namedtuple
+                        value_dict = annotation._asdict()
+                        if "value" in value_dict:
+                            value_list.append(value_dict['value'])
+                        elif "type" in value_dict:
+                            value_list.append(value_dict['type'])
+                        elif "pos" in value_dict:
+                            value_list.append(value_dict['pos'])
+                counts = Counter(value_list)
+                print(key, counts)
+                rows.append([key, counts.items()])
         return rows
 
 
@@ -146,8 +173,9 @@ class StatisticalEvaluator(BasicEvaluator):
 
         return pd.DataFrame(rows)
 
-    def _save(self, df, evaluation_folder):
-        df.to_csv(evaluation_folder / "statistical_evaluation.csv", index=False)
+    def _save(self, df, evaluation_folder, scenario_id):
+        file_name =  scenario_id+"statistical_analysis.csv"
+        df.to_csv(evaluation_folder / file_name, index=False)
 
 
 #Annotation(type='python-type:cltl.emotion_extraction.api.Emotion', value=JSON(type='GO', confidence=0.7935183048248291, value='anger'),
