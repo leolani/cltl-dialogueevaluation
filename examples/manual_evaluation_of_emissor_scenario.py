@@ -1,6 +1,10 @@
 from cltl.dialogue_evaluation.manual_evaluation import ManualEvaluator
+import os
 
 evaluator = ManualEvaluator()
 
-emissor_path='/Users/piek/Desktop/d-Leolani/docker-configs/chatonly-docker/storage/emissor'
-evaluator.evaluate_conversation(emissor_path, '2fe112e2-31cf-4aef-9011-d237135e53fb')
+emissor_path='/Users/piek/Desktop/t-MA-Combots-2022/assignments/assignment-1/interaction1'
+
+for path in os.listdir(emissor_path):
+    if os.path.isdir(os.path.join(emissor_path, path)):
+        evaluator.evaluate_conversation(emissor_path, path)

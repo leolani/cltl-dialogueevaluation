@@ -65,7 +65,7 @@ class StatisticalEvaluator(BasicEvaluator):
         # Save
         evaluation_folder = Path(scenario_folder + '/' + scenario_id + '/evaluation/')
         evaluation_folder.mkdir(parents=True, exist_ok=True)
-        self._save(df, evaluation_folder)
+        self._save(df, evaluation_folder, scenario_id)
 
 
     def _get_annotation_dict (self, signals:[Signal]):
