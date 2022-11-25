@@ -3,7 +3,7 @@ import os
 
 evaluator = ManualEvaluator()
 
-emissor_path='/Users/piek/Desktop/t-MA-Combots-2022/assignments/assignment-1/interaction1'
+emissor_path='/Users/piek/Desktop/t-MA-Combots-2022/assignments/interaction2'
 
 for path in os.listdir(emissor_path):
     if os.path.isdir(os.path.join(emissor_path, path)):
