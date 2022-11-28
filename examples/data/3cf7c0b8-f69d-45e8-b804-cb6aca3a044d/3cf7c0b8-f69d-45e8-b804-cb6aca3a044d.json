@@ -1,0 +1,54 @@
+{
+  "ruler": {
+    "start": 1668600521005,
+    "container_id": "3cf7c0b8-f69d-45e8-b804-cb6aca3a044d",
+    "@type": "TemporalRuler",
+    "end": 1668600997275,
+    "@context": {
+      "TemporalRuler": "https://emissor.org#TemporalRuler",
+      "id": "@id",
+      "start": "https://emissor.org#start",
+      "end": "https://emissor.org#end",
+      "container_id": {
+        "@id": "https://emissor.org#container_id",
+        "@type": "@id"
+      }
+    },
+    "_py_type": "emissor.representation.container-TemporalRuler"
+  },
+  "@type": "Scenario",
+  "context": {
+    "location_id": "38b64938-19e4-4ad1-a65a-578e0120c5f5",
+    "agent": {
+      "uri": "http://cltl.nl/leolani/world/leolani",
+      "name": "Leolani"
+    },
+    "persons": [],
+    "@type": "ScenarioContext",
+    "location": "{'ip': '130.37.57.86', 'hostname': 'feweb57086.feweb.vu.nl', 'city': 'Amsterdam', 'region': 'North Holland', 'country': 'NL', 'loc': '52.3556,4.7907', 'org': 'AS1103 SURF B.V.', 'postal': '1069', 'timezone': 'Europe/Amsterdam', 'readme': 'https://ipinfo.io/missingauth'}",
+    "objects": [],
+    "@context": {
+      "ScenarioContext": "https://emissor.org#ScenarioContext",
+      "id": "@id",
+      "agent": "https://emissor.org#agent"
+    },
+    "speaker": {
+      "uri": "http://cltl.nl/leolani/world/Selene",
+      "name": "Selene"
+    },
+    "_py_type": "cltl.combot.event.emissor-LeolaniContext"
+  },
+  "signals": {
+    "image": "./image.json",
+    "text": "./text.json",
+    "audio": "./audio.json"
+  },
+  "id": "3cf7c0b8-f69d-45e8-b804-cb6aca3a044d",
+  "@context": {
+    "Scenario": "https://emissor.org#Scenario",
+    "id": "@id",
+    "context": "https://emissor.org#context",
+    "signals": "https://emissor.org#signals",
+    "ruler": "https://emissor.org#ruler"
+  }
+}

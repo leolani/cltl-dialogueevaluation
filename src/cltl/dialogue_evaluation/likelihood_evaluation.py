@@ -15,7 +15,7 @@ class LikelihoodEvaluator(BasicEvaluator):
     def __init__(self, model_path_mlm, max_context=300, len_top_tokens=20):
         """Creates an evaluator that will use USR Masked Language Model scoring to approximate the quality of a conversation, across turns.
 
-        We use the the Roberta model that was pretrained with the TopicalChat data by the USR team
+        We use the Roberta model that was pretrained with the TopicalChat data by the USR team
         as a model for gettting the averaged token likelihood of the target sentence.
         The function *sentence_likelihood* also returns the most likley sentence according to the model
         and the averaged score for the mostly likely tokens.
@@ -42,7 +42,7 @@ class LikelihoodEvaluator(BasicEvaluator):
         self._log.debug(f"Likelihood Evaluator ready")
 
     def evaluate_conversation(self, scenario_folder, scenario_id, metrics_to_plot=None):
-        ### Create the scenario folder, the json files and a scenarioStorage and scenario in memory
+        # Create the scenario folder, the json files and a scenarioStorage and scenario in memory
         scenario_storage = ScenarioStorage(scenario_folder)
         scenario_ctrl = scenario_storage.load_scenario(scenario_id)
         signals = scenario_ctrl.get_signals(Modality.TEXT)
@@ -62,7 +62,7 @@ class LikelihoodEvaluator(BasicEvaluator):
         avg_df = self._average_metrics(speakers, turns, speaker_mlm_scores, speaker_mlm_max_scores)
 
         # Save
-        evaluation_folder = Path(scenario_folder + '/' + scenario_id + '/evaluation/')
+        evaluation_folder = Path(scenario_folder / scenario_id / 'evaluation')
         evaluation_folder.mkdir(parents=True, exist_ok=True)
         self._save(df, avg_df, evaluation_folder)
         #
@@ -143,7 +143,7 @@ class LikelihoodEvaluator(BasicEvaluator):
 
         ax = plt.gca()
         plt.xlim(0)
-        plt.xticks(ax.get_xticks()[::5], rotation="045")
+        plt.xticks(ax.get_xticks()[::5], rotation=45)
 
         plot_file = evaluation_folder / f"{xlabel}.png"
         print(plot_file)
