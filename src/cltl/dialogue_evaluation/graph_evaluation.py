@@ -25,7 +25,7 @@ class GraphEvaluator(BasicEvaluator):
     def evaluate_conversation(self, scenario_folder, rdf_folder, metrics_to_plot=None):
         # Read mapping of rdf log file to turn
         map_emissor_scenarios(scenario_folder, rdf_folder)
-        full_df = pd.read_json(scenario_folder + f'turn_to_trig_file.json')
+        full_df = pd.read_json(scenario_folder / f'turn_to_trig_file.json')
 
         # Recreate conversation and score graph
         rdf_count = 0
@@ -33,8 +33,15 @@ class GraphEvaluator(BasicEvaluator):
         for idx, row in full_df.iterrows():
             print(f"Processing turn {row['Turn']}/{total_turns}")
 
+            # If first row and no graph
+            if idx == 0 and not row['rdf_file']:
+                # Calculate metrics on empty graph
+                brain_as_graph = ConjunctiveGraph()
+                brain_as_netx = rdflib_to_networkx_multidigraph(brain_as_graph)
+                full_df = self._calculate_metrics(brain_as_graph, brain_as_netx, full_df, idx)
+
             # if row has a file to rdf, process it and calculate metrics
-            if row['rdf_file']:
+            elif row['rdf_file']:
                 for file in row['rdf_file']:
                     # Update count
                     rdf_count += 1
@@ -46,7 +53,7 @@ class GraphEvaluator(BasicEvaluator):
 
                     # Add new
                     print(f"\tAdding triples to brains")
-                    brain_as_graph.parse(rdf_folder + file, format='trig')
+                    brain_as_graph.parse(rdf_folder / file, format='trig')
                     brain_as_netx = rdflib_to_networkx_multidigraph(brain_as_graph)
 
                     # Calculate metrics (only when needed! otherwise copy row)
@@ -57,7 +64,7 @@ class GraphEvaluator(BasicEvaluator):
                 full_df = self._copy_metrics(full_df, idx)
 
         # Save
-        evaluation_folder = Path(scenario_folder + 'evaluation/')
+        evaluation_folder = Path(scenario_folder / 'evaluation/')
         evaluation_folder.mkdir(parents=True, exist_ok=True)
         self._save(full_df, evaluation_folder)
 
@@ -75,13 +82,14 @@ class GraphEvaluator(BasicEvaluator):
         # df.loc[idx, 'GROUP A - Average betweenness'] = get_avg_betweenness(brain_as_netx)
         df.loc[idx, 'GROUP A - Average degree connectivity'] = get_degree_connectivity(brain_as_netx)
         df.loc[idx, 'GROUP A - Average assortativity'] = get_assortativity(brain_as_netx)  # good
-        df.loc[idx, 'GROUP A - Average node connectivity'] = get_node_connectivity(brain_as_netx)
+        df.loc[idx, 'GROUP A - Average node connectivity'] = get_node_connectivity(brain_as_netx) \
+            if get_count_nodes(brain_as_netx) > 0 else 0
         df.loc[idx, 'GROUP A - Number of components'] = get_number_components(brain_as_netx)
         df.loc[idx, 'GROUP A - Number of strong components'] = get_assortativity(brain_as_netx)
         # df.loc[idx, 'GROUP A - Shortest path'] = get_shortest_path(brain_as_netx)
         df.loc[idx, 'GROUP A - Centrality entropy'] = get_entropy_centr(brain_as_netx)
         df.loc[idx, 'GROUP A - Closeness entropy'] = get_entropy_clos(brain_as_netx)
-        df.loc[idx, 'GROUP A - Sparseness'] = get_sparseness(brain_as_netx)  # good
+        df.loc[idx, 'GROUP A - Sparseness'] = get_sparseness(brain_as_netx) if get_count_nodes(brain_as_netx) > 0 else 0
         ####
         print(f"\tCalculating RDF graph metrics")
         df.loc[idx, 'GROUP B - Total classes'] = get_number_classes(brain_as_graph)
@@ -145,78 +153,42 @@ class GraphEvaluator(BasicEvaluator):
 
     @staticmethod
     def _copy_metrics(df, idx):
+        existing_columns = df.columns
+        group_a = ['GROUP A - Total nodes', 'GROUP A - Total edges', 'GROUP A - Average degree',
+                   'GROUP A - Average degree centrality', 'GROUP A - Average closeness',
+                   'GROUP A - Average betweenness',
+                   'GROUP A - Average degree connectivity', 'GROUP A - Average assortativity',
+                   'GROUP A - Average node connectivity', 'GROUP A - Number of components',
+                   'GROUP A - Number of strong components', 'GROUP A - Shortest path', 'GROUP A - Centrality entropy',
+                   'GROUP A - Closeness entropy', 'GROUP A - Sparseness']
+
+        group_b = ['GROUP B - Total classes', 'GROUP B - Total properties', 'GROUP B - Total instances',
+                   'GROUP B - Total object properties', 'GROUP B - Total data properties',
+                   'GROUP B - Total equivalent class properties', 'GROUP B - Total subclass properties',
+                   'GROUP B - Total inverse entities', 'GROUP B - Ratio of inverse relations',
+                   'GROUP B - Property class ratio', 'GROUP B - Average population', 'GROUP B - Class property ratio',
+                   'GROUP B - Attribute richness', 'GROUP B - Inheritance richness', 'GROUP B - Relationship richness',
+                   'GROUP B - Object properties ratio', 'GROUP B - Datatype properties ratio',
+                   'GROUP B - Total role assertions', 'GROUP B - Total general concept inclusions',
+                   'GROUP B - Total domain axioms', 'GROUP B - Total range axioms', 'GROUP B - Total role inclusions',
+                   'GROUP B - Total axioms', 'GROUP B - Total aBox axioms', 'GROUP B - Total tBox axioms'
+                   ]
+
+        group_c = ['GROUP C - Total triples', 'GROUP C - Total world instances', 'GROUP C - Total claims',
+                   'GROUP C - Total perspectives', 'GROUP C - Total mentions', 'GROUP C - Total conflicts',
+                   'GROUP C - Total sources', 'GROUP C - Total interactions', 'GROUP C - Total utterances',
+                   'GROUP C - Ratio claim to triples', 'GROUP C - Ratio perspectives to triples',
+                   'GROUP C - Ratio conflicts to triples', 'GROUP C - Ratio perspectives to claims',
+                   'GROUP C - Ratio mentions to claims', 'GROUP C - Ratio conflicts to claims',
+                   'GROUP C - Average perspectives per claim', 'GROUP C - Average mentions per claim',
+                   'GROUP C - Average turns per interaction', 'GROUP C - Average claims per source',
+                   'GROUP C - Average perspectives per source'
+                   ]
+
         print(f"\tCopying graph metrics")
-        df.loc[idx, 'GROUP A - Total nodes'] = df.loc[idx - 1, 'GROUP A - Total nodes']
-        df.loc[idx, 'GROUP A - Total edges'] = df.loc[idx - 1, 'GROUP A - Total edges']
-        df.loc[idx, 'GROUP A - Average degree'] = df.loc[idx - 1, 'GROUP A - Average degree']
-        df.loc[idx, 'GROUP A - Average degree centrality'] = df.loc[idx - 1, 'GROUP A - Average degree centrality']
-        df.loc[idx, 'GROUP A - Average closeness'] = df.loc[idx - 1, 'GROUP A - Average closeness']
-        # df.loc[idx, 'GROUP A - Average betweenness'] = df.loc[idx-1, 'GROUP A - Average betweenness']
-        df.loc[idx, 'GROUP A - Average degree connectivity'] = df.loc[idx - 1, 'GROUP A - Average degree connectivity']
-        df.loc[idx, 'GROUP A - Average assortativity'] = df.loc[idx - 1, 'GROUP A - Average assortativity']
-        df.loc[idx, 'GROUP A - Average node connectivity'] = df.loc[idx - 1, 'GROUP A - Average node connectivity']
-        df.loc[idx, 'GROUP A - Number of components'] = df.loc[idx - 1, 'GROUP A - Number of components']
-        df.loc[idx, 'GROUP A - Number of strong components'] = df.loc[idx - 1, 'GROUP A - Number of strong components']
-        # df.loc[idx, 'GROUP A - Shortest path'] = df.loc[idx-1, 'GROUP A - Shortest path']
-        df.loc[idx, 'GROUP A - Centrality entropy'] = df.loc[idx - 1, 'GROUP A - Centrality entropy']
-        df.loc[idx, 'GROUP A - Closeness entropy'] = df.loc[idx - 1, 'GROUP A - Closeness entropy']
-        df.loc[idx, 'GROUP A - Sparseness'] = df.loc[idx - 1, 'GROUP A - Sparseness']
-
-        df.loc[idx, 'GROUP B - Total classes'] = df.loc[idx - 1, 'GROUP B - Total classes']
-        df.loc[idx, 'GROUP B - Total properties'] = df.loc[idx - 1, 'GROUP B - Total properties']
-        # df.loc[idx, 'GROUP B - Total instances']  = df.loc[idx - 1, 'GROUP B - Total instances']
-        # df.loc[idx, 'GROUP B - Total object properties']  = df.loc[idx - 1, 'GROUP B - Total object properties']
-        # df.loc[idx, 'GROUP B - Total data properties']  = df.loc[idx - 1, 'GROUP B - Total data properties']
-        # df.loc[idx, 'GROUP B - Total equivalent class properties']  = df.loc[idx - 1, 'GROUP B - Total equivalent class properties']
-        # df.loc[idx, 'GROUP B - Total subclass properties']  = df.loc[idx - 1, 'GROUP B - Total subclass properties']
-        # df.loc[idx, 'GROUP B - Total entities']  = df.loc[idx - 1, 'GROUP B - Total entities']
-        # df.loc[idx, 'GROUP B - Total inverse entities']  = df.loc[idx - 1, 'GROUP B - Total inverse entities']
-        # df.loc[idx, 'GROUP B - Ratio of inverse relations']  = df.loc[idx - 1, 'GROUP B - Ratio of inverse relations']
-        # df.loc[idx, 'GROUP B - Property class ratio']  = df.loc[idx - 1, 'GROUP B - Property class ratio']
-        df.loc[idx, 'GROUP B - Average population'] = df.loc[idx - 1, 'GROUP B - Average population']
-        # df.loc[idx, 'GROUP B - Class property ratio']  = df.loc[idx - 1, 'GROUP B - Class property ratio']
-        df.loc[idx, 'GROUP B - Attribute richness'] = df.loc[idx - 1, 'GROUP B - Attribute richness']
-        # df.loc[idx, 'GROUP B - Inheritance richness']  = df.loc[idx - 1, 'GROUP B - Inheritance richness']
-        df.loc[idx, 'GROUP B - Relationship richness'] = df.loc[idx - 1, 'GROUP B - Relationship richness']
-        # df.loc[idx, 'GROUP B - Object properties ratio']  = df.loc[idx - 1, 'GROUP B - Object properties ratio']
-        # df.loc[idx, 'GROUP B - Datatype properties ratio']  = df.loc[idx - 1, 'GROUP B - Datatype properties ratio']
-        # df.loc[idx, 'GROUP B - Total concept assertions']  = df.loc[idx - 1, 'GROUP B - Total concept assertions']
-        # df.loc[idx, 'GROUP B - Total role assertions']  = df.loc[idx - 1, 'GROUP B - Total role assertions']
-        # df.loc[idx, 'GROUP B - Total general concept inclusions']  = df.loc[idx - 1, 'GROUP B - Total general concept inclusions']
-        # df.loc[idx, 'GROUP B - Total domain axioms']  = df.loc[idx - 1, 'GROUP B - Total domain axioms']
-        # df.loc[idx, 'GROUP B - Total range axioms']  = df.loc[idx - 1, 'GROUP B - Total range axioms']
-        # df.loc[idx, 'GROUP B - Total role inclusions']  = df.loc[idx - 1, 'GROUP B - Total role inclusions']
-        df.loc[idx, 'GROUP B - Total axioms'] = df.loc[idx - 1, 'GROUP B - Total axioms']
-        # df.loc[idx, 'GROUP B - Total aBox axioms']  = df.loc[idx - 1, 'GROUP B - Total aBox axioms']
-        # df.loc[idx, 'GROUP B - Total tBox axioms']  = df.loc[idx - 1, 'GROUP B - Total tBox axioms']
-
-        df.loc[idx, 'GROUP C - Total triples'] = df.loc[idx - 1, 'GROUP C - Total triples']
-        df.loc[idx, 'GROUP C - Total world instances'] = df.loc[idx - 1, 'GROUP C - Total world instances']
-        df.loc[idx, 'GROUP C - Total claims'] = df.loc[idx - 1, 'GROUP C - Total claims']
-        df.loc[idx, 'GROUP C - Total perspectives'] = df.loc[idx - 1, 'GROUP C - Total perspectives']
-        df.loc[idx, 'GROUP C - Total mentions'] = df.loc[idx - 1, 'GROUP C - Total mentions']
-        df.loc[idx, 'GROUP C - Total conflicts'] = df.loc[idx - 1, 'GROUP C - Total conflicts']
-        df.loc[idx, 'GROUP C - Total sources'] = df.loc[idx - 1, 'GROUP C - Total sources']
-        df.loc[idx, 'GROUP C - Total interactions'] = df.loc[idx, 'GROUP C - Total interactions']
-        df.loc[idx, 'GROUP C - Total utterances'] = df.loc[idx - 1, 'GROUP C - Total utterances']
-
-        df.loc[idx, 'GROUP C - Ratio claim to triples'] = df.loc[idx - 1, 'GROUP C - Ratio claim to triples']
-        df.loc[idx, 'GROUP C - Ratio perspectives to triples'] = df.loc[
-            idx - 1, 'GROUP C - Ratio perspectives to triples']
-        df.loc[idx, 'GROUP C - Ratio conflicts to triples'] = df.loc[idx - 1, 'GROUP C - Ratio conflicts to triples']
-        df.loc[idx, 'GROUP C - Ratio perspectives to claims'] = df.loc[
-            idx - 1, 'GROUP C - Ratio perspectives to claims']
-        df.loc[idx, 'GROUP C - Ratio mentions to claims'] = df.loc[idx - 1, 'GROUP C - Ratio mentions to claims']
-        df.loc[idx, 'GROUP C - Ratio conflicts to claims'] = df.loc[idx - 1, 'GROUP C - Ratio conflicts to claims']
-
-        df.loc[idx, 'GROUP C - Average perspectives per claim'] = df.loc[
-            idx - 1, 'GROUP C - Average perspectives per claim']
-        df.loc[idx, 'GROUP C - Average mentions per claim'] = df.loc[idx - 1, 'GROUP C - Average mentions per claim']
-        df.loc[idx, 'GROUP C - Average turns per interaction'] = df.loc[
-            idx - 1, 'GROUP C - Average turns per interaction']
-        df.loc[idx, 'GROUP C - Average claims per source'] = df.loc[idx - 1, 'GROUP C - Average claims per source']
-        df.loc[idx, 'GROUP C - Average perspectives per source'] = df.loc[
-            idx - 1, 'GROUP C - Average perspectives per source']
+        for metric in group_a + group_b + group_c:
+            if metric in existing_columns:
+                df.loc[idx, metric] = df.loc[idx - 1, metric]
 
         return df
 
@@ -254,7 +226,7 @@ class GraphEvaluator(BasicEvaluator):
 
         ax = plt.gca()
         plt.xlim(0)
-        plt.xticks(ax.get_xticks()[::5], rotation="045")
+        plt.xticks(ax.get_xticks()[::5], rotation=45)
 
         plot_file = evaluation_folder / f"{xlabel}.png"
         print(plot_file)
