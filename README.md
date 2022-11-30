@@ -1,10 +1,11 @@
 # cltl-dialogueevaluation
-Evaluation of an interaction, using dialogue and resulting eKGs
 
+Evaluation of an interaction, using dialogue and resulting eKGs
 
 ## Description
 
-This package takes in an eKG and returns an evaluation of its quality.
+This package provides the tools to evaluate a dialogue according to several approaches: human annotation, automatic
+evaluation (likelihood or graph based), and statistical overview.
 
 ## Getting started
 

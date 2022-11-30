@@ -1,8 +1,6 @@
 from pathlib import Path
 
-import matplotlib.pyplot as plt
 import pandas as pd
-import seaborn as sns
 from emissor.persistence import ScenarioStorage
 from emissor.representation.scenario import Modality
 
@@ -13,7 +11,8 @@ from cltl.dialogue_evaluation.metrics.utterance_likelihood import USR_MLM
 
 class LikelihoodEvaluator(BasicEvaluator):
     def __init__(self, model_path_mlm, max_context=300, len_top_tokens=20):
-        """Creates an evaluator that will use USR Masked Language Model scoring to approximate the quality of a conversation, across turns.
+        """Creates an evaluator that will use USR Masked Language Model scoring to approximate the quality of
+        a conversation, across turns.
 
         We use the Roberta model that was pretrained with the TopicalChat data by the USR team
         as a model for gettting the averaged token likelihood of the target sentence.
@@ -41,7 +40,7 @@ class LikelihoodEvaluator(BasicEvaluator):
 
         self._log.debug(f"Likelihood Evaluator ready")
 
-    def evaluate_conversation(self, scenario_folder, scenario_id, metrics_to_plot=None):
+    def evaluate_conversation(self, scenario_folder, scenario_id):
         # Create the scenario folder, the json files and a scenarioStorage and scenario in memory
         scenario_storage = ScenarioStorage(scenario_folder)
         scenario_ctrl = scenario_storage.load_scenario(scenario_id)
@@ -65,9 +64,6 @@ class LikelihoodEvaluator(BasicEvaluator):
         evaluation_folder = Path(scenario_folder / scenario_id / 'evaluation')
         evaluation_folder.mkdir(parents=True, exist_ok=True)
         self._save(df, avg_df, evaluation_folder)
-        #
-        if metrics_to_plot:
-            self.plot_metrics_progression(metrics_to_plot, [df], evaluation_folder)
 
     @staticmethod
     def _calculate_metrics(model_mlm, turns, speaker_mlm_scores, speaker_mlm_max_scores, speaker_turns):
@@ -114,38 +110,3 @@ class LikelihoodEvaluator(BasicEvaluator):
 
         file = "likelihood_evaluation" + "_context" + str(self.max_context) + "_overall.csv"
         avg_df.to_csv(evaluation_folder / file, index=False)
-
-    def plot_metrics_progression(self, metrics, convo_dfs, evaluation_folder):
-        # Plot metrics progression per conversation
-        for metric in metrics:
-            metric_df = pd.DataFrame()
-
-            # Iterate conversations
-            for idx, convo_df in enumerate(convo_dfs):
-                conversation_id = f'Conversation {idx}'
-                convo_df = convo_df.set_index('Turn')
-
-                # Add into a dataframe
-                if len(metric_df) == 0:
-                    metric_df[conversation_id] = convo_df[metric]
-                else:
-                    metric_df = pd.concat([metric_df, convo_df[metric]], axis=1)
-                    metric_df.rename(columns={metric: conversation_id}, inplace=True)
-
-            # Cutoff and plot
-            self.plot_progression(metric_df, metric, evaluation_folder)
-
-    @staticmethod
-    def plot_progression(df_to_plot, xlabel, evaluation_folder):
-        df_to_plot = df_to_plot.reset_index().melt('Turn', var_name='cols', value_name=xlabel)
-
-        g = sns.relplot(x="Turn", y=xlabel, hue='cols', data=df_to_plot, kind='line')
-
-        ax = plt.gca()
-        plt.xlim(0)
-        plt.xticks(ax.get_xticks()[::5], rotation=45)
-
-        plot_file = evaluation_folder / f"{xlabel}.png"
-        print(plot_file)
-
-        g.figure.savefig(plot_file, dpi=300)
