@@ -8,12 +8,11 @@ from emissor.representation.scenario import Modality
 
 import cltl.dialogue_evaluation.utils.text_signal as text_util
 from cltl.dialogue_evaluation.api import BasicEvaluator
-from cltl.dialogue_evaluation.metrics.utterance_likelihood import USR_MLM
 from cltl.dialogue_evaluation.metrics.utterance_usr_dialog_retrieval import USR_CTX
 
 
-class LikelihoodEvaluator(BasicEvaluator):
-    def __init__(self, model_path_mlm, max_context=300, len_top_tokens=20):
+class USR_DialogRetrieval_Evaluator(BasicEvaluator):
+    def __init__(self, model_path_ctx, context_type, max_context=300, len_top_tokens=20):
         """Creates an evaluator that will use USR Masked Language Model scoring to approximate the quality of a conversation, across turns.
 
         We use the Roberta model that was pretrained with the TopicalChat data by the USR team
@@ -32,13 +31,13 @@ class LikelihoodEvaluator(BasicEvaluator):
         model_path_mlm: one of ['adamlin/usr-topicalchat-roberta_ft', 'xlm-roberta-base', 'roberta-base']
         returns: None
         """
-        super(LikelihoodEvaluator, self).__init__()
-        self.model_path_mlm = model_path_mlm
+        super(USR_DialogRetrieval_Evaluator, self).__init__()
+        self.model_path_mlm = model_path_ctx
         self.max_context = max_context
         self.len_top_tokens = len_top_tokens
-
+        self.context = context_type
         # Create MLM
-        self.model_mlm = USR_MLM(path=self.model_path_mlm, top_results=self.len_top_tokens)
+        self.model_ctx = USR_CTX(path=self.model_path_mlm)
 
         self._log.debug(f"Likelihood Evaluator ready")
 
@@ -55,12 +54,11 @@ class LikelihoodEvaluator(BasicEvaluator):
         print('Max context:', self.max_context)
 
         # Get likelihood scored
-        speaker_mlm_scores = {k: [] for k in speakers}
-        speaker_mlm_max_scores = {k: [] for k in speakers}
+        speaker_ctx_scores = {k: [] for k in speakers}
         speaker_turns = {k: [] for k in speakers}
 
-        df = self._calculate_metrics(self.model_mlm, turns, speaker_mlm_scores, speaker_mlm_max_scores, speaker_turns)
-        avg_df = self._average_metrics(speakers, turns, speaker_mlm_scores, speaker_mlm_max_scores)
+        df = self._calculate_metrics(self.model_ctx, turns, speaker_ctx_scores, speaker_turns)
+        avg_df = self._average_metrics(speakers, turns, speaker_ctx_scores)
 
         # Save
         evaluation_folder = Path(scenario_folder / scenario_id / 'evaluation')
@@ -71,7 +69,7 @@ class LikelihoodEvaluator(BasicEvaluator):
             self.plot_metrics_progression(metrics_to_plot, [df], evaluation_folder)
 
     @staticmethod
-    def _calculate_metrics(model_mlm, turns, speaker_mlm_scores, speaker_mlm_max_scores, speaker_turns):
+    def _calculate_metrics(model_ctx, turns, speaker_ctx_scores, speaker_turns):
         # Iterate turns
         print(f"\n\tCalculating likelihood scores")
         rows = []
@@ -81,39 +79,33 @@ class LikelihoodEvaluator(BasicEvaluator):
             target = turn[1]
             cue = turn[2]
             speaker = turn[3]
-            llh, best_sentence, max_score = model_mlm.sentence_likelihood(context, target)
-            rows.append({"Turn": index, "Speaker": speaker, "Cue": cue, "Response": target, "Context": context,
-                         "MLM response": best_sentence, "System llh": llh, "MLM llh": max_score})
+            score = model_ctx.MCtx(context, target)
+            rows.append({"Turn": index, "Speaker": speaker, "Cue": cue, "Response": target, "Context": context, "Ctx Score": score})
 
             if speaker:
                 speaker_turns[speaker].append(index)
-                speaker_mlm_scores[speaker].append(llh)
-                speaker_mlm_max_scores[speaker].append(max_score)
+                speaker_ctx_scores[speaker].append(score)
 
         return pd.DataFrame(rows)
 
     @staticmethod
-    def _average_metrics(speakers, turns, speaker_mlm_scores, speaker_mlm_max_scores):
+    def _average_metrics(speakers, turns, speaker_ctx_scores):
         # Iterate turns
-        print(f"\n\tCalculating average likelihood scores")
+        print(f"\n\tCalculating average USR Context scores")
         overall_rows = []
         for speaker in speakers:
-            mlm_scores = speaker_mlm_scores[speaker]
-            mlm_average_score = sum(mlm_scores) / len(mlm_scores)
-            mlm_max_scores = speaker_mlm_max_scores[speaker]
-            mlm_average_max_score = sum(mlm_max_scores) / len(mlm_max_scores)
-            overall_rows.append({'Speaker': speaker, 'Nr. turns': len(turns),
-                                 'MLM': mlm_average_score, 'MLM avg': mlm_average_score,
-                                 'MLM max': mlm_max_scores, 'MLM avg max': mlm_average_max_score})
+            ctx_scores = speaker_ctx_scores[speaker]
+            ctx_average_score = sum(ctx_scores) / len(ctx_scores)
+            overall_rows.append({'Speaker': speaker, 'Nr. turns': len(turns), 'Ctx Avg': ctx_average_score})
 
         # Save
         return pd.DataFrame(overall_rows)
 
     def _save(self, df, avg_df, evaluation_folder):
-        file = "likelihood_evaluation" + "_context" + str(self.max_context) + ".csv"
+        file = "usr_evaluation" + "_context_" + + self.context+"_"+str(self.max_context) + ".csv"
         df.to_csv(evaluation_folder / file, index=False)
 
-        file = "likelihood_evaluation" + "_context" + str(self.max_context) + "_overall.csv"
+        file = "usr_evaluation" + "_context_" + self.context+"_"+str(self.max_context) + "_overall.csv"
         avg_df.to_csv(evaluation_folder / file, index=False)
 
     def plot_metrics_progression(self, metrics, convo_dfs, evaluation_folder):
@@ -134,7 +126,8 @@ class LikelihoodEvaluator(BasicEvaluator):
                     metric_df.rename(columns={metric: conversation_id}, inplace=True)
 
             # Cutoff and plot
-            self.plot_progression(metric_df, metric, evaluation_folder)
+            label = metric +self.context
+            self.plot_progression(metric_df, label, evaluation_folder)
 
     @staticmethod
     def plot_progression(df_to_plot, xlabel, evaluation_folder):
@@ -146,7 +139,7 @@ class LikelihoodEvaluator(BasicEvaluator):
         plt.xlim(0)
         plt.xticks(ax.get_xticks()[::5], rotation=45)
 
-        plot_file = evaluation_folder / f"{xlabel}.png"
+        plot_file = evaluation_folder / f"{xlabel+self.context}.png"
         print(plot_file)
 
         g.figure.savefig(plot_file, dpi=300)
