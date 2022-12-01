@@ -102,10 +102,11 @@ class USR_DialogRetrieval_Evaluator(BasicEvaluator):
         return pd.DataFrame(overall_rows)
 
     def _save(self, df, avg_df, evaluation_folder):
-        file = "usr_evaluation" + "_context_" + + self.context+"_"+str(self.max_context) + ".csv"
+
+        file = "usr_evaluation" + "_context_" +  self.context + "_" + str(self.max_context) + ".csv"
         df.to_csv(evaluation_folder / file, index=False)
 
-        file = "usr_evaluation" + "_context_" + self.context+"_"+str(self.max_context) + "_overall.csv"
+        file = "usr_evaluation" + "_context_" + self.context + "_" + str(self.max_context) + "_overall.csv"
         avg_df.to_csv(evaluation_folder / file, index=False)
 
     def plot_metrics_progression(self, metrics, convo_dfs, evaluation_folder):
@@ -126,7 +127,7 @@ class USR_DialogRetrieval_Evaluator(BasicEvaluator):
                     metric_df.rename(columns={metric: conversation_id}, inplace=True)
 
             # Cutoff and plot
-            label = metric +self.context
+            label = metric + "_" + self.context
             self.plot_progression(metric_df, label, evaluation_folder)
 
     @staticmethod
@@ -139,7 +140,7 @@ class USR_DialogRetrieval_Evaluator(BasicEvaluator):
         plt.xlim(0)
         plt.xticks(ax.get_xticks()[::5], rotation=45)
 
-        plot_file = evaluation_folder / f"{xlabel+self.context}.png"
+        plot_file = evaluation_folder / f"{xlabel}.png"
         print(plot_file)
 
         g.figure.savefig(plot_file, dpi=300)
