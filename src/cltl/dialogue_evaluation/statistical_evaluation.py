@@ -51,6 +51,22 @@ class StatisticalEvaluator(BasicEvaluator):
             duration = (end - start) / 60000
         return duration
 
+    def get_turn_stats(self, turns):
+        average_tokens_per_turn = 0
+        average_turn_length = 0
+        average_token_length = 0
+        for turn in turns:
+            tokens = turn[1].split(" ")
+            average_turn_length += len(turn[1])
+            average_tokens_per_turn += len(tokens)
+            for token in tokens:
+                average_token_length += len(token)
+
+        average_token_length = average_token_length/ average_tokens_per_turn
+        average_tokens_per_turn = average_tokens_per_turn/len(turns)
+        average_turn_length = average_turn_length/len(turns)
+        return average_turn_length, average_tokens_per_turn, average_token_length
+
     def analyse_interaction(self, scenario_folder, scenario_id, metrics_to_plot=None):
         # Save
         evaluation_folder = Path(scenario_folder + '/' + scenario_id + '/evaluation/')
@@ -81,6 +97,10 @@ class StatisticalEvaluator(BasicEvaluator):
         text_signals = scenario_ctrl.get_signals(Modality.TEXT)
         ids, turns, speakers = text_util.get_turns_with_context_from_signals(text_signals)
         meta+='NR. TURNS\t'+ str(len(turns))+"\n"
+        average_turn_length, average_tokens_per_turn, average_token_length = self.get_turn_stats(turns)
+        meta+='Average turn length\t' + str(average_turn_length)+'\n'
+        meta+='Average nr. tokens per turn\t' + str(average_tokens_per_turn)+'\n'
+        meta+='Average token length\t' + str(average_token_length)+'\n'
         meta+='SPEAKER SET\t'+ str(speakers)+"\n"
 
         text_type_counts, text_type_timelines, nr_annotations = self.get_statistics_from_signals(text_signals)
