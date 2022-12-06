@@ -1,6 +1,8 @@
 from pathlib import Path
 from collections import Counter
 import pandas as pd
+import glob
+from os import path
 from emissor.persistence import ScenarioStorage
 from emissor.representation.scenario import Modality
 
@@ -67,11 +69,65 @@ class StatisticalEvaluator(BasicEvaluator):
         average_turn_length = average_turn_length/len(turns)
         return average_turn_length, average_tokens_per_turn, average_token_length
 
+    def get_overview_statistics(self, scenario_folder):
+        stat_dict = {}
+        columns = ["Label"]
+        for f in glob.glob(scenario_folder+"/*/"+"evaluation/"+"*_meta_data.csv", recursive=True):
+            file = open(f, 'r')
+          #  print(file.name)
+            scenario = file.name
+            columns.append(scenario)
+            lines = [x.strip() for x in file.readlines()]
+            anno_type = "General"
+            scenario_dict = {}
+            if anno_type in stat_dict:
+                scenario_dict = stat_dict.get(anno_type)
+            for fields in lines:
+                # print(fields)
+                if type(fields) == str:
+                    fields = fields.split('\t')
+                if len(fields) == 1 and len(fields[0]) > 0:
+                    ### we are getting a new type of annotation
+                    # print("Saving the current data for:", anno_type)
+                    stat_dict[anno_type] = scenario_dict
+                    anno_type = fields[0]
+                    # print("Getting data for the new anno_type:[", anno_type, "]", fields)
+                    if anno_type in stat_dict:
+                        scenario_dict = stat_dict.get(anno_type)
+                    else:
+                        scenario_dict = {}
+                elif len(fields) == 2:
+                    col = fields[0]
+                    value = fields[1]
+                    # print(anno_type, 'col', col, 'value', value)
+                    if col in scenario_dict:
+                        scenario_dict[col].append((scenario, value))
+                    else:
+                        scenario_dict[col] = [(scenario, value)]
+                else:
+                    print('Error nr. of fields:', len(fields), fields)
+                    continue
+            return stat_dict, columns
+
+    def save_overview_statistics(self, scenario_folder, stat_dict, columns):
+        for key in stat_dict.keys():
+            dfall = pd.DataFrame(columns=columns)
+            anno_dict = stat_dict.get(key)
+            for anno in anno_dict.keys():
+                values = anno_dict.get(anno)
+                row = {'Label': anno}
+                for value in values:
+                    scenario = value[0]
+                    count = value[1]
+                    row.update({scenario: count})
+                dfall = dfall.append(row, ignore_index=True)
+            file_path = scenario_folder+"/"+key+".csv"
+            dfall.to_csv(file_path)
+
     def analyse_interaction(self, scenario_folder, scenario_id, metrics_to_plot=None):
         # Save
         evaluation_folder = Path(scenario_folder + '/' + scenario_id + '/evaluation/')
         evaluation_folder.mkdir(parents=True, exist_ok=True)
-
         meta = ""
         ### Create the scenario folder, the json files and a scenarioStorage and scenario in memory
         scenario_storage = ScenarioStorage(scenario_folder)
