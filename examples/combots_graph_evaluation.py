@@ -4,6 +4,7 @@ from cltl.dialogue_evaluation.graph_evaluation import GraphEvaluator
 from cltl.dialogue_evaluation.likelihood_evaluation import LikelihoodEvaluator
 
 SCENARIOS_FOLDER = Path("/Users/sbaez/Downloads/interaction1")
+SCENARIOS_FOLDER = Path("/Users/piek/Desktop/t-MA-Combots-2022/assignments/interaction1")
 SCENARIOS = sorted([path for path in SCENARIOS_FOLDER.iterdir() if path.is_dir() and path.stem != '.idea'])
 
 for SCENARIO_FOLDER in SCENARIOS:
