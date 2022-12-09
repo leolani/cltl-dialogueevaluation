@@ -13,5 +13,6 @@ for path in os.listdir(SCENARIOS_FOLDER):
     if os.path.isdir(SCENARIO_FOLDER):
         print(SCENARIO_FOLDER)
         RDF_FOLDER = os.path.join(SCENARIO_FOLDER, 'rdf')
+        print(RDF_FOLDER)
         evaluator.evaluate_conversation(Path(SCENARIO_FOLDER), Path(RDF_FOLDER),
                                         metrics_to_plot=['GROUP A - Average degree', 'GROUP A - Sparseness'])
