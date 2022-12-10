@@ -71,12 +71,19 @@ class StatisticalEvaluator(BasicEvaluator):
 
     def get_overview_statistics(self, scenario_folder):
         stat_dict = {}
+
+        storage = ScenarioStorage(scenario_folder)
+        scenarios = list(storage.list_scenarios())
+        print("Processing scenarios: ", scenarios)
         columns = ["Label"]
-        for f in glob.glob(scenario_folder+"/*/"+"evaluation/"+"*_meta_data.csv", recursive=True):
-            file = open(f, 'r')
-          #  print(file.name)
-            scenario = file.name
+        #files = glob.glob(scenario_folder+"/*/"+"evaluation/"+"*_meta_data.csv", recursive=True)
+        #print(files)
+        for scenario in scenarios:
             columns.append(scenario)
+            csv_path = scenario_folder+"/"+scenario+"/"+"evaluation/"+scenario+"_meta_data.csv"
+            file = open(csv_path, 'r')
+
+            print('Reading file for overview', file.name)
             lines = [x.strip() for x in file.readlines()]
             anno_type = "General"
             scenario_dict = {}
@@ -107,12 +114,27 @@ class StatisticalEvaluator(BasicEvaluator):
                 else:
                     print('Error nr. of fields:', len(fields), fields)
                     continue
-            return stat_dict, columns
+        return stat_dict, columns
 
     def save_overview_statistics(self, scenario_folder, stat_dict, columns):
+        turn_row = {'Label':'Turns'}
+        image_row = {'Label':'Images'}
+        storage = ScenarioStorage(scenario_folder)
+        scenarios = list(storage.list_scenarios())
+        for scenario in scenarios:
+            scenario_ctrl = storage.load_scenario(scenario)
+            text_signals = scenario_ctrl.get_signals(Modality.TEXT)
+            image_signals = scenario_ctrl.get_signals(Modality.IMAGE)
+            turn_row.update({scenario: len(text_signals)})
+            image_row.update({scenario: len(image_signals)})
+
         for key in stat_dict.keys():
             dfall = pd.DataFrame(columns=columns)
+            dfall = dfall.append(turn_row, ignore_index=True)
+            dfall = dfall.append(image_row, ignore_index=True)
             anno_dict = stat_dict.get(key)
+            ### adding the nr of turns to the stats
+
             for anno in anno_dict.keys():
                 values = anno_dict.get(anno)
                 row = {'Label': anno}
@@ -122,6 +144,7 @@ class StatisticalEvaluator(BasicEvaluator):
                     row.update({scenario: count})
                 dfall = dfall.append(row, ignore_index=True)
             file_path = scenario_folder+"/"+key+".csv"
+            print("Saving overview to:", file_path)
             dfall.to_csv(file_path)
 
     def analyse_interaction(self, scenario_folder, scenario_id, metrics_to_plot=None):
