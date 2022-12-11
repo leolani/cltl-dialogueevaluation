@@ -7,6 +7,7 @@ from cltl.dialogue_evaluation.metrics_plotting import Plotter
 from cltl.dialogue_evaluation.utils.constants import GRAPH_METRICS, LIKELIHOOD_METRICS, HUMAN_METRICS
 
 SCENARIOS_FOLDER = Path("/Users/sbaez/Downloads/interaction1")
+# SCENARIOS_FOLDER = Path("/Users/piek/Desktop/t-MA-Combots-2022/assignments/interaction1")
 SCENARIOS = sorted([path for path in SCENARIOS_FOLDER.iterdir()
                     if path.is_dir() and path.stem not in ['.idea', 'plots']])
 

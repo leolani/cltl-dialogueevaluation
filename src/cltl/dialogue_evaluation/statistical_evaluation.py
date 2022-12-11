@@ -20,11 +20,11 @@ class StatisticalEvaluator(BasicEvaluator):
 
         self._log.debug(f"Statistical Evaluator ready")
 
-    def get_statistics_from_text_annotation(self, text_signals):
+    def get_statistics_from_signals(self, signals):
 
         # TODO: fix next line, it's broken
         type_counts = {}
-        type_dict_text, nr_annotations = self._get_annotation_dict(text_signals)
+        type_dict_text, nr_annotations = self._get_annotation_dict(signals)
 
         for annoType in type_dict_text.keys():
             timedValues = type_dict_text.get(annoType)
@@ -34,15 +34,6 @@ class StatisticalEvaluator(BasicEvaluator):
             type_counts[annoType] = Counter(valueList)
 
         return type_counts, type_dict_text, nr_annotations
-
-    def get_statistics_from_image_annotation(self, scenario_ctrl, scenario_id):
-
-        image_signals = scenario_ctrl.get_signals(Modality.IMAGE)
-
-        type_dict_image, id_dict_text, nr_annotations = self._get_annotation_dict(image_signals)
-        type_rows = self._get_stats_from_text_dict(type_dict_image)
-        value_rows = self._get_stats_from_text_dict(id_dict_text)
-        return type_rows, value_rows, nr_annotations
 
     def get_duration_in_minutes(self, scenario_ctrl):
         start = 0
@@ -59,11 +50,104 @@ class StatisticalEvaluator(BasicEvaluator):
             duration = (end - start) / 60000
         return duration
 
+    def get_turn_stats(self, turns):
+        average_tokens_per_turn = 0
+        average_turn_length = 0
+        average_token_length = 0
+        for turn in turns:
+            tokens = turn[1].split(" ")
+            average_turn_length += len(turn[1])
+            average_tokens_per_turn += len(tokens)
+            for token in tokens:
+                average_token_length += len(token)
+
+        average_token_length = average_token_length / average_tokens_per_turn
+        average_tokens_per_turn = average_tokens_per_turn / len(turns)
+        average_turn_length = average_turn_length / len(turns)
+        return average_turn_length, average_tokens_per_turn, average_token_length
+
+    def get_overview_statistics(self, scenario_folder):
+        stat_dict = {}
+
+        storage = ScenarioStorage(scenario_folder)
+        scenarios = list(storage.list_scenarios())
+        print("Processing scenarios: ", scenarios)
+        columns = ["Label"]
+        # files = glob.glob(scenario_folder+"/*/"+"evaluation/"+"*_meta_data.csv", recursive=True)
+        # print(files)
+        for scenario in scenarios:
+            columns.append(scenario)
+            csv_path = scenario_folder + "/" + scenario + "/" + "evaluation/" + scenario + "_meta_data.csv"
+            file = open(csv_path, 'r')
+
+            print('Reading file for overview', file.name)
+            lines = [x.strip() for x in file.readlines()]
+            anno_type = "General"
+            scenario_dict = {}
+            if anno_type in stat_dict:
+                scenario_dict = stat_dict.get(anno_type)
+            for fields in lines:
+                # print(fields)
+                if type(fields) == str:
+                    fields = fields.split('\t')
+                if len(fields) == 1 and len(fields[0]) > 0:
+                    ### we are getting a new type of annotation
+                    # print("Saving the current data for:", anno_type)
+                    stat_dict[anno_type] = scenario_dict
+                    anno_type = fields[0]
+                    # print("Getting data for the new anno_type:[", anno_type, "]", fields)
+                    if anno_type in stat_dict:
+                        scenario_dict = stat_dict.get(anno_type)
+                    else:
+                        scenario_dict = {}
+                elif len(fields) == 2:
+                    col = fields[0]
+                    value = fields[1]
+                    # print(anno_type, 'col', col, 'value', value)
+                    if col in scenario_dict:
+                        scenario_dict[col].append((scenario, value))
+                    else:
+                        scenario_dict[col] = [(scenario, value)]
+                else:
+                    print('Error nr. of fields:', len(fields), fields)
+                    continue
+        return stat_dict, columns
+
+    def save_overview_statistics(self, scenario_folder, stat_dict, columns):
+        turn_row = {'Label': 'Turns'}
+        image_row = {'Label': 'Images'}
+        storage = ScenarioStorage(scenario_folder)
+        scenarios = list(storage.list_scenarios())
+        for scenario in scenarios:
+            scenario_ctrl = storage.load_scenario(scenario)
+            text_signals = scenario_ctrl.get_signals(Modality.TEXT)
+            image_signals = scenario_ctrl.get_signals(Modality.IMAGE)
+            turn_row.update({scenario: len(text_signals)})
+            image_row.update({scenario: len(image_signals)})
+
+        for key in stat_dict.keys():
+            dfall = pd.DataFrame(columns=columns)
+            dfall = dfall.append(turn_row, ignore_index=True)
+            dfall = dfall.append(image_row, ignore_index=True)
+            anno_dict = stat_dict.get(key)
+            ### adding the nr of turns to the stats
+
+            for anno in anno_dict.keys():
+                values = anno_dict.get(anno)
+                row = {'Label': anno}
+                for value in values:
+                    scenario = value[0]
+                    count = value[1]
+                    row.update({scenario: count})
+                dfall = dfall.append(row, ignore_index=True)
+            file_path = scenario_folder + "/" + key + ".csv"
+            print("Saving overview to:", file_path)
+            dfall.to_csv(file_path)
+
     def analyse_interaction(self, scenario_folder, scenario_id, metrics_to_plot=None):
         # Save
         evaluation_folder = Path(scenario_folder + '/' + scenario_id + '/evaluation/')
         evaluation_folder.mkdir(parents=True, exist_ok=True)
-
         meta = ""
         ### Create the scenario folder, the json files and a scenarioStorage and scenario in memory
         scenario_storage = ScenarioStorage(scenario_folder)
@@ -83,12 +167,19 @@ class StatisticalEvaluator(BasicEvaluator):
         meta += 'OBJECTS SEEN\t' + str(objects) + '\n'
         duration = self.get_duration_in_minutes(scenario_ctrl)
         meta += 'DURATION IN MINUTES\t' + str(duration) + "\n"
+
+        #### Text signals statistics
+        meta += "\nText signals\n"
         text_signals = scenario_ctrl.get_signals(Modality.TEXT)
         ids, turns, speakers = text_util.get_turns_with_context_from_signals(text_signals)
         meta += 'NR. TURNS\t' + str(len(turns)) + "\n"
+        average_turn_length, average_tokens_per_turn, average_token_length = self.get_turn_stats(turns)
+        meta += 'Average turn length\t' + str(average_turn_length) + '\n'
+        meta += 'Average nr. tokens per turn\t' + str(average_tokens_per_turn) + '\n'
+        meta += 'Average token length\t' + str(average_token_length) + '\n'
         meta += 'SPEAKER SET\t' + str(speakers) + "\n"
 
-        text_type_counts, text_type_timelines, nr_annotations = self.get_statistics_from_text_annotation(text_signals)
+        text_type_counts, text_type_timelines, nr_annotations = self.get_statistics_from_signals(text_signals)
         # rows.extend(self.get_statistics_from_image_annotation(scenario_ctrl, scenario_id))
         meta += 'TOTAL ANNOTATIONS\t' + str(nr_annotations) + "\n"
         meta += "\n"
@@ -97,6 +188,19 @@ class StatisticalEvaluator(BasicEvaluator):
             meta += key + '\n'
             for item in counts:
                 meta += item + "\t" + str(counts.get(item)) + "\n"
+
+        meta += "\nImage signals\n"
+
+        image_signals = scenario_ctrl.get_signals(Modality.IMAGE)
+        text_type_counts, text_type_timelines, nr_annotations = self.get_statistics_from_signals(image_signals)
+        meta += 'TOTAL ANNOTATIONS\t' + str(nr_annotations) + "\n"
+        meta += "\n"
+        for key in text_type_counts.keys():
+            counts = text_type_counts.get(key)
+            meta += key + '\n'
+            for item in counts:
+                meta += item + "\t" + str(counts.get(item)) + "\n"
+
         # testing
         print(meta)
 
@@ -141,71 +245,11 @@ class StatisticalEvaluator(BasicEvaluator):
                         type_dict[type_key].append((time_key, value))
         return type_dict, len(all_annotations)
 
-    def _get_stats_from_image_dict(self, dict: {}):
-        # Iterate turns
-        rows = []
-        for key in dict:
-            #   print('key', key)
-            if not key == 'python-type:builtins.NoneType':
-                annotations = dict.get(key)
-                value_list = []
-                for key, annotation in annotations:
-                    # if isinstance(value, [str, int, bool]):
-                    if isinstance(annotation, str):
-                        value_list.append(annotation)
-                    else:
-                        try:
-                            # value is the correct python object
-                            value_dict = vars(annotation)
-                            print('value_dict', value_dict)
-                        except:
-                            # value is a namedtuple
-                            value_dict = annotation._asdict()
-                            if "value" in value_dict:
-                                value_list.append(value_dict['value'])
-                            elif "type" in value_dict:
-                                value_list.append(value_dict['type'])
-                            elif "pos" in value_dict:
-                                value_list.append(value_dict['pos'])
-                    counts = Counter(value_list)
-                    print(key, counts)
-                    rows.append([key, value_list])
-
-        return rows
-
-    def _get_stats_from_text_dict(self, dict: {}):
-        # Iterate turns
-        rows = []
-        for key in dict:
-            annotations = dict.get(key)
-            for key, annotation in annotations:
-                value_list = []
-                # if isinstance(value, [str, int, bool]):
-                if isinstance(annotation, str):
-                    value_list.append(annotation)
-                else:
-                    try:
-                        # value is the correct python object
-                        value_dict = vars(annotation)
-                        print('value_dict', value_dict)
-                    except:
-                        # value is a namedtuple
-                        value_dict = annotation._asdict()
-                        if "value" in value_dict:
-                            value_list.append(value_dict['value'])
-                        elif "type" in value_dict:
-                            value_list.append(value_dict['type'])
-                        elif "pos" in value_dict:
-                            value_list.append(value_dict['pos'])
-                # print(key, value_list)
-                rows.append([key, value_list])
-            # print(rows[:10])
-        return rows
-
     def _get_get_value_from_annotation(self, annotation):
         anno = ""
+        # print(annotation)
         if isinstance(annotation, str):
-            anno = "label:" + annotation
+            anno = "faceID:" + annotation
         else:
             try:
                 # value is the correct python object
@@ -214,36 +258,44 @@ class StatisticalEvaluator(BasicEvaluator):
                 # print('value_dict', value_dict)
             except:
                 # value is a namedtuple
-                value_dict = annotation._asdict()
-                type = ""
-                value = ""
-                if "value" in value_dict:
-                    value = value_dict['value']
-                    if "type" in value_dict:
-                        type = value_dict['type']
-                elif "type" in value_dict:
-                    value = value_dict['type']
-                    type = "label"
-                elif "pos" in value_dict:
-                    value = value_dict['pos']
-                    type = "pos"
-                elif "label" in value_dict:
-                    value = value_dict['label']
-                    type = "entity"
-                else:
-                    print('UNKNOWN annotation', annotation)
-                anno = type + ":" + value
+                try:
+                    value_dict = annotation._asdict()
+                    type = ""
+                    value = ""
+                    if "value" in value_dict:
+                        value = value_dict['value']
+                        if "type" in value_dict:
+                            type = value_dict['type']
+                    elif "label" in value_dict:
+                        value = value_dict['label']
+                        if "type" in value_dict:
+                            type = value_dict['type']
+                        elif "text" in value_dict:
+                            type = value_dict['label']
+                            value = value_dict['text']
+                        else:
+                            type = "label"
+                    elif "type" in value_dict:
+                        if "text" in value_dict:
+                            type = value_dict['type']
+                            value = value_dict['text']
+                        else:
+                            value = value_dict['type']
+                            type = "label"
+                    elif "pos" in value_dict:
+                        value = value_dict['pos']
+                        type = "pos"
+                    # elif "label" in value_dict:
+                    #     value = value_dict['label']
+                    #     type = "entity"
+                    else:
+                        print('UNKNOWN annotation', annotation)
+                    anno = type + ":" + value
+                except:
+                    if annotation:
+                        print('UNKNOWN annotation type', type(annotation), annotation)
+
         return anno
-
-    @staticmethod
-    def _calculate_metrics(turns, speaker_turns):
-        # Iterate turns
-        rows = []
-        for index, turn in enumerate(turns):
-            # TODO count things here (e.g. entities mentioned,
-            pass
-
-        return pd.DataFrame(rows)
 
     def _save(self, df, evaluation_folder, scenario_id):
         file_name = scenario_id + "_statistical_analysis.csv"
