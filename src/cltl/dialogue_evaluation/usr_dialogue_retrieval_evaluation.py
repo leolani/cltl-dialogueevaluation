@@ -80,7 +80,8 @@ class USR_DialogRetrieval_Evaluator(BasicEvaluator):
             cue = turn[2]
             speaker = turn[3]
             score = model_ctx.MCtx(context, target)
-            rows.append({"Turn": index, "Speaker": speaker, "Cue": cue, "Response": target, "Context": context, "Ctx Score": score})
+            rows.append({"Turn": index, "Speaker": speaker, "Cue": cue, "Response": target, "Context": context,
+                         "Ctx Score": score})
 
             if speaker:
                 speaker_turns[speaker].append(index)
@@ -103,7 +104,7 @@ class USR_DialogRetrieval_Evaluator(BasicEvaluator):
 
     def _save(self, df, avg_df, evaluation_folder):
 
-        file = "usr_evaluation" + "_context_" +  self.context + "_" + str(self.max_context) + ".csv"
+        file = "usr_evaluation" + "_context_" + self.context + "_" + str(self.max_context) + ".csv"
         df.to_csv(evaluation_folder / file, index=False)
 
         file = "usr_evaluation" + "_context_" + self.context + "_" + str(self.max_context) + "_overall.csv"

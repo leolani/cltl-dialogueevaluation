@@ -9,7 +9,6 @@ from emissor.representation.scenario import Modality
 import cltl.dialogue_evaluation.utils.text_signal as text_util
 from cltl.dialogue_evaluation.api import BasicEvaluator
 from cltl.dialogue_evaluation.metrics.utterance_likelihood import USR_MLM
-from cltl.dialogue_evaluation.metrics.utterance_usr_dialog_retrieval import USR_CTX
 
 
 class LikelihoodEvaluator(BasicEvaluator):
