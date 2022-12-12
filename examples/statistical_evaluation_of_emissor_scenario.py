@@ -1,5 +1,5 @@
 from cltl.dialogue_evaluation.statistical_evaluation import StatisticalEvaluator
-import os
+
 evaluator = StatisticalEvaluator()
 
 emissor_path='/Users/piek/Desktop/t-MA-Combots-2022/assignments/interaction2'

@@ -76,8 +76,7 @@ class StatisticalEvaluator(BasicEvaluator):
         scenarios = list(storage.list_scenarios())
         print("Processing scenarios: ", scenarios)
         columns = ["Label"]
-        #files = glob.glob(scenario_folder+"/*/"+"evaluation/"+"*_meta_data.csv", recursive=True)
-        #print(files)
+
         for scenario in scenarios:
             columns.append(scenario)
             csv_path = scenario_folder+"/"+scenario+"/"+"evaluation/"+scenario+"_meta_data.csv"
