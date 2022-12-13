@@ -128,8 +128,8 @@ class ManualEvaluator(BasicEvaluator):
         columns = ["Label"]
 
         for scenario in scenarios:
-            if not scenario=='7ed0b885-c7b9-452a-bf8d-65a4d44409aa' and not scenario=='e7f18940-d085-4dde-a56e-9604fd22e601':
-                continue
+           # if not scenario=='7ed0b885-c7b9-452a-bf8d-65a4d44409aa' and not scenario=='e7f18940-d085-4dde-a56e-9604fd22e601':
+           #     continue
             columns.append(scenario)
            # csv_path = scenario_folder+"/"+scenario+"/"+"evaluation/"+scenario+"_manual_evaluation.csv"
             csv_path = scenario_folder+"/"+scenario+"/"+"evaluation/"+scenario+"_manual_evaluation.csv"
@@ -209,7 +209,7 @@ class ManualEvaluator(BasicEvaluator):
                        "Engaging": engaging/agent_turns,"Specific": specific/agent_turns,"Relevant": relevant/agent_turns,
                        "Correct": correct/agent_turns,"Semantically_Appropriate":appropriate/agent_turns,
                        "Understandable":understandable/agent_turns,"Fluent":fluent/agent_turns}
-                print(scenario, row)
+                #print(scenario, row)
                 stat_dict[scenario] = row
             #break
         return stat_dict, columns
@@ -243,9 +243,10 @@ class ManualEvaluator(BasicEvaluator):
                     else:
                         count = 0
                 else:
-                   count = 0
+                   # print("cannot find scenario for label", label, scenario)
+                    count = 0
                 row.update({scenario: count})
-            print(row)
+            #print("added the row",row)
             dfall = dfall.append(row, ignore_index=True)
 
         file_path = scenario_folder + "/" + "manual_evaluation_overview.csv"
