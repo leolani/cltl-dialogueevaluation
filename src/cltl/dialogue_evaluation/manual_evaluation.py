@@ -138,7 +138,7 @@ class ManualEvaluator(BasicEvaluator):
             agent_turns =0
             for index in df.index:
                 if not df['Speaker'][index]==agent:
-                    print(df['Speaker'][index])
+                  #  print(df['Speaker'][index])
                     continue
                 scored = False
                 if df["Overall Human Rating"][index]:
@@ -172,8 +172,7 @@ class ManualEvaluator(BasicEvaluator):
                 if scored:
                     agent_turns += 1
             #### After for loop
-            print('agent_turns', agent_turns)
-            print(interesting)
+            ##print(interesting)
             row = {"Overall_Rating":overall/agent_turns,"Interesting": interesting/agent_turns,
                    "Engaging": engaging/agent_turns,"Specific": specific/agent_turns,"Relevant": relevant/agent_turns,
                    "Correct": correct/agent_turns,"Semantically_Appropriate":appropriate/agent_turns,
@@ -212,7 +211,7 @@ class ManualEvaluator(BasicEvaluator):
                     count = 0
                 row.update({scenario: count})
             print(row)
-            dfall.append(row, ignore_index=True)
+            dfall = dfall.append(row, ignore_index=True)
 
         file_path = scenario_folder + "/" + "manual_evaluation_overview.csv"
         print("Saving overview to:", file_path)
