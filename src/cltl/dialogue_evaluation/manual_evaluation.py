@@ -142,43 +142,63 @@ class ManualEvaluator(BasicEvaluator):
                     continue
                 scored = False
                 if df["Overall Human Rating"][index]:
-                    overall += df["Overall Human Rating"][index]
-                    scored = True
+                    value = df["Overall Human Rating"][index]
+                    if type(value)=='float' or type(value)=='numpy.float64':
+                        print('value', value)
+                        overall += value
+                        scored = True
+                    else:
+                        print(type(value))
                 if df["Interesting"][index]:
-                    print(df["Interesting"][index])
-                    interesting += df["Interesting"][index]
-                    scored = True
+                    value = df["Interesting"][index]
+                    if type(value)=='float':
+                        interesting += value
+                        scored = True
                 if df["Engaging"][index]:
-                    interesting +=  df["Engaging"][index]
-                    scored = True
+                    value = df["Engaging"][index]
+                    if type(value)=='float':
+                        engaging += value
+                        scored = True
                 if df["Specific"][index]:
-                    interesting +=  df["Specific"][index]
-                    scored = True
+                    value = df["Specific"][index]
+                    if type(value)=='float':
+                        specific += value
+                        scored = True
                 if df["Relevant"][index]:
-                    interesting +=  df["Relevant"][index]
-                    scored = True
+                    value = df["Relevant"][index]
+                    if type(value)=='float':
+                        relevant += value
+                        scored = True
                 if df["Correct"][index]:
-                    interesting +=  df["Correct"][index]
-                    scored = True
+                    value = df["Correct"][index]
+                    if type(value)=='float':
+                        correct += value
+                        scored = True
                 if df["Semantically Appropriate"][index]:
-                    interesting +=  df["Semantically Appropriate"][index]
-                    scored = True
+                    value = df["Semantically Appropriate"][index]
+                    if type(value)=='float':
+                        appropriate += value
+                        scored = True
                 if df["Understandable"][index]:
-                    interesting +=  df["Understandable"][index]
-                    scored = True
+                    value = df["Understandable"][index]
+                    if type(value)=='float':
+                        understandable += value
+                        scored = True
                 if df["Fluent"][index]:
-                    interesting +=  df["Fluent"][index]
-                    scored = True
+                    value = df["Fluent"][index]
+                    if type(value)=='float':
+                        fluent += value
+                        scored = True
                 if scored:
                     agent_turns += 1
             #### After for loop
-            ##print(interesting)
-            row = {"Overall_Rating":overall/agent_turns,"Interesting": interesting/agent_turns,
-                   "Engaging": engaging/agent_turns,"Specific": specific/agent_turns,"Relevant": relevant/agent_turns,
-                   "Correct": correct/agent_turns,"Semantically_Appropriate":appropriate/agent_turns,
-                   "Understandable":understandable/agent_turns,"Fluent":fluent/agent_turns}
-            print(row)
-            stat_dict[scenario] = row
+            if agent_turns>0:
+                row = {"Overall_Rating":overall/agent_turns,"Interesting": interesting/agent_turns,
+                       "Engaging": engaging/agent_turns,"Specific": specific/agent_turns,"Relevant": relevant/agent_turns,
+                       "Correct": correct/agent_turns,"Semantically_Appropriate":appropriate/agent_turns,
+                       "Understandable":understandable/agent_turns,"Fluent":fluent/agent_turns}
+                print(row)
+                stat_dict[scenario] = row
             #break
         return stat_dict, columns
 
@@ -202,13 +222,16 @@ class ManualEvaluator(BasicEvaluator):
 
         for label in rows:
             row = {'Label': label}
-            for scenario in columns[1:]:
+            for scenario in scenarios:
                # print(label, scenario)
-                count_dict = stat_dict.get(scenario)
-                if label in count_dict.keys():
-                    count = count_dict[label]
+                if scenario in stat_dict.keys():
+                    count_dict = stat_dict.get(scenario)
+                    if label in count_dict.keys():
+                        count = count_dict[label]
+                    else:
+                        count = 0
                 else:
-                    count = 0
+                   count = 0
                 row.update({scenario: count})
             print(row)
             dfall = dfall.append(row, ignore_index=True)
