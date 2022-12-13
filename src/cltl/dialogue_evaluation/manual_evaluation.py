@@ -143,52 +143,95 @@ class ManualEvaluator(BasicEvaluator):
                 scored = False
                 if df["Overall Human Rating"][index]:
                     value = df["Overall Human Rating"][index]
-                    if type(value)=='float' or type(value)=='numpy.float64':
-                        print('value', value)
-                        overall += value
+                    #if type(value)=='float' or type(value)=='numpy.float64':
+                    if not value=='nan' and not value=='-':
+                        if type(value=='str'):
+                            overall += float(value)
+                        else:
+                            overall += value
                         scored = True
                     else:
                         print(type(value))
                 if df["Interesting"][index]:
                     value = df["Interesting"][index]
-                    if type(value)=='float':
-                        interesting += value
+                    if not value=='nan' and not value=='-':
+                        if type(value=='str'):
+                            interesting += float(value)
+                        else:
+                            overall += value
                         scored = True
+                    else:
+                        print(type(value))
                 if df["Engaging"][index]:
                     value = df["Engaging"][index]
-                    if type(value)=='float':
-                        engaging += value
+                    if not value=='nan' and not value=='-':
+                        if type(value=='str'):
+                            engaging += float(value)
+                        else:
+                            overall += value
                         scored = True
+                    else:
+                        print(type(value))
                 if df["Specific"][index]:
                     value = df["Specific"][index]
-                    if type(value)=='float':
-                        specific += value
+                    if not value=='nan' and not value=='-':
+                        if type(value=='str'):
+                            specific += float(value)
+                        else:
+                            overall += value
                         scored = True
+                    else:
+                        print(type(value))
                 if df["Relevant"][index]:
                     value = df["Relevant"][index]
-                    if type(value)=='float':
-                        relevant += value
+                    if not value == 'nan' and not value == '-':
+                        if type(value == 'str'):
+                            relevant += float(value)
+                        else:
+                            overall += value
                         scored = True
+                    else:
+                        print(type(value))
                 if df["Correct"][index]:
                     value = df["Correct"][index]
-                    if type(value)=='float':
-                        correct += value
+                    if not value=='nan' and not value=='-':
+                        if type(value=='str'):
+                            correct += float(value)
+                        else:
+                            overall += value
                         scored = True
+                    else:
+                        print(type(value))
                 if df["Semantically Appropriate"][index]:
                     value = df["Semantically Appropriate"][index]
-                    if type(value)=='float':
-                        appropriate += value
+                    if not value=='nan' and not value=='-':
+                        if type(value=='str'):
+                            appropriate += float(value)
+                        else:
+                            overall += value
                         scored = True
+                    else:
+                        print(type(value))
                 if df["Understandable"][index]:
                     value = df["Understandable"][index]
-                    if type(value)=='float':
-                        understandable += value
+                    if not value=='nan' and not value=='-':
+                        if type(value=='str'):
+                            understandable += float(value)
+                        else:
+                            overall += value
                         scored = True
+                    else:
+                        print(type(value))
                 if df["Fluent"][index]:
                     value = df["Fluent"][index]
-                    if type(value)=='float':
-                        fluent += value
+                    if not value=='nan' and not value=='-':
+                        if type(value=='str'):
+                            fluent += float(value)
+                        else:
+                            overall += value
                         scored = True
+                    else:
+                        print(type(value))
                 if scored:
                     agent_turns += 1
             #### After for loop
