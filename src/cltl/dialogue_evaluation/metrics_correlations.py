@@ -48,7 +48,6 @@ class Correlator(BasicCorrelator):
                      f'{scenario.stem}_manual_evaluation.csv']:
             try:
                 df = pd.read_csv(scenario / 'evaluation' / file, header=0, index_col='Turn')
-                evaluations.append(df)
             except:
                 try:
                     df = pd.read_csv(scenario / 'evaluation' / file, header=0, index_col='Turn', sep=';')
@@ -57,12 +56,12 @@ class Correlator(BasicCorrelator):
                     df = pd.DataFrame()
                     # continue
 
+            columns_to_keep = [c for c in metrics if c in df.columns]
+            df = df[columns_to_keep]
             evaluations.append(df)
 
         # Merge and select
-        full_df = pd.concat(evaluations).groupby(level=0).mean(numeric_only=True)
-        columns_to_keep = [c for c in metrics if c in full_df.columns]
-        full_df = full_df[columns_to_keep]
+        full_df = pd.concat(evaluations, axis=1)
 
         # rename
         full_df.rename(columns={'System llh': 'AUTOMATIC - System llh', 'MLM llh': 'AUTOMATIC - MLM llh',
@@ -82,6 +81,9 @@ class Correlator(BasicCorrelator):
     def plot_correlations(df_to_plot, mask, name, evaluation_folder):
         # Plot
         plt.figure()
+        plt.xticks(fontsize=3)
+        plt.yticks(fontsize=3)
+
         g = sns.heatmap(df_to_plot, mask=mask, annot=False, fmt=".2f",
                         cmap="YlGnBu", cbar_kws={"shrink": .3, "location": "top"},
                         cbar=True, center=0,
@@ -92,3 +94,4 @@ class Correlator(BasicCorrelator):
         plot_file.mkdir(parents=True, exist_ok=True)
         g.figure.savefig(plot_file / f"Correlation heatmap.png", dpi=300, transparent=True, bbox_inches='tight')
         plt.close()
+        print(f"\tSaved to file: {plot_file}")
