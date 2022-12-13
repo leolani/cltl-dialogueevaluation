@@ -19,12 +19,12 @@ usr_evaluator = LikelihoodEvaluator(model_path_mlm='adamlin/usr-topicalchat-robe
 #     usr_evaluator.evaluate_conversation(SCENARIOS_FOLDER, scenario_id=SCENARIO_FOLDER.stem)
 
 plotter = Plotter()
-# plotter.plot_conversations(SCENARIOS_FOLDER,
-#                            metrics=['GROUP A - Average degree', 'GROUP A - Sparseness', #'GROUP A - Shortest path',
-#                                     'GROUP A - Number of components', 'GROUP A - Centrality entropy',
-#                                     'GROUP B - Average population',
-#                                     'GROUP C - Ratio claim to triples', 'GROUP C - Ratio perspectives to claims',
-#                                     'MLM llh'])
+plotter.plot_conversations(SCENARIOS_FOLDER,
+                           metrics=['GROUP A - Average degree', 'GROUP A - Sparseness', #'GROUP A - Shortest path',
+                                    'GROUP A - Number of components', 'GROUP A - Centrality entropy',
+                                    'GROUP B - Average population',
+                                    'GROUP C - Ratio claim to triples', 'GROUP C - Ratio perspectives to claims',
+                                    'MLM llh'])
 
 correlator = Correlator()
 correlator.correlate_metrics(SCENARIOS_FOLDER,

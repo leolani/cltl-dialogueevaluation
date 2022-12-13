@@ -34,13 +34,13 @@ class Correlator(BasicCorrelator):
             self.plot_correlations(corr_df, None, conversation_id, scenarios_path)
 
         # Average conversations
-        avg_df = pd.concat(corr_dfs).groupby(level=0).mean()
+        avg_df = pd.concat(corr_dfs).groupby(level=0).mean(numeric_only=True)
         avg_df = avg_df.reindex(sorted(avg_df.columns), axis=1)
         self.plot_correlations(avg_df, None, '', scenarios_path)
 
     @staticmethod
     def read_evaluations(scenario, metrics):
-        print(f"processing {scenario.stem}")
+        print(f"Correlations on {scenario.stem}")
 
         # Read evaluations
         evaluations = []
@@ -91,3 +91,4 @@ class Correlator(BasicCorrelator):
         plot_file = evaluation_folder / name / 'plots'
         plot_file.mkdir(parents=True, exist_ok=True)
         g.figure.savefig(plot_file / f"Correlation heatmap.png", dpi=300, transparent=True, bbox_inches='tight')
+        plt.close()

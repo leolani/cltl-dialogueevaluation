@@ -21,9 +21,10 @@ class Plotter(BasicPlotter):
 
         # Plot metrics progression per conversation
         for metric in metrics:
-            metric_df = pd.DataFrame()
+            print(f"Plotting metric {metric}")
 
             # Read data
+            metric_df = pd.DataFrame()
             for scenario in scenarios_paths:
                 filename = 'graph_evaluation.csv' if metric in GRAPH_METRICS else 'likelihood_evaluation_context300.csv'
                 convo_df = pd.read_csv(scenario / 'evaluation' / filename, header=0)
@@ -55,4 +56,5 @@ class Plotter(BasicPlotter):
         # Save
         plot_file = evaluation_folder / 'plots'
         plot_file.mkdir(parents=True, exist_ok=True)
-        g.figure.savefig(plot_file / f"{xlabel}.png", dpi=300)
+        g.figure.savefig(plot_file / f"{xlabel}.png", dpi=300, transparent=True, bbox_inches='tight')
+        plt.close()
