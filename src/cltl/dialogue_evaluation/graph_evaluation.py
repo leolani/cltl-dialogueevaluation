@@ -89,7 +89,7 @@ class GraphEvaluator(BasicEvaluator):
             if get_count_nodes(brain_as_netx) > 0 else 0
         df.loc[idx, 'GROUP A - Number of components'] = get_number_components(brain_as_netx)
         df.loc[idx, 'GROUP A - Number of strong components'] = get_assortativity(brain_as_netx)
-        df.loc[idx, 'GROUP A - Shortest path'] = get_shortest_path(brain_as_netx)
+        # df.loc[idx, 'GROUP A - Shortest path'] = get_shortest_path(brain_as_netx)
         df.loc[idx, 'GROUP A - Centrality entropy'] = get_entropy_centr(brain_as_netx)
         df.loc[idx, 'GROUP A - Closeness entropy'] = get_entropy_clos(brain_as_netx)
         df.loc[idx, 'GROUP A - Sparseness'] = get_sparseness(brain_as_netx) if get_count_nodes(brain_as_netx) > 0 else 0
