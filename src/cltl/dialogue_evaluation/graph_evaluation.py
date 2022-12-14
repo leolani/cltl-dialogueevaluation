@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -26,14 +27,15 @@ class GraphEvaluator(BasicEvaluator):
         print(f'----------SCENARIO:{scenario_folder.stem}, EVALUATION:graph metrics---------')
 
         # Read mapping of rdf log file to turn
-        map_emissor_scenarios(scenario_folder, rdf_folder)
+        if not os.path.exists(scenario_folder / f'turn_to_trig_file.json'):
+            map_emissor_scenarios(scenario_folder, rdf_folder)
         full_df = pd.read_json(scenario_folder / f'turn_to_trig_file.json')
 
         # Recreate conversation and score graph
         rdf_count = 0
         total_turns = len(full_df)
         for idx, row in full_df.iterrows():
-            print(f"Processing turn {row['Turn']}/{total_turns-1}")
+            print(f"Processing turn {row['Turn']}/{total_turns - 1}")
 
             # If first row and no graph
             if idx == 0 and not row['rdf_file']:
@@ -233,4 +235,3 @@ class GraphEvaluator(BasicEvaluator):
         g.figure.savefig(plot_file, dpi=300, transparent=True, bbox_inches='tight')
         plt.close()
         print(f"\tSaved to file: {plot_file}")
-
