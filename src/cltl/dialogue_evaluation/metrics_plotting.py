@@ -56,5 +56,5 @@ class Plotter(BasicPlotter):
         # Save
         plot_file = evaluation_folder / 'plots'
         plot_file.mkdir(parents=True, exist_ok=True)
-        g.figure.savefig(plot_file / f"{xlabel}.png", dpi=300, transparent=True, bbox_inches='tight')
+        g.figure.savefig(plot_file / f"{xlabel}.png", dpi=300, transparent=False, bbox_inches='tight')
         plt.close()

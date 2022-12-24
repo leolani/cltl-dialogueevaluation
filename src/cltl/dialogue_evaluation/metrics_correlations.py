@@ -92,6 +92,6 @@ class Correlator(BasicCorrelator):
         # Save
         plot_file = evaluation_folder / name / 'plots'
         plot_file.mkdir(parents=True, exist_ok=True)
-        g.figure.savefig(plot_file / f"Correlation heatmap.png", dpi=300, transparent=True, bbox_inches='tight')
+        g.figure.savefig(plot_file / f"Correlation heatmap.png", dpi=300, transparent=False, bbox_inches='tight')
         plt.close()
         print(f"\tSaved to file: {plot_file}")
