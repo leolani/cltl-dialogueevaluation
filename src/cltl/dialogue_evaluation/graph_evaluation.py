@@ -11,7 +11,7 @@ from cltl.dialogue_evaluation.api import BasicEvaluator
 from cltl.dialogue_evaluation.metrics.brain_measures import *
 from cltl.dialogue_evaluation.metrics.graph_measures import *
 from cltl.dialogue_evaluation.metrics.ontology_measures import *
-from cltl.dialogue_evaluation.utils.map_rdf_files import map_emissor_scenarios
+from cltl.dialogue_evaluation.utils.map_rdf_files import map_scenarios
 
 
 class GraphEvaluator(BasicEvaluator):
@@ -28,7 +28,7 @@ class GraphEvaluator(BasicEvaluator):
 
         # Read mapping of rdf log file to turn
         if not os.path.exists(scenario_folder / f'turn_to_trig_file.json'):
-            map_emissor_scenarios(scenario_folder, rdf_folder)
+            map_scenarios(scenario_folder, rdf_folder)
         full_df = pd.read_json(scenario_folder / f'turn_to_trig_file.json')
 
         # Recreate conversation and score graph
