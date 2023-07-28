@@ -1,5 +1,6 @@
-import pandas as pd
-import seaborn as sns
+import os
+import json
+from pathlib import Path
 from emissor.persistence import ScenarioStorage
 from emissor.representation.scenario import Modality
 import evaluate
@@ -32,8 +33,8 @@ class ReferenceEvaluator(BasicEvaluator):
         print('Nr of reference turns:', len(ref_turns), ' extracted from reference scenario: ', ref_scenario_id)
         print('Reference Speakers:', ref_speakers)
 
-        sys_scenario_folder = ScenarioStorage(sys_scenario_folder)
-        sys_scenario_ctrl = ref_scenario_storage.load_scenario(sys_scenario_id)
+        sys_scenario_storage = ScenarioStorage(sys_scenario_folder)
+        sys_scenario_ctrl = sys_scenario_storage.load_scenario(sys_scenario_id)
         sys_signals = sys_scenario_ctrl.get_signals(Modality.TEXT)
         sys_ids, sys_turns, sys_speakers = text_util.get_turns_with_context_from_signals(sys_signals, max_context=0)
 
@@ -49,12 +50,14 @@ class ReferenceEvaluator(BasicEvaluator):
         print(results)
         #
         # # Save
-        # evaluation_folder = Path(scenario_folder / scenario_id / 'evaluation')
-        # evaluation_folder.mkdir(parents=True, exist_ok=True)
-        # self._save(df, avg_df, evaluation_folder)
+        evaluation_folder_path = os.path.join(sys_scenario_folder, sys_scenario_id, 'evaluation')
+        ##evaluation_folder = os.path.(evaluation_folder_path)
+        if not os.path.exists(evaluation_folder_path):
+            os.mkdir(evaluation_folder_path)
+        self._save(results, evaluation_folder_path)
         # #
-        # if metrics_to_plot:
-        #     self.plot_metrics_progression(metrics_to_plot, [df], evaluation_folder)
+#        if metrics_to_plot:
+#             self.plot_metrics_progression(metrics_to_plot, [df], evaluation_folder)
 
     @staticmethod
     def _calculate_metrics(model_mlm, turns, speaker_mlm_scores, speaker_mlm_max_scores, speaker_turns):
@@ -78,27 +81,8 @@ class ReferenceEvaluator(BasicEvaluator):
 
         return pd.DataFrame(rows)
 
-    @staticmethod
-    def _average_metrics(speakers, turns, speaker_mlm_scores, speaker_mlm_max_scores):
-        # Iterate turns
-        print(f"\n\tCalculating average likelihood scores")
-        overall_rows = []
-        for speaker in speakers:
-            mlm_scores = speaker_mlm_scores[speaker]
-            mlm_average_score = sum(mlm_scores) / len(mlm_scores)
-            mlm_max_scores = speaker_mlm_max_scores[speaker]
-            mlm_average_max_score = sum(mlm_max_scores) / len(mlm_max_scores)
-            overall_rows.append({'Speaker': speaker, 'Nr. turns': len(turns),
-                                 'MLM': mlm_average_score, 'MLM avg': mlm_average_score,
-                                 'MLM max': mlm_max_scores, 'MLM avg max': mlm_average_max_score})
-
-        # Save
-        return pd.DataFrame(overall_rows)
-
-    def _save(self, df, avg_df, evaluation_folder):
-        file = "likelihood_evaluation" + "_context" + str(self.max_context) + ".csv"
-        df.to_csv(evaluation_folder / file, index=False)
-
-        file = "likelihood_evaluation" + "_context" + str(self.max_context) + "_overall.csv"
-        avg_df.to_csv(evaluation_folder / file, index=False)
+    def _save(self, results, evaluation_folder):
+        file_path = os.path.join(evaluation_folder, "reference_evaluation.csv")
+        file = open(file_path, "w")
+        json.dump(results, file, indent=4)
 
