@@ -26,7 +26,7 @@ GRAPH_METRICS = ['GROUP A - Total nodes', 'GROUP A - Total edges', 'GROUP A - Av
                  'GROUP C - Average perspectives per source'
                  ]
 
-LIKELIHOOD_METRICS = ["MLM response", "System llh", "MLM llh"]
+LIKELIHOOD_METRICS = ["System llh", "MLM llh"]
 
 HUMAN_METRICS = ['Overall Human Rating', 'Interesting', 'Engaging', 'Specific',
                  'Relevant', 'Correct', 'Semantically Appropriate', 'Understandable', 'Fluent']

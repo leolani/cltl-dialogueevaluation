@@ -1,1 +1,309 @@
-[{"Mention ID": "0425f982-b0b7-4504-8430-1c781a70a980", "Turn": 0, "Speaker": "LEOLANI", "Response": "Nice to see you! Do you want to talk to me?", "rdf_file": []}, {"Mention ID": "fa46ea8d-a010-4266-b9ed-c99f6ee9e655", "Turn": 1, "Speaker": "selene", "Response": "yes", "rdf_file": []}, {"Mention ID": "8b28dcbe-7261-4cc0-a8d7-b465f92608e6", "Turn": 2, "Speaker": "LEOLANI", "Response": "Hi, nice to meet you! What is your name?", "rdf_file": []}, {"Mention ID": "b95a0cae-827c-4f1f-9a61-1651dafebced", "Turn": 3, "Speaker": "selene", "Response": "selene", "rdf_file": []}, {"Mention ID": "8c2e3a37-27bd-4005-80a8-aafe003dffee", "Turn": 4, "Speaker": "LEOLANI", "Response": "So your name is Selene?", "rdf_file": []}, {"Mention ID": "26ebc5d2-5253-475e-ae4f-369ba3035dc8", "Turn": 5, "Speaker": "selene", "Response": "yes", "rdf_file": ["brain_log_2022-11-16-12-09-43.trig"]}, {"Mention ID": "7b6ff4a3-f06d-4cf1-a172-cf6b1691d022", "Turn": 6, "Speaker": "LEOLANI", "Response": "Nice to meet you, Selene!", "rdf_file": []}, {"Mention ID": "347ed0c8-4b01-4250-b288-b5e37f161de1", "Turn": 7, "Speaker": "LEOLANI", "Response": "I am curious. Has selene be from by a location?", "rdf_file": []}, {"Mention ID": "d6953629-4a74-4d63-88b9-8b9199c6bd01", "Turn": 8, "Speaker": "selene", "Response": "I am from Mexico", "rdf_file": ["brain_log_2022-11-16-12-09-57.trig", "brain_log_2022-11-16-12-10-11.trig", "brain_log_2022-11-16-12-10-13.trig"]}, {"Mention ID": "ba4652fe-1f00-4166-a8d5-d95084670d70", "Turn": 9, "Speaker": "LEOLANI", "Response": "This is news to me. I had never heard about mexico before!", "rdf_file": []}, {"Mention ID": "39bdff54-388d-499f-811e-261109c32409", "Turn": 10, "Speaker": "selene", "Response": "Mexico is beautiful", "rdf_file": ["brain_log_2022-11-16-12-10-14.trig", "brain_log_2022-11-16-12-10-24.trig"]}, {"Mention ID": "53f4657d-df98-499e-ae03-6fc559492177", "Turn": 11, "Speaker": "LEOLANI", "Response": "I am curious. Has a institution ever locate in mexico?. I am curious. Has person been family of selene? ", "rdf_file": []}, {"Mention ID": "239dc676-d2fd-449e-87f7-ece2fc961588", "Turn": 12, "Speaker": "LEOLANI", "Response": "Let me ask you something. Has a agent ever be from mexico?", "rdf_file": []}, {"Mention ID": "1da7b32d-dd32-4205-9569-04a500d5bce2", "Turn": 13, "Speaker": "LEOLANI", "Response": "I just learned something, I had never heard about beautiful before!", "rdf_file": []}, {"Mention ID": "026cbbc9-6f3e-4b66-8e73-f4d5547a221c", "Turn": 14, "Speaker": "selene", "Response": "The University of Mexico is located in Mexico", "rdf_file": ["brain_log_2022-11-16-12-10-52.trig", "brain_log_2022-11-16-12-10-54.trig", "brain_log_2022-11-16-12-11-05.trig", "brain_log_2022-11-16-12-11-06.trig", "brain_log_2022-11-16-12-11-08.trig", "brain_log_2022-11-16-12-11-10.trig"]}, {"Mention ID": "b0fcaca4-78eb-4e83-858b-2ec5a5d8186f", "Turn": 15, "Speaker": "LEOLANI", "Response": "That rings a bell. I have heard about mexico before. Exciting news! I had never heard about the university of mexico before!", "rdf_file": []}, {"Mention ID": "99daccfc-2671-493a-bc5f-10e4afe406a2", "Turn": 16, "Speaker": "LEOLANI", "Response": "I think I trust you.. This is news to me. I had never heard about the university of mexico before!. I know. I have heard about the university of mexico before. You have my trust.", "rdf_file": []}, {"Mention ID": "41e30f14-adcf-45d6-9c81-f5133b91405a", "Turn": 17, "Speaker": "selene", "Response": "I have a sister", "rdf_file": ["brain_log_2022-11-16-12-11-44.trig", "brain_log_2022-11-16-12-11-49.trig", "brain_log_2022-11-16-12-11-55.trig"]}, {"Mention ID": "5c8b5554-1a45-4b2d-893f-55dac63668b9", "Turn": 18, "Speaker": "LEOLANI", "Response": "I believe you. This sounds familiar. I have heard about someone before", "rdf_file": []}, {"Mention ID": "88a5f8ac-9f5f-4130-a24f-06a6a47e7279", "Turn": 19, "Speaker": "selene", "Response": "Karla is my sister", "rdf_file": ["brain_log_2022-11-16-12-12-26.trig", "brain_log_2022-11-16-12-12-33.trig"]}, {"Mention ID": "e06b4f00-a794-415c-bac6-5aa4a6ba5f15", "Turn": 20, "Speaker": "LEOLANI", "Response": "I just learned something, I had never heard about karla before!", "rdf_file": []}, {"Mention ID": "4a474c96-acb6-4f5a-95bc-98d8565b221a", "Turn": 21, "Speaker": "LEOLANI", "Response": "I trust you", "rdf_file": []}, {"Mention ID": "04dc9f23-d1dc-4b86-9607-a96e2cd2c5ef", "Turn": 22, "Speaker": "selene", "Response": "Karla is from Mexico", "rdf_file": ["brain_log_2022-11-16-12-13-03.trig", "brain_log_2022-11-16-12-13-05.trig", "brain_log_2022-11-16-12-13-11.trig", "brain_log_2022-11-16-12-13-13.trig"]}, {"Mention ID": "c5bf9017-28c1-4529-ae81-6e9f886ed716", "Turn": 23, "Speaker": "LEOLANI", "Response": "That rings a bell. I have heard about mexico before. I would like to know. Has karla dislike by a agent?", "rdf_file": []}, {"Mention ID": "4be22411-b299-40ee-b61b-cceb244fefa2", "Turn": 24, "Speaker": "LEOLANI", "Response": "That rings a bell. I have heard about mexico before. I am curious. Has karla ever like a agent?", "rdf_file": []}, {"Mention ID": "36f36f9e-e663-4b6b-a32c-1e18ba7a2569", "Turn": 25, "Speaker": "selene", "Response": "Karla likes Mickey Mouse", "rdf_file": ["brain_log_2022-11-16-12-13-52.trig", "brain_log_2022-11-16-12-13-54.trig", "brain_log_2022-11-16-12-13-59.trig", "brain_log_2022-11-16-12-14-01.trig"]}, {"Mention ID": "74043e95-f009-467d-b4f2-476647e7502e", "Turn": 26, "Speaker": "LEOLANI", "Response": "I am curious. Has karla work at by a institution?. I am glad to have learned something new. I had never heard about mickey mouse before!", "rdf_file": []}, {"Mention ID": "05a87e40-e7a6-466d-ad07-8262c020d54b", "Turn": 27, "Speaker": "LEOLANI", "Response": "I believe you. I am curious. Has agent been friends with karla? ", "rdf_file": []}, {"Mention ID": "9457fa07-80ee-4f0e-aa59-9c4dc80e27f3", "Turn": 28, "Speaker": "selene", "Response": "Luis is friends with Karla", "rdf_file": ["brain_log_2022-11-16-12-15-10.trig", "brain_log_2022-11-16-12-15-11.trig", "brain_log_2022-11-16-12-15-18.trig", "brain_log_2022-11-16-12-15-21.trig", "brain_log_2022-11-16-12-15-23.trig", "brain_log_2022-11-16-12-15-25.trig"]}, {"Mention ID": "1ecc623f-c37a-4dd0-a6c3-100220032589", "Turn": 29, "Speaker": "LEOLANI", "Response": "Let me ask you something. Has karla music by a band?. Exciting news! I had never heard about luis before!", "rdf_file": []}, {"Mention ID": "bde26ed8-f63b-4275-89ac-1eb0ea8f35c8", "Turn": 30, "Speaker": "LEOLANI", "Response": "I believe you. If you don't mind me asking. Has a person ever be wife of friends with karla?. Let me ask you something. Has luis ever know a agent?", "rdf_file": []}, {"Mention ID": "e1b5cc2a-3817-4dad-b1b9-7b4de81c2653", "Turn": 31, "Speaker": "selene", "Response": "Luis knows Karla", "rdf_file": ["brain_log_2022-11-16-12-15-56.trig", "brain_log_2022-11-16-12-15-59.trig"]}, {"Mention ID": "6499e4b5-6d7e-46cc-aecb-c3edfadd36c8", "Turn": 32, "Speaker": "LEOLANI", "Response": "I am curious. Has a agent ever visit karla?. This sounds familiar. I have heard about luis before", "rdf_file": []}, {"Mention ID": "839b5213-fde2-4340-9a4b-85eb08574263", "Turn": 33, "Speaker": "selene", "Response": "Karla knows Luis", "rdf_file": ["brain_log_2022-11-16-12-16-02.trig", "brain_log_2022-11-16-12-16-05.trig", "brain_log_2022-11-16-12-16-08.trig", "brain_log_2022-11-16-12-16-10.trig"]}, {"Mention ID": "f93e6129-8cf9-4219-a408-2f41bcde8286", "Turn": 34, "Speaker": "LEOLANI", "Response": "I know. I have heard about karla before. I am curious. Has a agent ever be colleague of luis?", "rdf_file": []}, {"Mention ID": "4d64b266-5712-48bb-ad42-90decc5028c1", "Turn": 35, "Speaker": "LEOLANI", "Response": "If you don't mind me asking. Has Luis sported sports instrument.?. I am curious. Has karla own by a object?", "rdf_file": []}, {"Mention ID": "999ef5fd-1755-4da2-ab9c-e15d2d1ca8db", "Turn": 36, "Speaker": "selene", "Response": "goodbye", "rdf_file": []}]
+[
+  {
+    "Mention ID": "0425f982-b0b7-4504-8430-1c781a70a980",
+    "Turn": 0,
+    "Speaker": "LEOLANI",
+    "Response": "Nice to see you! Do you want to talk to me?",
+    "rdf_file": []
+  },
+  {
+    "Mention ID": "fa46ea8d-a010-4266-b9ed-c99f6ee9e655",
+    "Turn": 1,
+    "Speaker": "selene",
+    "Response": "yes",
+    "rdf_file": []
+  },
+  {
+    "Mention ID": "8b28dcbe-7261-4cc0-a8d7-b465f92608e6",
+    "Turn": 2,
+    "Speaker": "LEOLANI",
+    "Response": "Hi, nice to meet you! What is your name?",
+    "rdf_file": []
+  },
+  {
+    "Mention ID": "b95a0cae-827c-4f1f-9a61-1651dafebced",
+    "Turn": 3,
+    "Speaker": "selene",
+    "Response": "selene",
+    "rdf_file": []
+  },
+  {
+    "Mention ID": "8c2e3a37-27bd-4005-80a8-aafe003dffee",
+    "Turn": 4,
+    "Speaker": "LEOLANI",
+    "Response": "So your name is Selene?",
+    "rdf_file": []
+  },
+  {
+    "Mention ID": "26ebc5d2-5253-475e-ae4f-369ba3035dc8",
+    "Turn": 5,
+    "Speaker": "selene",
+    "Response": "yes",
+    "rdf_file": [
+      "brain_log_2022-11-16-12-09-43.trig"
+    ]
+  },
+  {
+    "Mention ID": "7b6ff4a3-f06d-4cf1-a172-cf6b1691d022",
+    "Turn": 6,
+    "Speaker": "LEOLANI",
+    "Response": "Nice to meet you, Selene!",
+    "rdf_file": []
+  },
+  {
+    "Mention ID": "347ed0c8-4b01-4250-b288-b5e37f161de1",
+    "Turn": 7,
+    "Speaker": "LEOLANI",
+    "Response": "I am curious. Has selene be from by a location?",
+    "rdf_file": []
+  },
+  {
+    "Mention ID": "d6953629-4a74-4d63-88b9-8b9199c6bd01",
+    "Turn": 8,
+    "Speaker": "selene",
+    "Response": "I am from Mexico",
+    "rdf_file": [
+      "brain_log_2022-11-16-12-09-57.trig",
+      "brain_log_2022-11-16-12-10-11.trig",
+      "brain_log_2022-11-16-12-10-13.trig"
+    ]
+  },
+  {
+    "Mention ID": "ba4652fe-1f00-4166-a8d5-d95084670d70",
+    "Turn": 9,
+    "Speaker": "LEOLANI",
+    "Response": "This is news to me. I had never heard about mexico before!",
+    "rdf_file": []
+  },
+  {
+    "Mention ID": "39bdff54-388d-499f-811e-261109c32409",
+    "Turn": 10,
+    "Speaker": "selene",
+    "Response": "Mexico is beautiful",
+    "rdf_file": [
+      "brain_log_2022-11-16-12-10-14.trig",
+      "brain_log_2022-11-16-12-10-24.trig"
+    ]
+  },
+  {
+    "Mention ID": "53f4657d-df98-499e-ae03-6fc559492177",
+    "Turn": 11,
+    "Speaker": "LEOLANI",
+    "Response": "I am curious. Has a institution ever locate in mexico?. I am curious. Has person been family of selene? ",
+    "rdf_file": []
+  },
+  {
+    "Mention ID": "239dc676-d2fd-449e-87f7-ece2fc961588",
+    "Turn": 12,
+    "Speaker": "LEOLANI",
+    "Response": "Let me ask you something. Has a agent ever be from mexico?",
+    "rdf_file": []
+  },
+  {
+    "Mention ID": "1da7b32d-dd32-4205-9569-04a500d5bce2",
+    "Turn": 13,
+    "Speaker": "LEOLANI",
+    "Response": "I just learned something, I had never heard about beautiful before!",
+    "rdf_file": []
+  },
+  {
+    "Mention ID": "026cbbc9-6f3e-4b66-8e73-f4d5547a221c",
+    "Turn": 14,
+    "Speaker": "selene",
+    "Response": "The University of Mexico is located in Mexico",
+    "rdf_file": [
+      "brain_log_2022-11-16-12-10-52.trig",
+      "brain_log_2022-11-16-12-10-54.trig",
+      "brain_log_2022-11-16-12-11-05.trig",
+      "brain_log_2022-11-16-12-11-06.trig",
+      "brain_log_2022-11-16-12-11-08.trig",
+      "brain_log_2022-11-16-12-11-10.trig"
+    ]
+  },
+  {
+    "Mention ID": "b0fcaca4-78eb-4e83-858b-2ec5a5d8186f",
+    "Turn": 15,
+    "Speaker": "LEOLANI",
+    "Response": "That rings a bell. I have heard about mexico before. Exciting news! I had never heard about the university of mexico before!",
+    "rdf_file": []
+  },
+  {
+    "Mention ID": "99daccfc-2671-493a-bc5f-10e4afe406a2",
+    "Turn": 16,
+    "Speaker": "LEOLANI",
+    "Response": "I think I trust you.. This is news to me. I had never heard about the university of mexico before!. I know. I have heard about the university of mexico before. You have my trust.",
+    "rdf_file": []
+  },
+  {
+    "Mention ID": "41e30f14-adcf-45d6-9c81-f5133b91405a",
+    "Turn": 17,
+    "Speaker": "selene",
+    "Response": "I have a sister",
+    "rdf_file": [
+      "brain_log_2022-11-16-12-11-44.trig",
+      "brain_log_2022-11-16-12-11-49.trig",
+      "brain_log_2022-11-16-12-11-55.trig"
+    ]
+  },
+  {
+    "Mention ID": "5c8b5554-1a45-4b2d-893f-55dac63668b9",
+    "Turn": 18,
+    "Speaker": "LEOLANI",
+    "Response": "I believe you. This sounds familiar. I have heard about someone before",
+    "rdf_file": []
+  },
+  {
+    "Mention ID": "88a5f8ac-9f5f-4130-a24f-06a6a47e7279",
+    "Turn": 19,
+    "Speaker": "selene",
+    "Response": "Karla is my sister",
+    "rdf_file": [
+      "brain_log_2022-11-16-12-12-26.trig",
+      "brain_log_2022-11-16-12-12-33.trig"
+    ]
+  },
+  {
+    "Mention ID": "e06b4f00-a794-415c-bac6-5aa4a6ba5f15",
+    "Turn": 20,
+    "Speaker": "LEOLANI",
+    "Response": "I just learned something, I had never heard about karla before!",
+    "rdf_file": []
+  },
+  {
+    "Mention ID": "4a474c96-acb6-4f5a-95bc-98d8565b221a",
+    "Turn": 21,
+    "Speaker": "LEOLANI",
+    "Response": "I trust you",
+    "rdf_file": []
+  },
+  {
+    "Mention ID": "04dc9f23-d1dc-4b86-9607-a96e2cd2c5ef",
+    "Turn": 22,
+    "Speaker": "selene",
+    "Response": "Karla is from Mexico",
+    "rdf_file": [
+      "brain_log_2022-11-16-12-13-03.trig",
+      "brain_log_2022-11-16-12-13-05.trig",
+      "brain_log_2022-11-16-12-13-11.trig",
+      "brain_log_2022-11-16-12-13-13.trig"
+    ]
+  },
+  {
+    "Mention ID": "c5bf9017-28c1-4529-ae81-6e9f886ed716",
+    "Turn": 23,
+    "Speaker": "LEOLANI",
+    "Response": "That rings a bell. I have heard about mexico before. I would like to know. Has karla dislike by a agent?",
+    "rdf_file": []
+  },
+  {
+    "Mention ID": "4be22411-b299-40ee-b61b-cceb244fefa2",
+    "Turn": 24,
+    "Speaker": "LEOLANI",
+    "Response": "That rings a bell. I have heard about mexico before. I am curious. Has karla ever like a agent?",
+    "rdf_file": []
+  },
+  {
+    "Mention ID": "36f36f9e-e663-4b6b-a32c-1e18ba7a2569",
+    "Turn": 25,
+    "Speaker": "selene",
+    "Response": "Karla likes Mickey Mouse",
+    "rdf_file": [
+      "brain_log_2022-11-16-12-13-52.trig",
+      "brain_log_2022-11-16-12-13-54.trig",
+      "brain_log_2022-11-16-12-13-59.trig",
+      "brain_log_2022-11-16-12-14-01.trig"
+    ]
+  },
+  {
+    "Mention ID": "74043e95-f009-467d-b4f2-476647e7502e",
+    "Turn": 26,
+    "Speaker": "LEOLANI",
+    "Response": "I am curious. Has karla work at by a institution?. I am glad to have learned something new. I had never heard about mickey mouse before!",
+    "rdf_file": []
+  },
+  {
+    "Mention ID": "05a87e40-e7a6-466d-ad07-8262c020d54b",
+    "Turn": 27,
+    "Speaker": "LEOLANI",
+    "Response": "I believe you. I am curious. Has agent been friends with karla? ",
+    "rdf_file": []
+  },
+  {
+    "Mention ID": "9457fa07-80ee-4f0e-aa59-9c4dc80e27f3",
+    "Turn": 28,
+    "Speaker": "selene",
+    "Response": "Luis is friends with Karla",
+    "rdf_file": [
+      "brain_log_2022-11-16-12-15-10.trig",
+      "brain_log_2022-11-16-12-15-11.trig",
+      "brain_log_2022-11-16-12-15-18.trig",
+      "brain_log_2022-11-16-12-15-21.trig",
+      "brain_log_2022-11-16-12-15-23.trig",
+      "brain_log_2022-11-16-12-15-25.trig"
+    ]
+  },
+  {
+    "Mention ID": "1ecc623f-c37a-4dd0-a6c3-100220032589",
+    "Turn": 29,
+    "Speaker": "LEOLANI",
+    "Response": "Let me ask you something. Has karla music by a band?. Exciting news! I had never heard about luis before!",
+    "rdf_file": []
+  },
+  {
+    "Mention ID": "bde26ed8-f63b-4275-89ac-1eb0ea8f35c8",
+    "Turn": 30,
+    "Speaker": "LEOLANI",
+    "Response": "I believe you. If you don't mind me asking. Has a person ever be wife of friends with karla?. Let me ask you something. Has luis ever know a agent?",
+    "rdf_file": []
+  },
+  {
+    "Mention ID": "e1b5cc2a-3817-4dad-b1b9-7b4de81c2653",
+    "Turn": 31,
+    "Speaker": "selene",
+    "Response": "Luis knows Karla",
+    "rdf_file": [
+      "brain_log_2022-11-16-12-15-56.trig",
+      "brain_log_2022-11-16-12-15-59.trig"
+    ]
+  },
+  {
+    "Mention ID": "6499e4b5-6d7e-46cc-aecb-c3edfadd36c8",
+    "Turn": 32,
+    "Speaker": "LEOLANI",
+    "Response": "I am curious. Has a agent ever visit karla?. This sounds familiar. I have heard about luis before",
+    "rdf_file": []
+  },
+  {
+    "Mention ID": "839b5213-fde2-4340-9a4b-85eb08574263",
+    "Turn": 33,
+    "Speaker": "selene",
+    "Response": "Karla knows Luis",
+    "rdf_file": [
+      "brain_log_2022-11-16-12-16-02.trig",
+      "brain_log_2022-11-16-12-16-05.trig",
+      "brain_log_2022-11-16-12-16-08.trig",
+      "brain_log_2022-11-16-12-16-10.trig"
+    ]
+  },
+  {
+    "Mention ID": "f93e6129-8cf9-4219-a408-2f41bcde8286",
+    "Turn": 34,
+    "Speaker": "LEOLANI",
+    "Response": "I know. I have heard about karla before. I am curious. Has a agent ever be colleague of luis?",
+    "rdf_file": []
+  },
+  {
+    "Mention ID": "4d64b266-5712-48bb-ad42-90decc5028c1",
+    "Turn": 35,
+    "Speaker": "LEOLANI",
+    "Response": "If you don't mind me asking. Has Luis sported sports instrument.?. I am curious. Has karla own by a object?",
+    "rdf_file": []
+  },
+  {
+    "Mention ID": "999ef5fd-1755-4da2-ab9c-e15d2d1ca8db",
+    "Turn": 36,
+    "Speaker": "selene",
+    "Response": "goodbye",
+    "rdf_file": []
+  }
+]

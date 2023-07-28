@@ -48,10 +48,8 @@ class LikelihoodEvaluator(BasicEvaluator):
         signals = scenario_ctrl.get_signals(Modality.TEXT)
         ids, turns, speakers = text_util.get_turns_with_context_from_signals(signals, self.max_context)
 
-        print('SCENARIO_FOLDER:', scenario_folder)
-        print('Nr of turns:', len(turns), ' extracted from scenario: ', scenario_id)
-        print('Speakers:', speakers)
-        print('Max context:', self.max_context)
+        print(f'----------SCENARIO:{scenario_folder.stem}, EVALUATION:likelihood metrics---------')
+        print('Nr of turns:', len(turns), 'Speakers:', speakers, 'Max context:', self.max_context)
 
         # Get likelihood scored
         speaker_mlm_scores = {k: [] for k in speakers}
@@ -72,14 +70,15 @@ class LikelihoodEvaluator(BasicEvaluator):
     @staticmethod
     def _calculate_metrics(model_mlm, turns, speaker_mlm_scores, speaker_mlm_max_scores, speaker_turns):
         # Iterate turns
-        print(f"\n\tCalculating likelihood scores")
         rows = []
         for index, turn in enumerate(turns):
-            print(f"\t\tProcessing turn {index}/{len(turns)}")
+            print(f"Processing turn {index}/{len(turns) - 1}")
             context = turn[0]
             target = turn[1]
             cue = turn[2]
             speaker = turn[3]
+
+            print(f"\tCalculating likelihood scores")
             llh, best_sentence, max_score = model_mlm.sentence_likelihood(context, target)
             rows.append({"Turn": index, "Speaker": speaker, "Cue": cue, "Response": target, "Context": context,
                          "MLM response": best_sentence, "System llh": llh, "MLM llh": max_score})
@@ -97,6 +96,7 @@ class LikelihoodEvaluator(BasicEvaluator):
         print(f"\n\tCalculating average likelihood scores")
         overall_rows = []
         for speaker in speakers:
+            print(f"\t\tProcessing speaker {speaker}/{len(speakers) - 1}")
             mlm_scores = speaker_mlm_scores[speaker]
             mlm_average_score = sum(mlm_scores) / len(mlm_scores)
             mlm_max_scores = speaker_mlm_max_scores[speaker]
@@ -111,9 +111,11 @@ class LikelihoodEvaluator(BasicEvaluator):
     def _save(self, df, avg_df, evaluation_folder):
         file = "likelihood_evaluation" + "_context" + str(self.max_context) + ".csv"
         df.to_csv(evaluation_folder / file, index=False)
+        print(f"\n\tSaved to file: {evaluation_folder / file}")
 
         file = "likelihood_evaluation" + "_context" + str(self.max_context) + "_overall.csv"
         avg_df.to_csv(evaluation_folder / file, index=False)
+        print(f"\n\tSaved to file: {evaluation_folder / file}")
 
     def plot_metrics_progression(self, metrics, convo_dfs, evaluation_folder):
         # Plot metrics progression per conversation
@@ -146,6 +148,6 @@ class LikelihoodEvaluator(BasicEvaluator):
         plt.xticks(ax.get_xticks()[::5], rotation=45)
 
         plot_file = evaluation_folder / f"{xlabel}.png"
-        print(plot_file)
-
-        g.figure.savefig(plot_file, dpi=300)
+        g.figure.savefig(plot_file, dpi=300, transparent=True, bbox_inches='tight')
+        plt.close()
+        print(f"\tSaved to file: {plot_file}")
