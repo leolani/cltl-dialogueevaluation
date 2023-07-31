@@ -1,1 +1,4 @@
 evaluate
+nltk
+importlib_metadata
+
