@@ -3,6 +3,7 @@ import json
 from datetime import date
 from emissor.persistence import ScenarioStorage
 from emissor.representation.scenario import Modality
+import datasets
 import evaluate
 import cltl.dialogue_evaluation.utils.text_signal as text_util
 from cltl.dialogue_evaluation.api import BasicEvaluator
@@ -10,7 +11,8 @@ import importlib_metadata
 
 #https://github.com/huggingface/evaluate
 #https://huggingface.co/spaces/evaluate-metric/bleu
-NLG_METRICS = ['rouge', 'blue', 'sacrebleu', 'bleurt', 'meteor', 'google_bleu', 'harshhpareek/bertscore', "all"]
+#https://huggingface.co/docs/datasets/metrics
+NLG_METRICS = ['rouge', 'blue', 'sacrebleu', 'bleurt', 'meteor', 'google_bleu', 'bertscore', "all"]
 
 
 class ReferenceEvaluator(BasicEvaluator):
@@ -70,50 +72,91 @@ class ReferenceEvaluator(BasicEvaluator):
 
             if metric=="blue" or metric=="all":
                 try:
-                    print(metric)
-                    evaluator = evaluate.load("bleu")
+                    print("blue")
+                    evaluator = datasets.load("bleu")
+                   # print(evaluator.inputs_description())
+                   # evaluator = evaluate.load("bleu")
                     result = evaluator.compute(predictions=predictions, references=references)
-                    #print(result)
+                    print('Result', result)
                     results["Scores"].append(result)
-                except:
+                except Exception as e:
+                    # By this way we can know about the type of error occurring
+                    print("The error is: ", e)
                     pass
 
             #install the following dependencies ['absl', 'nltk', 'rouge_score']
             if metric=="rouge" or metric=="all":
                 try:
-                    print(metric)
-                    evaluator = evaluate.load("rouge")
+                    print("rouge")
+                    evaluator = datasets.load_metric("rouge")
+                   # evaluator = evaluate.load("rouge")
                     result = evaluator.compute(predictions=predictions, references=references)
                     #print(result)
                     results["Scores"].append(result)
-                except:
+                except Exception as e:
+                    # By this way we can know about the type of error occurring
+                    print("The error is: ", e)
                     pass
 
             if metric=="meteor" or metric=="all":
                 try:
-                    print(metric)
-                    evaluator = evaluate.load("meteor")
+                    print("meteor")
+                    evaluator = datasets.load_metric("meteor")
+                 #   evaluator = evaluate.load("meteor")
                     result = evaluator.compute(predictions=predictions, references=references)
                     print(result)
                     results["Scores"].append(result)
-                except:
+                except Exception as e:
+                    # By this way we can know about the type of error occurring
+                    print("The error is: ", e)
                     pass
 
-            if metric=="sacrebleu" or metric=="all":
-                print(metric)
-                print("NOT INSTALLED YET")
-                # evaluator = evaluate.load("sacrebleu")
-                # result = evaluator.compute(predictions=predictions, references=references)
-                # print(result)
-                # results["Scores"].append(result)
+            if metric=="google_bleu" or metric=="all":
+                try:
+                    print("google_bleu")
+                    evaluator = datasets.load_metric("google_bleu")
+                 #   evaluator = evaluate.load("meteor")
+                    result = evaluator.compute(predictions=predictions, references=references)
+                    print(result)
+                    results["Scores"].append(result)
+                except Exception as e:
+                    # By this way we can know about the type of error occurring
+                    print("The error is: ", e)
+                    pass
+            #https://github.com/neulab/BARTScore
 
+
+            if metric=="bertscore" or metric=="all":
+                #https://arxiv.org/abs/1904.09675
+                try:
+                    print("bertscore")
+                    evaluator = datasets.load_metric("bertscore")
+                 #   evaluator = evaluate.load("meteor")
+                    result = evaluator.compute(predictions=predictions, references=references)
+                    print(result)
+                    results["Scores"].append(result)
+                except Exception as e:
+                    # By this way we can know about the type of error occurring
+                    print("The error is: ", e)
+                    pass
+
+            # install the following  pip install sacrebleu
+            if metric=="sacrebleu" or metric=="all":
+                print("sacrebleu")
+                print("NOT IMPLEMENTED")
+                #evaluator = datasets.load_metric("sacrebleu")
+                #result = evaluator.compute(predictions=predictions, references=references)
+                #print(result)
+                #results["Scores"].append(result)
+
+            #install the following  https://github.com/google-research/bleurt
             if metric=="bleurt" or metric=="all":
-                print(metric)
-                print("NOT INSTALLED YET")
-            #     evaluator = evaluate.load("bleurt")
-            #     result = evaluator.compute(predictions=predictions, references=references)
-            #     print(result)
-            #     results["Scores"].append(result)
+                print("bleurt")
+                print("NOT IMPLEMENTED")
+               # evaluator = datasets.load_metric("bleurt")
+               # result = evaluator.compute(predictions=predictions, references=references)
+               # print(result)
+               # results["Scores"].append(result)
 
         #
         # # Save

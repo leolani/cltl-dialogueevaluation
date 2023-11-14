@@ -1,4 +1,5 @@
 evaluate
+datasets
 nltk
 importlib_metadata
-
+sacrebleu

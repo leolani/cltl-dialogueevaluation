@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 evaluator = ReferenceEvaluator()
-METRIC = ["all"]   #nlg_metrics =['rouge','blue','sacrebleu','bleurt', 'meteor','google_bleu', 'harshhpareek/bertscore', 'all']
+METRIC = ["blue"]   #nlg_metrics =['rouge','blue','sacrebleu','bleurt', 'meteor','google_bleu', 'harshhpareek/bertscore', 'all']
 
 # evaluate.list_evaluation_modules = ['precision', 'code_eval', 'roc_auc', 'cuad', 'xnli', 'rouge', 'pearsonr', 'mse', 'super_glue', 'comet', 'cer', 'sacrebleu', 'mahalanobis',
 #            'wer', 'competition_math', 'f1', 'recall', 'coval', 'mauve', 'xtreme_s', 'bleurt', 'ter', 'accuracy', 'exact_match', 'indic_glue', 'spearmanr',
@@ -28,12 +28,18 @@ METRIC = ["all"]   #nlg_metrics =['rouge','blue','sacrebleu','bleurt', 'meteor',
 
 REFERENCE_SCENARIO = Path("/Users/piek/Desktop/t-MA-Combots-2023/assignments/interaction2")
 SYSTEM_SCENARIO =  Path("/Users/piek/Desktop/t-MA-Combots-2023/assignments/interaction2")
-SYSTEM_ID = "0b6a48b4-3afc-44c3-923f-c9dc594314f6"
-REFERENCE_ID =  "0b6a48b4-3afc-44c3-923f-c9dc594314f6"
+SYSTEM_ID = "4ae67886-0f67-4b66-87c1-eb3b0a2c4426"
+REFERENCE_ID =  "4ae67886-0f67-4b66-87c1-eb3b0a2c4426"
+path = "/Users/piek/Desktop/t-MA-Combots-2023/combots-lectures-2023/week3/emissor/"
 
-evaluator.evaluate_conversation(ref_scenario_folder=REFERENCE_SCENARIO,
-                                sys_scenario_folder=SYSTEM_SCENARIO,
+evaluator.evaluate_conversation(ref_scenario_folder=path,
+                                sys_scenario_folder=path,
                                 ref_scenario_id=REFERENCE_ID,
                                 sys_scenario_id=SYSTEM_ID,
                                 metrics_to_plot=METRIC)
 
+# evaluator.evaluate_conversation(ref_scenario_folder=REFERENCE_SCENARIO,
+#                                 sys_scenario_folder=SYSTEM_SCENARIO,
+#                                 ref_scenario_id=REFERENCE_ID,
+#                                 sys_scenario_id=SYSTEM_ID,
+#                                 metrics_to_plot=METRIC)
