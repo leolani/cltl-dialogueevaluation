@@ -7,6 +7,8 @@ import datasets
 import evaluate
 import cltl.dialogue_evaluation.utils.text_signal as text_util
 from cltl.dialogue_evaluation.api import BasicEvaluator
+import numpy as np
+import pandas as pd
 import importlib_metadata
 
 #https://github.com/huggingface/evaluate
@@ -73,11 +75,15 @@ class ReferenceEvaluator(BasicEvaluator):
             if metric=="blue" or metric=="all":
                 try:
                     print("blue")
-                    evaluator = datasets.load("bleu")
-                   # print(evaluator.inputs_description())
-                   # evaluator = evaluate.load("bleu")
-                    result = evaluator.compute(predictions=predictions, references=references)
-                    print('Result', result)
+                    evaluator = datasets.load_metric("bleu")
+                    _predictions = [i.split() for i in predictions]
+                    _references = [[i.split()] for i in references]
+                   # print('predictions', _predictions)
+                   # print('references', _references)
+                    result = evaluator.compute(predictions=_predictions, references=_references)
+                    result['precisions'] = np.average(result['precisions'])
+                    result['metric']='blue'
+                   # print('Result', result)
                     results["Scores"].append(result)
                 except Exception as e:
                     # By this way we can know about the type of error occurring
@@ -91,7 +97,11 @@ class ReferenceEvaluator(BasicEvaluator):
                     evaluator = datasets.load_metric("rouge")
                    # evaluator = evaluate.load("rouge")
                     result = evaluator.compute(predictions=predictions, references=references)
-                    #print(result)
+                    result = {key: value.mid.fmeasure * 100 for key, value in result.items()}
+                    result = {k: round(v, 4) for k, v in result.items()}
+                    result['metric']='rouge'
+
+                  #  print(result)
                     results["Scores"].append(result)
                 except Exception as e:
                     # By this way we can know about the type of error occurring
@@ -102,38 +112,27 @@ class ReferenceEvaluator(BasicEvaluator):
                 try:
                     print("meteor")
                     evaluator = datasets.load_metric("meteor")
-                 #   evaluator = evaluate.load("meteor")
                     result = evaluator.compute(predictions=predictions, references=references)
-                    print(result)
+                    result['metric']='meteor'
+
+                   # print(result)
                     results["Scores"].append(result)
                 except Exception as e:
                     # By this way we can know about the type of error occurring
                     print("The error is: ", e)
                     pass
-
-            if metric=="google_bleu" or metric=="all":
-                try:
-                    print("google_bleu")
-                    evaluator = datasets.load_metric("google_bleu")
-                 #   evaluator = evaluate.load("meteor")
-                    result = evaluator.compute(predictions=predictions, references=references)
-                    print(result)
-                    results["Scores"].append(result)
-                except Exception as e:
-                    # By this way we can know about the type of error occurring
-                    print("The error is: ", e)
-                    pass
-            #https://github.com/neulab/BARTScore
-
 
             if metric=="bertscore" or metric=="all":
                 #https://arxiv.org/abs/1904.09675
                 try:
                     print("bertscore")
                     evaluator = datasets.load_metric("bertscore")
-                 #   evaluator = evaluate.load("meteor")
-                    result = evaluator.compute(predictions=predictions, references=references)
-                    print(result)
+                    result = evaluator.compute(predictions=predictions, references=references, lang="en", model_type="distilbert-base-uncased")
+                    result['precision'] = round(np.average(result['precision']),4)
+                    result['recall'] = round(np.average(result['recall']), 4)
+                    result['f1'] = round(np.average(result['f1']), 4)
+                    result['metric']='bertscore'
+                  #  print(result)
                     results["Scores"].append(result)
                 except Exception as e:
                     # By this way we can know about the type of error occurring
@@ -157,6 +156,16 @@ class ReferenceEvaluator(BasicEvaluator):
                # result = evaluator.compute(predictions=predictions, references=references)
                # print(result)
                # results["Scores"].append(result)
+
+            if metric=="google_bleu" or metric=="all":
+                print("google_bleu")
+                print("NOT IMPLEMENTED")
+                # evaluator = datasets.load_metric("google_bleu")
+                # result = evaluator.compute(predictions=predictions, references=references)
+                # print(result)
+                # results["Scores"].append(result)
+
+            #https://github.com/neulab/BARTScore
 
         #
         # # Save

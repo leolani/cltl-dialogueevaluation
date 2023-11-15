@@ -1,10 +1,10 @@
 from cltl.dialogue_evaluation.reference_evaluation import ReferenceEvaluator
-import os
 from pathlib import Path
 
 
 evaluator = ReferenceEvaluator()
-METRIC = ["blue"]   #nlg_metrics =['rouge','blue','sacrebleu','bleurt', 'meteor','google_bleu', 'harshhpareek/bertscore', 'all']
+METRIC = ["blue", "rouge", "bertscore", "meteor"]
+#nlg_metrics =['rouge','blue','sacrebleu','bleurt', 'meteor','google_bleu', 'harshhpareek/bertscore', 'all']
 
 # evaluate.list_evaluation_modules = ['precision', 'code_eval', 'roc_auc', 'cuad', 'xnli', 'rouge', 'pearsonr', 'mse', 'super_glue', 'comet', 'cer', 'sacrebleu', 'mahalanobis',
 #            'wer', 'competition_math', 'f1', 'recall', 'coval', 'mauve', 'xtreme_s', 'bleurt', 'ter', 'accuracy', 'exact_match', 'indic_glue', 'spearmanr',
