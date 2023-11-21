@@ -46,7 +46,7 @@ class LikelihoodEvaluator(BasicEvaluator):
         scenario_storage = ScenarioStorage(scenario_folder)
         scenario_ctrl = scenario_storage.load_scenario(scenario_id)
         signals = scenario_ctrl.get_signals(Modality.TEXT)
-        ids, turns, speakers = text_util.get_turns_with_context_from_signals(signals, self.max_context)
+        ids, turns, speakers = text_util.get_utterances_with_context_from_signals(signals, self.max_context)
 
         print(f'----------SCENARIO:{scenario_folder.stem}, EVALUATION:likelihood metrics---------')
         print('Nr of turns:', len(turns), 'Speakers:', speakers, 'Max context:', self.max_context)

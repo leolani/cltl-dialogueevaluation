@@ -46,7 +46,7 @@ class USR_DialogRetrieval_Evaluator(BasicEvaluator):
         scenario_storage = ScenarioStorage(scenario_folder)
         scenario_ctrl = scenario_storage.load_scenario(scenario_id)
         signals = scenario_ctrl.get_signals(Modality.TEXT)
-        ids, turns, speakers = text_util.get_turns_with_context_from_signals(signals, self.max_context)
+        ids, turns, speakers = text_util.get_utterances_with_context_from_signals(signals, self.max_context)
 
         print('SCENARIO_FOLDER:', scenario_folder)
         print('Nr of turns:', len(turns), ' extracted from scenario: ', scenario_id)

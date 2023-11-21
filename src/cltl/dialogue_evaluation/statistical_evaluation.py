@@ -1,13 +1,13 @@
-from pathlib import Path
+import glob
+import json
 from collections import Counter
 import pandas as pd
-import glob
-from os import path
+import os
 from emissor.persistence import ScenarioStorage
 from emissor.representation.scenario import Modality
 
 import cltl.dialogue_evaluation.utils.text_signal as text_util
-import cltl.dialogue_evaluation.utils.image_signal as image_util
+#import cltl.dialogue_evaluation.utils.image_signal as image_util
 from emissor.representation.scenario import Signal
 
 from cltl.dialogue_evaluation.api import BasicEvaluator
@@ -53,23 +53,23 @@ class StatisticalEvaluator(BasicEvaluator):
             duration = (end - start) / 60000
         return duration
 
-    def get_turn_stats(self, turns):
-        average_tokens_per_turn = 0
-        average_turn_length = 0
+    def get_utterance_stats(self, utterances):
+        average_tokens_per_utt = 0
+        average_utt_length = 0
         average_token_length = 0
-        for turn in turns:
-            tokens = turn[1].split(" ")
-            average_turn_length += len(turn[1])
-            average_tokens_per_turn += len(tokens)
+        for utt in utterances:
+            tokens = utt[1].split(" ")
+            average_utt_length += len(utt[1])
+            average_tokens_per_utt += len(tokens)
             for token in tokens:
                 average_token_length += len(token)
 
-        average_token_length = average_token_length/ average_tokens_per_turn
-        average_tokens_per_turn = average_tokens_per_turn/len(turns)
-        average_turn_length = average_turn_length/len(turns)
-        return average_turn_length, average_tokens_per_turn, average_token_length
+        average_token_length = average_token_length/ average_utt_length
+        average_tokens_per_utt = average_utt_length/len(utterances)
+        average_turn_length = average_utt_length/len(utterances)
+        return average_turn_length, average_tokens_per_utt, average_token_length
 
-    def get_overview_statistics(self, scenario_folder):
+    def get_overview_statistics(self,scenario_folder):
         stat_dict = {}
 
         storage = ScenarioStorage(scenario_folder)
@@ -79,7 +79,11 @@ class StatisticalEvaluator(BasicEvaluator):
 
         for scenario in scenarios:
             columns.append(scenario)
-            csv_path = scenario_folder+"/"+scenario+"/"+"evaluation/"+scenario+"_meta_data.csv"
+            csv_path = os.path.join(scenario_folder, scenario, "evaluation", scenario+"_meta_data.csv")
+            if not os.path.exists(csv_path):
+                print("No evaluation file for:", csv_path)
+                continue
+
             file = open(csv_path, 'r')
 
             print('Reading file for overview', file.name)
@@ -88,7 +92,9 @@ class StatisticalEvaluator(BasicEvaluator):
             scenario_dict = {}
             if anno_type in stat_dict:
                 scenario_dict = stat_dict.get(anno_type)
+            nr = 0
             for fields in lines:
+                nr+=1
                 # print(fields)
                 if type(fields) == str:
                     fields = fields.split('\t')
@@ -111,12 +117,97 @@ class StatisticalEvaluator(BasicEvaluator):
                     else:
                         scenario_dict[col] = [(scenario, value)]
                 else:
-                    print('Error nr. of fields:', len(fields), fields)
+                    print('Error in line', nr, ' nr. of fields:', len(fields), fields)
                     continue
         return stat_dict, columns
 
+
+
+    def get_overview_statistics_any_depth(self, folder):
+        stat_dict = {}
+        columns = ["Label"]
+
+        for f in glob.glob(folder+"/**/*_meta_data.json", recursive=True):
+            file = open(f, 'r')
+            print(file.name)
+            meta = json.load(file)
+            scenario = meta['Scenario']['Scenario_id']
+            columns.append(scenario)
+
+            anno_type="Scenario"
+            scenario_info = meta[anno_type]
+            if anno_type in stat_dict:
+                scenario_dict = stat_dict.get(anno_type)
+            else:
+                scenario_dict = {}
+            for key, value in scenario_info.items():
+                if key in scenario_dict:
+                    scenario_dict[key].append((scenario, value))
+                else:
+                    scenario_dict[key] = [(scenario, value)]
+            stat_dict[anno_type] = scenario_dict
+
+            anno_type = "Text"
+            scenario_info = meta[anno_type]
+            if anno_type in stat_dict:
+                scenario_dict = stat_dict.get(anno_type)
+            else:
+                scenario_dict = {}
+            for key, value in scenario_info.items():
+                if key=="Text_annotations":
+                    for akey, avalue in scenario_info[key].items():
+                        if akey in scenario_dict:
+                            scenario_dict[akey].append((scenario, avalue))
+                        else:
+                            scenario_dict[akey] = [(scenario, avalue)]
+                else:
+                    if key in scenario_dict:
+                        scenario_dict[key].append((scenario, value))
+                    else:
+                        scenario_dict[key] = [(scenario, value)]
+            stat_dict[anno_type] = scenario_dict
+
+            anno_type = "Image"
+            scenario_info = meta[anno_type]
+            if anno_type in stat_dict:
+                scenario_dict = stat_dict.get(anno_type)
+            else:
+                scenario_dict = {}
+            for key, value in scenario_info.items():
+                if key=="Image_annotations":
+                    for akey, avalue in scenario_info[key].items():
+                        if akey in scenario_dict:
+                            scenario_dict[akey].append((scenario, avalue))
+                        else:
+                            scenario_dict[akey] = [(scenario, avalue)]
+                else:
+                    if key in scenario_dict:
+                        scenario_dict[key].append((scenario, value))
+                    else:
+                        scenario_dict[key] = [(scenario, value)]
+            stat_dict[anno_type] = scenario_dict
+
+        return stat_dict, columns
+
+    def save_overview_globally(self, folder, stat_dict, columns):
+        dfall = pd.DataFrame(columns=columns)
+        for key in stat_dict.keys():
+            # dfall.update
+            anno_dict = stat_dict.get(key)
+            for anno in anno_dict.keys():
+                values = anno_dict.get(anno)
+                row = {'Label': anno}
+                for value in values:
+                    scenario = value[0]
+                    count = value[1]
+                    row.update({scenario: count})
+                dfall = dfall.append(row, ignore_index=True)
+            ##dfall.to_csv(os.path.join(folder, key + ".csv"))
+        dfall.to_csv(os.path.join(folder, "overview" + ".csv"))
+            # print(dfall.info())
+
     def save_overview_statistics(self, scenario_folder, stat_dict, columns):
-        turn_row = {'Label':'Turns'}
+        utterance_row = {'Label':'Utterances'}
         image_row = {'Label':'Images'}
         storage = ScenarioStorage(scenario_folder)
         scenarios = list(storage.list_scenarios())
@@ -124,7 +215,7 @@ class StatisticalEvaluator(BasicEvaluator):
             scenario_ctrl = storage.load_scenario(scenario)
             text_signals = scenario_ctrl.get_signals(Modality.TEXT)
             image_signals = scenario_ctrl.get_signals(Modality.IMAGE)
-            turn_row.update({scenario: len(text_signals)})
+            utterance_row.update({scenario: len(text_signals)})
             image_row.update({scenario: len(image_signals)})
 
         for key in stat_dict.keys():
@@ -142,17 +233,21 @@ class StatisticalEvaluator(BasicEvaluator):
                     count = value[1]
                     row.update({scenario: count})
                 dfall = dfall.append(row, ignore_index=True)
-            file_path = scenario_folder+"/"+key+".csv"
+            file_path = os.path.join(scenario_folder, key+".csv")
             print("Saving overview to:", file_path)
             dfall.to_csv(file_path)
 
-    def analyse_interaction(self, scenario_folder, scenario_id, metrics_to_plot=None):
+
+    def analyse_interaction(self, emissor_folder, scenario_id, metrics_to_plot=None):
+        scenario_folder = os.path.join(emissor_folder, scenario_id)
         # Save
-        evaluation_folder = Path(scenario_folder + '/' + scenario_id + '/evaluation/')
-        evaluation_folder.mkdir(parents=True, exist_ok=True)
+        evaluation_folder = os.path.join(scenario_folder, 'evaluation')
+        if not os.path.exists(evaluation_folder):
+            os.mkdir(evaluation_folder)
         meta = ""
         ### Create the scenario folder, the json files and a scenarioStorage and scenario in memory
-        scenario_storage = ScenarioStorage(scenario_folder)
+        print("scenario_folder", scenario_folder)
+        scenario_storage = ScenarioStorage(emissor_folder)
         scenario_ctrl = scenario_storage.load_scenario(scenario_id)
         meta+='SCENARIO_FOLDER\t'+ scenario_folder+"\n"
         meta+='SCENARIO_ID\t'+ scenario_id+"\n"
@@ -173,9 +268,9 @@ class StatisticalEvaluator(BasicEvaluator):
         #### Text signals statistics
         meta+="\nText signals\n"
         text_signals = scenario_ctrl.get_signals(Modality.TEXT)
-        ids, turns, speakers = text_util.get_turns_with_context_from_signals(text_signals)
+        ids, turns, speakers = text_util.get_utterances_with_context_from_signals(text_signals)
         meta+='NR. TURNS\t'+ str(len(turns))+"\n"
-        average_turn_length, average_tokens_per_turn, average_token_length = self.get_turn_stats(turns)
+        average_turn_length, average_tokens_per_turn, average_token_length = self.get_utterance_stats(turns)
         meta+='Average turn length\t' + str(average_turn_length)+'\n'
         meta+='Average nr. tokens per turn\t' + str(average_tokens_per_turn)+'\n'
         meta+='Average token length\t' + str(average_token_length)+'\n'
@@ -209,7 +304,8 @@ class StatisticalEvaluator(BasicEvaluator):
 
         ## Save the meta data
         file_name = scenario_id + "_meta_data.csv"
-        with open(evaluation_folder / file_name, 'w') as f:
+        file_path = os.path.join(evaluation_folder, file_name)
+        with open(file_path, 'w') as f:
             f.write(meta)
 
         # Get likelihood scored
@@ -220,6 +316,83 @@ class StatisticalEvaluator(BasicEvaluator):
         #df = pd.DataFrame(text_temp_rows)
 
         #self._save(df, evaluation_folder, scenario_id)
+
+
+    def analyse_interaction_json(self, emissor_folder, scenario_id, metrics_to_plot=None):
+        scenario_folder = os.path.join(emissor_folder, scenario_id)
+        # Save
+        evaluation_folder = os.path.join(scenario_folder, 'evaluation')
+        if not os.path.exists(evaluation_folder):
+            os.mkdir(evaluation_folder)
+        meta = {}
+        ### Create the scenario folder, the json files and a scenarioStorage and scenario in memory
+        print("scenario_folder", scenario_folder)
+        scenario_storage = ScenarioStorage(emissor_folder)
+        scenario_ctrl = scenario_storage.load_scenario(scenario_id)
+        t = {}
+        #t['SCENARIO_FOLDER'] = scenario_folder
+        t['Scenario_id']= scenario_id
+        speaker = scenario_ctrl.scenario.context.speaker["name"]
+        agent = scenario_ctrl.scenario.context.agent["name"]
+        location = scenario_ctrl.scenario.context.location_id  #### Change this to location name when this implemented
+        t['Agent']=agent
+        t['Speaker']=speaker
+        t['Location']=location
+
+        people = scenario_ctrl.scenario.context.persons
+        objects = scenario_ctrl.scenario.context.objects
+        t['People_seen '] = str(people)
+        t['Objects_seen']= str(objects)
+        duration = self.get_duration_in_minutes(scenario_ctrl)
+        t['Duration_in_minutes'] = str(duration)
+        meta["Scenario"]=t
+
+        #### Text signals statistics
+        text_signals = scenario_ctrl.get_signals(Modality.TEXT)
+        ids, utterances, speakers = text_util.get_utterances_with_context_from_signals(text_signals)
+        t = {}
+        t['Nr.utterances'] = str(len(utterances))
+        average_utt_length, average_tokens_per_utt, average_token_length = self.get_utterance_stats(utterances)
+        t['Average_utterance_length'] = str(average_utt_length)
+        t['Average_tokens_per_utterance'] = str(average_tokens_per_utt)
+        t['Average_token_length'] = str(average_token_length)
+
+        text_type_counts, text_type_timelines, nr_annotations = self.get_statistics_from_signals(text_signals)
+       # rows.extend(self.get_statistics_from_image_annotation(scenario_ctrl, scenario_id))
+
+        t['Nr.annotations']=  str(nr_annotations)
+        items = {}
+        for key in text_type_counts.keys():
+            counts = text_type_counts.get(key)
+            for c in counts:
+                items[c]=str(counts.get(c))
+
+        t['Text_annotations']=items
+        meta["Text"]=t
+
+
+        t={}
+        image_signals = scenario_ctrl.get_signals(Modality.IMAGE)
+        t["Nr.images"]=str (len(image_signals))
+        text_type_counts, text_type_timelines, nr_annotations = self.get_statistics_from_signals(image_signals)
+        t[ 'Nr.annotations']=  str(nr_annotations)
+        items = {}
+        for key in text_type_counts.keys():
+            counts = text_type_counts.get(key)
+            for c in counts:
+                items[c] = str(counts.get(c))
+        t['Image_annotations'] = items
+        meta["Image"]=t
+
+            # testing
+        print(meta)
+
+        ## Save the meta data
+        file_name = scenario_id + "_meta_data.json"
+        file_path = os.path.join(evaluation_folder, file_name)
+        with open(file_path, 'w') as f:
+            json_object = json.dumps(meta, indent=4)
+            f.write(json_object)
 
 
     def _get_annotation_dict (self, signals:[Signal]):

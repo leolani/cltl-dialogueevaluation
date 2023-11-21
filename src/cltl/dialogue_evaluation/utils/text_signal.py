@@ -16,7 +16,7 @@ def get_speaker_from_text_signal(textSignal: TextSignal):
     return speaker
 
 
-def get_turns_with_context_from_signals(signals: [], max_context=200):
+def get_utterances_with_context_from_signals(signals: [], max_context=200):
     ids = []
     quadruples = []
     speakers = set()
@@ -39,3 +39,9 @@ def get_turns_with_context_from_signals(signals: [], max_context=200):
         quadruple = (context, target, cue, speaker)
         quadruples.append(quadruple)
     return ids, quadruples, speakers
+
+def get_texts_from_utterances(utterances=[]):
+    texts = []
+    for utt in utterances:
+        texts.append(utt[1])
+    return texts

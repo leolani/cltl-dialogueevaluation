@@ -37,35 +37,34 @@ class ReferenceEvaluator(BasicEvaluator):
         ref_scenario_storage = ScenarioStorage(ref_scenario_folder)
         ref_scenario_ctrl = ref_scenario_storage.load_scenario(ref_scenario_id)
         ref_signals = ref_scenario_ctrl.get_signals(Modality.TEXT)
-        ref_ids, ref_turns, ref_speakers = text_util.get_turns_with_context_from_signals(ref_signals, max_context=0)
+        ref_ids, ref_utt, ref_speakers = text_util.get_utterances_with_context_from_signals(ref_signals, max_context=0)
 
         print('Reference SCENARIO_FOLDER:', ref_scenario_folder)
-        print('Nr of reference turns:', len(ref_turns), ' extracted from reference scenario: ', ref_scenario_id)
+        print('Nr of reference utterances:', len(ref_utt), ' extracted from reference scenario: ', ref_scenario_id)
         print('Reference Speakers:', ref_speakers)
 
         sys_scenario_storage = ScenarioStorage(sys_scenario_folder)
         sys_scenario_ctrl = sys_scenario_storage.load_scenario(sys_scenario_id)
         sys_signals = sys_scenario_ctrl.get_signals(Modality.TEXT)
-        sys_ids, sys_turns, sys_speakers = text_util.get_turns_with_context_from_signals(sys_signals, max_context=0)
+        sys_ids, sys_utt, sys_speakers = text_util.get_utterances_with_context_from_signals(sys_signals, max_context=0)
 
 
         print('System SCENARIO_FOLDER:', sys_scenario_folder)
-        print('Nr of system turns:', len(sys_turns), ' extracted from reference scenario: ', sys_scenario_id)
+        print('Nr of system utterances:', len(sys_utt), ' extracted from reference scenario: ', sys_scenario_id)
         print('system Speakers:', sys_speakers)
-        references = text_util.get_uterances_from_turns(sys_turns)
-        predictions = text_util.get_uterances_from_turns(ref_turns)
+        references = text_util.get_texts_from_utterances(sys_utt)
+        predictions = text_util.get_texts_from_utterances(ref_utt)
 
         print('Applying the following metrics',metrics_to_plot)
-
 
         results ={}
         results["Description"]="EMSISSOR dialogue conversation by turns"
         results["Reference scenario"]= ref_scenario_id
         results["Reference speakers"]= str(ref_speakers)
-        results["Reference turns"] = len(ref_turns)
+        results["Reference utterances"] = len(ref_utt)
         results["System scenario"]= sys_scenario_id
         results["System speakers"]= str(sys_speakers)
-        results["System turns"] = len(sys_turns)
+        results["System utterances"] = len(sys_utt)
         results["date"]=  str(date.today())
         results["Scores"]=[]
         for metric in metrics_to_plot:
