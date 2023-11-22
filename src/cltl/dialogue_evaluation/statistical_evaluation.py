@@ -54,20 +54,20 @@ class StatisticalEvaluator(BasicEvaluator):
         return duration
 
     def get_utterance_stats(self, utterances):
-        average_tokens_per_utt = 0
-        average_utt_length = 0
-        average_token_length = 0
+        total_utt_length = 0
+        total_token_length = 0
+        total_tokens = 0
         for utt in utterances:
             tokens = utt[1].split(" ")
-            average_utt_length += len(utt[1])
-            average_tokens_per_utt += len(tokens)
+            total_utt_length += len(utt[1])
+            total_tokens += len(tokens)
             for token in tokens:
-                average_token_length += len(token)
+                total_token_length += len(token)
 
-        average_token_length = average_token_length/ average_utt_length
-        average_tokens_per_utt = average_utt_length/len(utterances)
-        average_turn_length = average_utt_length/len(utterances)
-        return average_turn_length, average_tokens_per_utt, average_token_length
+        average_token_length = total_token_length/ total_tokens
+        average_tokens_per_utt = total_tokens/len(utterances)
+        average_utt_length = total_utt_length/len(utterances)
+        return average_utt_length, average_tokens_per_utt, average_token_length
 
     def get_overview_statistics(self,scenario_folder):
         stat_dict = {}
