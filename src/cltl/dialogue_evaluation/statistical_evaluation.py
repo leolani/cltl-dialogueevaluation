@@ -194,7 +194,9 @@ class StatisticalEvaluator(BasicEvaluator):
         for key in stat_dict.keys():
             # dfall.update
             anno_dict = stat_dict.get(key)
-            for anno in anno_dict.keys():
+            sorted_keys = list(anno_dict.keys())
+            sorted_keys.sort()
+            for anno in sorted_keys:
                 values = anno_dict.get(anno)
                 row = {'Label': anno}
                 for value in values:
