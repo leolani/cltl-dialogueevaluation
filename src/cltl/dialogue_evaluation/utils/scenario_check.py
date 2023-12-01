@@ -11,6 +11,8 @@ def check_scenario_data(scenario_folder, scenario):
         print(f)
         if f==scenario+'.json':
             HAS_SCENARIO=True
+        if (scenario+'.json').endswith(f):
+            HAS_SCENARIO=True
         elif f=='text.json':
             HAS_TEXT=True
         elif f=='image.json':

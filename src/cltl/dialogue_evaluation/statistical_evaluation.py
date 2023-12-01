@@ -128,6 +128,8 @@ class StatisticalEvaluator(BasicEvaluator):
         columns = ["Label"]
 
         for f in glob.glob(folder+"/**/*_meta_data.json", recursive=True):
+            scenario_dir = os.path.dirname(os.path.dirname(f))
+            speaker = None
             file = open(f, 'r')
             print(file.name)
             meta = json.load(file)
@@ -141,6 +143,8 @@ class StatisticalEvaluator(BasicEvaluator):
             else:
                 scenario_dict = {}
             for key, value in scenario_info.items():
+                if key=="Speaker":
+                    speaker = value
                 if key in scenario_dict:
                     scenario_dict[key].append((scenario, value))
                 else:
@@ -186,7 +190,15 @@ class StatisticalEvaluator(BasicEvaluator):
                     else:
                         scenario_dict[key] = [(scenario, value)]
             stat_dict[anno_type] = scenario_dict
-
+            try:
+                if speaker:
+                    basename = os.path.basename(scenario_dir)
+                    scenario_dir_new = os.path.join(folder,speaker+"_"+basename)
+                    if not os.path.exists(scenario_dir_new):
+                        os.mkdir(scenario_dir_new)
+                    os.rename(scenario_dir, scenario_dir_new)
+            except:
+                print(scenario_dir_new)
         return stat_dict, columns
 
     def save_overview_globally(self, folder, stat_dict, columns):
