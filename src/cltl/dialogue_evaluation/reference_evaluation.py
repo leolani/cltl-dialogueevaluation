@@ -26,7 +26,140 @@ class ReferenceEvaluator(BasicEvaluator):
         super(ReferenceEvaluator, self).__init__()
         self._log.debug(f"Reference Evaluator ready")
 
-    def evaluate_conversation(self, ref_scenario_folder,
+    def apply_metrics(self, metrics_to_plot, references, predictions):
+        results =[]
+        for metric in metrics_to_plot:
+            if not metric in NLG_METRICS:
+                print('Unknown metrics: %s. Please provide one of the following: %s', metric, NLG_METRICS)
+
+            if metric=="blue" or metric=="all":
+                try:
+                    print("blue")
+                    evaluator = datasets.load_metric("bleu")
+                    _predictions = [i.split() for i in predictions]
+                    _references = [[i.split()] for i in references]
+                    print('_predictions', _predictions)
+                    print('_references', _references)
+                    result = evaluator.compute(predictions=_predictions, references=_references)
+                    result['precisions'] = np.average(result['precisions'])
+                    result['metric']='blue'
+                    print('Result', result)
+                    results.append(result)
+                except Exception as e:
+                    # By this way we can know about the type of error occurring
+                    print("The error is: ", e)
+                    pass
+
+            #install the following dependencies ['absl', 'nltk', 'rouge_score']
+            if metric=="rouge" or metric=="all":
+                try:
+                    print("rouge")
+                    evaluator = datasets.load_metric("rouge")
+                   # evaluator = evaluate.load("rouge")
+                    result = evaluator.compute(predictions=predictions, references=references)
+                    result = {key: value.mid.fmeasure * 100 for key, value in result.items()}
+                    result = {k: round(v, 4) for k, v in result.items()}
+                    result['metric']='rouge'
+
+                    print(result)
+                    results.append(result)
+                except Exception as e:
+                    # By this way we can know about the type of error occurring
+                    print("The error is: ", e)
+                    pass
+
+            if metric=="meteor" or metric=="all":
+                try:
+                    print("meteor")
+                    evaluator = datasets.load_metric("meteor")
+                    result = evaluator.compute(predictions=predictions, references=references)
+                    result['metric']='meteor'
+
+                    print(result)
+                    results.append(result)
+                except Exception as e:
+                    # By this way we can know about the type of error occurring
+                    print("The error is: ", e)
+                    pass
+
+            if metric=="bertscore" or metric=="all":
+                #https://arxiv.org/abs/1904.09675
+                try:
+                    print("bertscore")
+                    evaluator = datasets.load_metric("bertscore")
+                    result = evaluator.compute(predictions=predictions, references=references, lang="en", model_type="distilbert-base-uncased")
+                    result['precision'] = round(np.average(result['precision']),4)
+                    result['recall'] = round(np.average(result['recall']), 4)
+                    result['f1'] = round(np.average(result['f1']), 4)
+                    result['metric']='bertscore'
+                    print(result)
+                    results.append(result)
+                except Exception as e:
+                    # By this way we can know about the type of error occurring
+                    print("The error is: ", e)
+                    pass
+
+            # install the following  pip install sacrebleu
+            if metric=="sacrebleu" or metric=="all":
+                print("sacrebleu")
+                print("NOT IMPLEMENTED")
+                #evaluator = datasets.load_metric("sacrebleu")
+                #result = evaluator.compute(predictions=predictions, references=references)
+                #print(result)
+                #results.append(result)
+
+            #install the following  https://github.com/google-research/bleurt
+            if metric=="bleurt" or metric=="all":
+                print("bleurt")
+                print("NOT IMPLEMENTED")
+               # evaluator = datasets.load_metric("bleurt")
+               # result = evaluator.compute(predictions=predictions, references=references)
+               # print(result)
+               # results.append(result)
+
+            if metric=="google_bleu" or metric=="all":
+                print("google_bleu")
+                print("NOT IMPLEMENTED")
+                # evaluator = datasets.load_metric("google_bleu")
+                # result = evaluator.compute(predictions=predictions, references=references)
+                # print(result)
+                # results.append(result)
+            #https://github.com/neulab/BARTScore
+        return results
+
+    def evaluate_conversation_single_scenario_csv(self, csv_name, csv_file, metrics_to_plot):
+        results ={}
+        results["Description"]="EMSISSOR dialogue conversation by turns"
+        results["csv_file"]= csv_name
+        results["date"]=  str(date.today())
+        try:
+            df = pd.read_csv(csv_file)
+            #print(df.head())
+            results = {}
+            results["Description"] = "EMSISSOR dialogue conversation by turns"
+            results["date"] = str(date.today())
+
+            eval_refs =[]
+            eval_preds =[]
+            for index, row in df.iterrows():
+                if pd.notnull(row["Reference Response"]) & pd.notnull(row["Response"]):
+                    eval_preds.append(row['Response'])
+                    eval_refs.append(row['Reference Response'])
+            results["Reference utterances"] = len(eval_refs)
+            results["System utterances"] = len(eval_preds)
+            results["Scores"] = []
+            if len(eval_refs)>0:
+                print('references', eval_refs)
+                print('predictions', eval_preds)
+                scores = self.apply_metrics(metrics_to_plot,references=eval_refs ,predictions=eval_preds )
+                results["Scores"]=scores
+                print(scores)
+        except Exception as e:
+            print('Error reading', csv_file)
+            print(e)
+        return results
+
+    def evaluate_conversation_two_scenarios(self, ref_scenario_folder,
                               sys_scenario_folder,
                               ref_scenario_id,
                               sys_scenario_id, metrics_to_plot=None):
@@ -66,105 +199,105 @@ class ReferenceEvaluator(BasicEvaluator):
         results["System speakers"]= str(sys_speakers)
         results["System utterances"] = len(sys_utt)
         results["date"]=  str(date.today())
-        results["Scores"]=[]
-        for metric in metrics_to_plot:
-            if not metric in NLG_METRICS:
-                print('Unknown metrics: %s. Please provide one of the following: %s', metric, NLG_METRICS)
-
-            if metric=="blue" or metric=="all":
-                try:
-                    print("blue")
-                    evaluator = datasets.load_metric("bleu")
-                    _predictions = [i.split() for i in predictions]
-                    _references = [[i.split()] for i in references]
-                   # print('predictions', _predictions)
-                   # print('references', _references)
-                    result = evaluator.compute(predictions=_predictions, references=_references)
-                    result['precisions'] = np.average(result['precisions'])
-                    result['metric']='blue'
-                   # print('Result', result)
-                    results["Scores"].append(result)
-                except Exception as e:
-                    # By this way we can know about the type of error occurring
-                    print("The error is: ", e)
-                    pass
-
-            #install the following dependencies ['absl', 'nltk', 'rouge_score']
-            if metric=="rouge" or metric=="all":
-                try:
-                    print("rouge")
-                    evaluator = datasets.load_metric("rouge")
-                   # evaluator = evaluate.load("rouge")
-                    result = evaluator.compute(predictions=predictions, references=references)
-                    result = {key: value.mid.fmeasure * 100 for key, value in result.items()}
-                    result = {k: round(v, 4) for k, v in result.items()}
-                    result['metric']='rouge'
-
-                  #  print(result)
-                    results["Scores"].append(result)
-                except Exception as e:
-                    # By this way we can know about the type of error occurring
-                    print("The error is: ", e)
-                    pass
-
-            if metric=="meteor" or metric=="all":
-                try:
-                    print("meteor")
-                    evaluator = datasets.load_metric("meteor")
-                    result = evaluator.compute(predictions=predictions, references=references)
-                    result['metric']='meteor'
-
-                   # print(result)
-                    results["Scores"].append(result)
-                except Exception as e:
-                    # By this way we can know about the type of error occurring
-                    print("The error is: ", e)
-                    pass
-
-            if metric=="bertscore" or metric=="all":
-                #https://arxiv.org/abs/1904.09675
-                try:
-                    print("bertscore")
-                    evaluator = datasets.load_metric("bertscore")
-                    result = evaluator.compute(predictions=predictions, references=references, lang="en", model_type="distilbert-base-uncased")
-                    result['precision'] = round(np.average(result['precision']),4)
-                    result['recall'] = round(np.average(result['recall']), 4)
-                    result['f1'] = round(np.average(result['f1']), 4)
-                    result['metric']='bertscore'
-                  #  print(result)
-                    results["Scores"].append(result)
-                except Exception as e:
-                    # By this way we can know about the type of error occurring
-                    print("The error is: ", e)
-                    pass
-
-            # install the following  pip install sacrebleu
-            if metric=="sacrebleu" or metric=="all":
-                print("sacrebleu")
-                print("NOT IMPLEMENTED")
-                #evaluator = datasets.load_metric("sacrebleu")
-                #result = evaluator.compute(predictions=predictions, references=references)
-                #print(result)
-                #results["Scores"].append(result)
-
-            #install the following  https://github.com/google-research/bleurt
-            if metric=="bleurt" or metric=="all":
-                print("bleurt")
-                print("NOT IMPLEMENTED")
-               # evaluator = datasets.load_metric("bleurt")
-               # result = evaluator.compute(predictions=predictions, references=references)
-               # print(result)
-               # results["Scores"].append(result)
-
-            if metric=="google_bleu" or metric=="all":
-                print("google_bleu")
-                print("NOT IMPLEMENTED")
-                # evaluator = datasets.load_metric("google_bleu")
-                # result = evaluator.compute(predictions=predictions, references=references)
-                # print(result)
-                # results["Scores"].append(result)
-
-            #https://github.com/neulab/BARTScore
+        results["Scores"]=self.apply_metrics(metrics_to_plot, references, predictions)
+        # for metric in metrics_to_plot:
+        #     if not metric in NLG_METRICS:
+        #         print('Unknown metrics: %s. Please provide one of the following: %s', metric, NLG_METRICS)
+        #
+        #     if metric=="blue" or metric=="all":
+        #         try:
+        #             print("blue")
+        #             evaluator = datasets.load_metric("bleu")
+        #             _predictions = [i.split() for i in predictions]
+        #             _references = [[i.split()] for i in references]
+        #            # print('predictions', _predictions)
+        #            # print('references', _references)
+        #             result = evaluator.compute(predictions=_predictions, references=_references)
+        #             result['precisions'] = np.average(result['precisions'])
+        #             result['metric']='blue'
+        #            # print('Result', result)
+        #             results["Scores"].append(result)
+        #         except Exception as e:
+        #             # By this way we can know about the type of error occurring
+        #             print("The error is: ", e)
+        #             pass
+        #
+        #     #install the following dependencies ['absl', 'nltk', 'rouge_score']
+        #     if metric=="rouge" or metric=="all":
+        #         try:
+        #             print("rouge")
+        #             evaluator = datasets.load_metric("rouge")
+        #            # evaluator = evaluate.load("rouge")
+        #             result = evaluator.compute(predictions=predictions, references=references)
+        #             result = {key: value.mid.fmeasure * 100 for key, value in result.items()}
+        #             result = {k: round(v, 4) for k, v in result.items()}
+        #             result['metric']='rouge'
+        #
+        #           #  print(result)
+        #             results["Scores"].append(result)
+        #         except Exception as e:
+        #             # By this way we can know about the type of error occurring
+        #             print("The error is: ", e)
+        #             pass
+        #
+        #     if metric=="meteor" or metric=="all":
+        #         try:
+        #             print("meteor")
+        #             evaluator = datasets.load_metric("meteor")
+        #             result = evaluator.compute(predictions=predictions, references=references)
+        #             result['metric']='meteor'
+        #
+        #            # print(result)
+        #             results["Scores"].append(result)
+        #         except Exception as e:
+        #             # By this way we can know about the type of error occurring
+        #             print("The error is: ", e)
+        #             pass
+        #
+        #     if metric=="bertscore" or metric=="all":
+        #         #https://arxiv.org/abs/1904.09675
+        #         try:
+        #             print("bertscore")
+        #             evaluator = datasets.load_metric("bertscore")
+        #             result = evaluator.compute(predictions=predictions, references=references, lang="en", model_type="distilbert-base-uncased")
+        #             result['precision'] = round(np.average(result['precision']),4)
+        #             result['recall'] = round(np.average(result['recall']), 4)
+        #             result['f1'] = round(np.average(result['f1']), 4)
+        #             result['metric']='bertscore'
+        #           #  print(result)
+        #             results["Scores"].append(result)
+        #         except Exception as e:
+        #             # By this way we can know about the type of error occurring
+        #             print("The error is: ", e)
+        #             pass
+        #
+        #     # install the following  pip install sacrebleu
+        #     if metric=="sacrebleu" or metric=="all":
+        #         print("sacrebleu")
+        #         print("NOT IMPLEMENTED")
+        #         #evaluator = datasets.load_metric("sacrebleu")
+        #         #result = evaluator.compute(predictions=predictions, references=references)
+        #         #print(result)
+        #         #results["Scores"].append(result)
+        #
+        #     #install the following  https://github.com/google-research/bleurt
+        #     if metric=="bleurt" or metric=="all":
+        #         print("bleurt")
+        #         print("NOT IMPLEMENTED")
+        #        # evaluator = datasets.load_metric("bleurt")
+        #        # result = evaluator.compute(predictions=predictions, references=references)
+        #        # print(result)
+        #        # results["Scores"].append(result)
+        #
+        #     if metric=="google_bleu" or metric=="all":
+        #         print("google_bleu")
+        #         print("NOT IMPLEMENTED")
+        #         # evaluator = datasets.load_metric("google_bleu")
+        #         # result = evaluator.compute(predictions=predictions, references=references)
+        #         # print(result)
+        #         # results["Scores"].append(result)
+        #
+        #     #https://github.com/neulab/BARTScore
 
         #
         # # Save
