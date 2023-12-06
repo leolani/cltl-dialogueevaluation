@@ -36,12 +36,12 @@ class ReferenceEvaluator(BasicEvaluator):
                     evaluator = datasets.load_metric("bleu")
                     _predictions = [i.split() for i in predictions]
                     _references = [[i.split()] for i in references]
-                    print('_predictions', _predictions)
-                    print('_references', _references)
+                   # print('_predictions', _predictions)
+                   # print('_references', _references)
                     result = evaluator.compute(predictions=_predictions, references=_references)
                     result['precisions'] = np.average(result['precisions'])
                     result['metric']='blue'
-                    print('Result', result)
+                   # print('Result', result)
                     results.append(result)
                 except Exception as e:
                     # By this way we can know about the type of error occurring
@@ -59,7 +59,7 @@ class ReferenceEvaluator(BasicEvaluator):
                     result = {k: round(v, 4) for k, v in result.items()}
                     result['metric']='rouge'
 
-                    print(result)
+                  #  print(result)
                     results.append(result)
                 except Exception as e:
                     # By this way we can know about the type of error occurring
@@ -73,7 +73,7 @@ class ReferenceEvaluator(BasicEvaluator):
                     result = evaluator.compute(predictions=predictions, references=references)
                     result['metric']='meteor'
 
-                    print(result)
+                  #  print(result)
                     results.append(result)
                 except Exception as e:
                     # By this way we can know about the type of error occurring
@@ -90,7 +90,7 @@ class ReferenceEvaluator(BasicEvaluator):
                     result['recall'] = round(np.average(result['recall']), 4)
                     result['f1'] = round(np.average(result['f1']), 4)
                     result['metric']='bertscore'
-                    print(result)
+                  #  print(result)
                     results.append(result)
                 except Exception as e:
                     # By this way we can know about the type of error occurring
@@ -128,15 +128,11 @@ class ReferenceEvaluator(BasicEvaluator):
     def evaluate_conversation_single_scenario_csv(self, csv_name, csv_file, metrics_to_plot):
         results ={}
         results["Description"]="EMSISSOR dialogue conversation by turns"
-        results["csv_file"]= csv_name
+        results["File"]= csv_name
         results["date"]=  str(date.today())
         try:
             df = pd.read_csv(csv_file, sep=';')
             #print(df.head())
-            results = {}
-            results["Description"] = "EMSISSOR dialogue conversation by turns"
-            results["date"] = str(date.today())
-
             eval_refs =[]
             eval_preds =[]
             for index, row in df.iterrows():
