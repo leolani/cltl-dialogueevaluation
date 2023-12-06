@@ -28,7 +28,7 @@ METRIC = ["blue", "rouge", "bertscore", "meteor"]
 #            'ronaldahmed/ccl_win', 'meg/perplexity', 'cakiki/tokens_per_byte', 'lsy641/distinct']
 
 
-path = "/Users/piek/Downloads/submissions"
+path = "/Users/piek/Downloads/submissions-2"
 
 for f in os.listdir(path):
    # if f=='liud_133551_7051251_Angus_manual_evaluation.csv':

@@ -4,12 +4,10 @@ from datetime import date
 from emissor.persistence import ScenarioStorage
 from emissor.representation.scenario import Modality
 import datasets
-import evaluate
 import cltl.dialogue_evaluation.utils.text_signal as text_util
 from cltl.dialogue_evaluation.api import BasicEvaluator
 import numpy as np
 import pandas as pd
-import importlib_metadata
 
 #https://github.com/huggingface/evaluate
 #https://huggingface.co/spaces/evaluate-metric/bleu
@@ -133,7 +131,7 @@ class ReferenceEvaluator(BasicEvaluator):
         results["csv_file"]= csv_name
         results["date"]=  str(date.today())
         try:
-            df = pd.read_csv(csv_file)
+            df = pd.read_csv(csv_file, sep=';')
             #print(df.head())
             results = {}
             results["Description"] = "EMSISSOR dialogue conversation by turns"
@@ -149,13 +147,14 @@ class ReferenceEvaluator(BasicEvaluator):
             results["System utterances"] = len(eval_preds)
             results["Scores"] = []
             if len(eval_refs)>0:
-                print('references', eval_refs)
-                print('predictions', eval_preds)
+                print('references', len(eval_refs))
+                print('predictions', len(eval_preds))
                 scores = self.apply_metrics(metrics_to_plot,references=eval_refs ,predictions=eval_preds )
                 results["Scores"]=scores
                 print(scores)
         except Exception as e:
             print('Error reading', csv_file)
+            results['Error']=str(e)
             print(e)
         return results
 
