@@ -76,4 +76,9 @@ if __name__ == "__main__":
     submission_path = '/Users/piek/Desktop/t-MA-Combots-2023/assignments/interactions/emissor-online'
 
     submission_path = '/Users/piek/Desktop/t-MA-Combots-2023/server/emissor/Yannis'
-    server_submission(submission_path)
+    submission_path = '/Users/piek/Desktop/t-MA-Combots-2023/assignments/interaction-robot/emissor'
+
+    for persona in os.listdir(submission_path):
+        persona_folder = os.path.join(submission_path, persona)
+        if os.path.isdir(persona_folder):
+            server_submission(persona_folder)
