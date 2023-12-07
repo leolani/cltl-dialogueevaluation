@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+import pandas as pd
 from cltl.dialogue_evaluation.likelihood_evaluation import LikelihoodEvaluator
 from cltl.dialogue_evaluation.usr_dialogue_retrieval_evaluation import USR_DialogRetrieval_Evaluator
 import cltl.dialogue_evaluation.utils.scenario_check as check
@@ -7,7 +8,7 @@ import cltl.dialogue_evaluation.utils.scenario_check as check
 SUBMISSION_FOLDER = Path("/Users/piek/Desktop/t-MA-Combots-2023/assignments/interaction-robot/emissor")
 
 def apply_usr_to_conversation_csv (input_folder, mlm, ctx, uk):
-    SCENARIOS = sorted([path for path in input_folder.iterdir()
+    SCENARIOS = sorted([path for path in Path(input_folder).iterdir()
                         if path.is_dir() and path.stem not in ['.idea', 'plots']])
 
     for SCENARIO_FOLDER in SCENARIOS:
@@ -36,7 +37,33 @@ def apply_usr_to_conversation_csv (input_folder, mlm, ctx, uk):
                 uk.evaluate_conversation(scenario_folder=input_folder, scenario_id=SCENARIO_FOLDER.stem)
 
 
-
+def make_overview_csv(submission_path):
+    overviewdf= pd.DataFrame()
+    for persona in os.listdir(submission_path):
+        persona_folder = os.path.join(submission_path, persona)
+        if os.path.isdir(persona_folder):
+            print(persona_folder)
+            SCENARIOS = sorted([path for path in Path(persona_folder).iterdir()
+                                if path.is_dir() and path.stem not in ['.idea', 'plots']])
+            for SCENARIO_FOLDER in SCENARIOS:
+                print(SCENARIO_FOLDER)
+                likelihood_result_csv = os.path.join(SCENARIO_FOLDER, "evaluation", "likelihood_evaluation_context300_overall.csv")
+                if os.path.exists(likelihood_result_csv):
+                    overviewrow = {"persona" : persona, "scenario" : SCENARIO_FOLDER.stem}
+                    df = pd.read_csv(likelihood_result_csv)
+                    for index, row in df.iterrows():
+                        if row['Speaker']=='speaker':
+                            overviewrow.update({"Speaker_turns" : row['Nr. turns']})
+                            overviewrow.update({"Speaker_MLM_LLH" : row['MLM avg']})
+                            overviewrow.update({"Speaker_MLM_max": row['MLM avg max']})
+                        elif row['Speaker']=='LEOLANI':
+                            overviewrow.update({"Leolani_turns" : row['Nr. turns']})
+                            overviewrow.update({"Leolani_MLM_LLH" : row['MLM avg']})
+                            overviewrow.update({"Leolani_MLM_max" : row['MLM avg max']})
+                    print(overviewrow)
+                    overviewdf = overviewdf.append(overviewrow, ignore_index=True)
+    file = os.path.join(submission_path, "mlm_overview.csv")
+    overviewdf.to_csv(file)
 
 if __name__ == "__main__":
     submission_path = '/Users/piek/Desktop/t-MA-Combots-2023/assignments/interaction-offline'
@@ -61,4 +88,6 @@ if __name__ == "__main__":
         persona_folder = os.path.join(submission_path, persona)
         if os.path.isdir(persona_folder):
             print(persona_folder)
-            apply_usr_to_conversation_csv(Path(persona_folder), evaluator_mlm, evaluator_ctx, evaluator_uk)
+            apply_usr_to_conversation_csv(persona_folder, evaluator_mlm, evaluator_ctx, evaluator_uk)
+
+    make_overview_csv(submission_path)

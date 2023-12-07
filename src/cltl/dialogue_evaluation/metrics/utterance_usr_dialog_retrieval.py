@@ -19,9 +19,9 @@ class USR_CTX:
         self.__tokenizer = RobertaTokenizer.from_pretrained('adamlin/usr-topicalchat-ctx')
 
         if path is not None:
-            self.__model = RobertaForSequenceClassification.from_pretrained(path, config=self.__config)
+            self.__model = RobertaForSequenceClassification.from_pretrained(path, config=self.__config )
         else:
-            self.__model = RobertaForSequenceClassification.from_pretrained('adamlin/usr-topicalchat-ctx', config=self.__config)
+            self.__model = RobertaForSequenceClassification.from_pretrained('adamlin/usr-topicalchat-ctx', config=self.__config,  local_files_only=True)
 
         self.__device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
         self.__model.to(self.__device)
