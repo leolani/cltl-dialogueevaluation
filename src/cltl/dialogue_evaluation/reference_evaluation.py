@@ -131,23 +131,51 @@ class ReferenceEvaluator(BasicEvaluator):
         results["File"]= csv_name
         results["date"]=  str(date.today())
         try:
-            df = pd.read_csv(csv_file, sep=';')
-            #print(df.head())
+          #  df = pd.read_csv(csv_file, sep=';')
+            df = pd.read_excel(csv_file)
+            results["System utterances"] = str((df['Speaker']=='LEOLANI').count()),
+           # print(df.head())
             eval_refs =[]
             eval_preds =[]
             for index, row in df.iterrows():
                 if pd.notnull(row["Reference Response"]) & pd.notnull(row["Response"]):
                     eval_preds.append(row['Response'])
                     eval_refs.append(row['Reference Response'])
+
             results["Reference utterances"] = len(eval_refs)
-            results["System utterances"] = len(eval_preds)
             results["Scores"] = []
             if len(eval_refs)>0:
                 print('references', len(eval_refs))
                 print('predictions', len(eval_preds))
                 scores = self.apply_metrics(metrics_to_plot,references=eval_refs ,predictions=eval_preds )
                 results["Scores"]=scores
-                print(scores)
+                #print(scores)
+              #Overall Human Rating	Interesting	Engaging	Specific	Relevant	Correct	Semantically Appropriate	Understandable	Fluent
+           # mean = df.mean(axis=1, skipna=True)
+           # results['Manual']=mean
+            human_overall = df['Overall Human Rating'].mean(axis=0, skipna=True)
+            human_interesting = df['Interesting'].mean(axis=0, skipna=True)
+            human_engaging = df['Engaging'].mean(axis=0, skipna=True)
+            human_specific = df['Specific'].mean(axis=0, skipna=True)
+            human_relevant = df['Relevant'].mean(axis=0, skipna=True)
+            human_correct = df['Correct'].mean(axis=0, skipna=True)
+            human_seman_appr = df['Semantically Appropriate'].mean(axis=0, skipna=True)
+            human_understandable = df['Understandable'].mean(axis=0, skipna=True)
+            human_fluent = df['Fluent'].mean(axis=0, skipna=True)
+            human_scores = {"Evaluated_responses" : str(df['Overall Human Rating'].count()),
+                            "human_overall" : human_overall,
+                            'human_interesting' : human_interesting,
+                            'human_engaging' : human_engaging,
+                            'human_specific' : human_specific,
+                            'human_relevant' : human_relevant,
+                            'human_correct' : human_correct,
+                            'human_seman_appr' : human_seman_appr,
+                            'human_undestandable' : human_understandable,
+                            'human_fluent' : human_fluent}
+            print(human_scores)
+            results["manual"]=human_scores
+
+
         except Exception as e:
             print('Error reading', csv_file)
             results['Error']=str(e)

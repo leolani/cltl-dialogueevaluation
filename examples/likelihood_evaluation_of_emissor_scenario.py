@@ -53,16 +53,16 @@ def make_overview_csv(submission_path):
                     df = pd.read_csv(likelihood_result_csv)
                     for index, row in df.iterrows():
                         if row['Speaker']=='speaker':
-                            overviewrow.update({"Speaker_turns" : row['Nr. turns']})
+                            overviewrow.update({"Turns" : row['Nr. turns']})
                             overviewrow.update({"Speaker_MLM_LLH" : row['MLM avg']})
                             overviewrow.update({"Speaker_MLM_max": row['MLM avg max']})
                         elif row['Speaker']=='LEOLANI':
-                            overviewrow.update({"Leolani_turns" : row['Nr. turns']})
+                            #overviewrow.update({"Leolani_turns" : row['Nr. turns']})
                             overviewrow.update({"Leolani_MLM_LLH" : row['MLM avg']})
                             overviewrow.update({"Leolani_MLM_max" : row['MLM avg max']})
                     print(overviewrow)
                     overviewdf = overviewdf.append(overviewrow, ignore_index=True)
-    file = os.path.join(submission_path, "mlm_overview.csv")
+    file = os.path.join(submission_path, "overview-mlm.csv")
     overviewdf.to_csv(file)
 
 if __name__ == "__main__":
