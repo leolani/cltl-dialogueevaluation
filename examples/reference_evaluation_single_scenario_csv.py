@@ -61,19 +61,20 @@ def make_overview_json(submission_path):
     overviewdf.to_csv(file)
 
 
-submission_path = "/Users/piek/Downloads/submissions-2"
+submission_path = "/Users/piek/Desktop/t-MA-Combots-2023/assignments/evaluation/submissions-2"
+#submission_path = "/Users/piek/Desktop/t-MA-Combots-2023/assignments/test"
 #submission_path = "/Users/piek/Downloads/test"
 
-# for f in os.listdir(submission_path):
-#     #if f=='Angus_liud_133551_7051251_Angus_manual_evaluation.xlsx':
-#     if f.endswith(".xlsx"):
-#         print(f)
-#         file_path = os.path.join(submission_path, f)
-#         eval_file_path = os.path.join(submission_path, f+".json")
-#         result = evaluator.evaluate_conversation_single_scenario_csv(csv_name = f, csv_file=file_path, metrics_to_plot=METRIC)
-#         json_object = json.dumps(result, indent=4)
-#         with open(eval_file_path, "w") as outfile:
-#             outfile.write(json_object)
+for f in os.listdir(submission_path):
+    #if f=='Angus_liud_133551_7051251_Angus_manual_evaluation.xlsx':
+    if f.endswith(".xlsx"):
+        print(f)
+        file_path = os.path.join(submission_path, f)
+        eval_file_path = os.path.join(submission_path, f+".json")
+        result = evaluator.evaluate_conversation_single_scenario_csv(csv_name = f, csv_file=file_path, metrics_to_plot=METRIC)
+        json_object = json.dumps(result, indent=4)
+        with open(eval_file_path, "w") as outfile:
+            outfile.write(json_object)
 
 
 make_overview_json(submission_path)

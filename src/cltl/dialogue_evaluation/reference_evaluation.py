@@ -133,7 +133,7 @@ class ReferenceEvaluator(BasicEvaluator):
         try:
           #  df = pd.read_csv(csv_file, sep=';')
             df = pd.read_excel(csv_file)
-            results["System utterances"] = str((df['Speaker']=='LEOLANI').count()),
+            results["System utterances"] = int((df['Speaker']=='LEOLANI').count()),
            # print(df.head())
             eval_refs =[]
             eval_preds =[]
