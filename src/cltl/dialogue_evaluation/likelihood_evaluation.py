@@ -1,5 +1,4 @@
-from pathlib import Path
-
+import os
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
@@ -48,7 +47,7 @@ class LikelihoodEvaluator(BasicEvaluator):
         signals = scenario_ctrl.get_signals(Modality.TEXT)
         ids, turns, speakers = text_util.get_utterances_with_context_from_signals(signals, self.max_context)
 
-        print(f'----------SCENARIO:{scenario_folder.stem}, EVALUATION:likelihood metrics---------')
+        print(f'----------SCENARIO:{scenario_folder}, EVALUATION:likelihood metrics---------')
         print('Nr of turns:', len(turns), 'Speakers:', speakers, 'Max context:', self.max_context)
 
         # Get likelihood scored
@@ -60,8 +59,9 @@ class LikelihoodEvaluator(BasicEvaluator):
         avg_df = self._average_metrics(speakers, turns, speaker_mlm_scores, speaker_mlm_max_scores)
 
         # Save
-        evaluation_folder = Path(scenario_folder / scenario_id / 'evaluation')
-        evaluation_folder.mkdir(parents=True, exist_ok=True)
+        evaluation_folder = os.path.join(scenario_folder, scenario_id, 'evaluation')
+        if not os.path.exists(evaluation_folder):
+            os.mkdir(evaluation_folder)
         self._save(df, avg_df, evaluation_folder)
         #
         if metrics_to_plot:
@@ -109,13 +109,15 @@ class LikelihoodEvaluator(BasicEvaluator):
         return pd.DataFrame(overall_rows)
 
     def _save(self, df, avg_df, evaluation_folder):
-        file = "likelihood_evaluation" + "_context" + str(self.max_context) + ".csv"
-        df.to_csv(evaluation_folder / file, index=False)
-        print(f"\n\tSaved to file: {evaluation_folder / file}")
+        filename = "likelihood_evaluation" + "_context" + str(self.max_context) + ".csv"
+        path = os.path.join(evaluation_folder, filename)
+        df.to_csv(path, index=False)
+        print(f"\n\tSaved to file: {path}")
 
-        file = "likelihood_evaluation" + "_context" + str(self.max_context) + "_overall.csv"
-        avg_df.to_csv(evaluation_folder / file, index=False)
-        print(f"\n\tSaved to file: {evaluation_folder / file}")
+        filename = "likelihood_evaluation" + "_context" + str(self.max_context) + "_overall.csv"
+        path = os.path.join(evaluation_folder, filename)
+        avg_df.to_csv(path, index=False)
+        print(f"\n\tSaved to file: {path}")
 
     def plot_metrics_progression(self, metrics, convo_dfs, evaluation_folder):
         # Plot metrics progression per conversation

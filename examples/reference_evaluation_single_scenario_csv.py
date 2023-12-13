@@ -61,9 +61,8 @@ def make_overview_json(submission_path):
     overviewdf.to_csv(file)
 
 
-submission_path = "/Users/piek/Desktop/t-MA-Combots-2023/assignments/evaluation/submissions-2"
+submission_path = "/Users/piek/Desktop/t-MA-Combots-2023/assignments/evaluation/emissor"
 #submission_path = "/Users/piek/Desktop/t-MA-Combots-2023/assignments/test"
-#submission_path = "/Users/piek/Downloads/test"
 
 for f in os.listdir(submission_path):
     #if f=='Angus_liud_133551_7051251_Angus_manual_evaluation.xlsx':

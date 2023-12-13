@@ -68,7 +68,7 @@ def make_overview_csv(submission_path):
 if __name__ == "__main__":
     submission_path = '/Users/piek/Desktop/t-MA-Combots-2023/assignments/interaction-offline'
     #submission_path = '/Users/piek/Desktop/t-MA-Combots-2023/assignments/interaction-online'
-    #submission_path = '/Users/piek/Desktop/t-MA-Combots-2023/assignments/interaction-robot/emissor'
+    submission_path = '/Users/piek/Desktop/t-MA-Combots-2023/assignments/emissor'
     evaluator_ctx = None
     evaluator_uk = None
     evaluator_mlm = None
