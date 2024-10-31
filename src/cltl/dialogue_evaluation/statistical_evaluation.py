@@ -1,7 +1,9 @@
 import glob
 import json
 from collections import Counter
+import matplotlib.pyplot as plt
 import pandas as pd
+import seaborn as sns
 import os
 from emissor.persistence import ScenarioStorage
 from emissor.representation.scenario import Modality
@@ -121,8 +123,6 @@ class StatisticalEvaluator(BasicEvaluator):
                     continue
         return stat_dict, columns
 
-
-
     def get_overview_statistics_any_depth(self, folder):
         stat_dict = {}
         columns = ["Label"]
@@ -234,7 +234,7 @@ class StatisticalEvaluator(BasicEvaluator):
 
         for key in stat_dict.keys():
             dfall = pd.DataFrame(columns=columns)
-            dfall = dfall.append(turn_row, ignore_index=True)
+            dfall = dfall.append(utterance_row, ignore_index=True)
             dfall = dfall.append(image_row, ignore_index=True)
             anno_dict = stat_dict.get(key)
             ### adding the nr of turns to the stats
@@ -488,7 +488,40 @@ class StatisticalEvaluator(BasicEvaluator):
 
         return anno
 
+    def plot_metrics_progression(self, metrics, convo_dfs, evaluation_folder):
+        # Plot metrics progression per conversation
+        for metric in metrics:
+            metric_df = pd.DataFrame()
 
+            # Iterate conversations
+            for idx, convo_df in enumerate(convo_dfs):
+                conversation_id = f'Conversation {idx}'
+                convo_df = convo_df.set_index('Turn')
+
+                # Add into a dataframe
+                if len(metric_df) == 0:
+                    metric_df[conversation_id] = convo_df[metric]
+                else:
+                    metric_df = pd.concat([metric_df, convo_df[metric]], axis=1)
+                    metric_df.rename(columns={metric: conversation_id}, inplace=True)
+
+            # Cutoff and plot
+            self.plot_progression(metric_df, metric, evaluation_folder)
+
+    @staticmethod
+    def plot_progression(df_to_plot, xlabel, evaluation_folder):
+        df_to_plot = df_to_plot.reset_index().melt('Turn', var_name='cols', value_name=xlabel)
+
+        g = sns.relplot(x="Turn", y=xlabel, hue='cols', data=df_to_plot, kind='line')
+
+        ax = plt.gca()
+        plt.xlim(0)
+        plt.xticks(ax.get_xticks()[::5], rotation=45)
+
+        plot_file = evaluation_folder / f"{xlabel}.png"
+        g.figure.savefig(plot_file, dpi=300, transparent=True, bbox_inches='tight')
+        plt.close()
+        print(f"\tSaved to file: {plot_file}")
 
     def _save(self, df, evaluation_folder, scenario_id):
         file_name =  scenario_id+"_statistical_analysis.csv"
