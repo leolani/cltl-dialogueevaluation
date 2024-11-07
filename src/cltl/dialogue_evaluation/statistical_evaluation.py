@@ -25,6 +25,27 @@ class StatisticalEvaluator(BasicEvaluator):
 
         self._log.debug(f"Statistical Evaluator ready")
 
+
+    def check_scenario_data(self, scenario_folder, scenario):
+        HAS_SCENARIO = False
+        HAS_TEXT = False
+        HAS_IMAGE = False
+        HAS_RDF = False
+        print(scenario_folder)
+        for f in os.listdir(scenario_folder):
+            if f==scenario+'.json':
+                HAS_SCENARIO=True
+            if (scenario+'.json').endswith(f):
+                HAS_SCENARIO=True
+            elif f=='text.json':
+                HAS_TEXT=True
+            elif f=='image.json':
+                HAS_IMAGE=True
+            elif f=='rdf':
+                HAS_RDF=True
+        return HAS_SCENARIO, HAS_TEXT, HAS_IMAGE, HAS_RDF
+
+
     def get_statistics_from_signals(self, signals):
 
         # TODO: fix next line, it's broken
@@ -265,15 +286,32 @@ class StatisticalEvaluator(BasicEvaluator):
         scenario_ctrl = scenario_storage.load_scenario(scenario_id)
         meta+='SCENARIO_FOLDER\t'+ scenario_folder+"\n"
         meta+='SCENARIO_ID\t'+ scenario_id+"\n"
-        speaker = scenario_ctrl.scenario.context.speaker["name"]
-        agent = scenario_ctrl.scenario.context.agent["name"]
-        location = scenario_ctrl.scenario.context.location_id  #### Change this to location name when this implemented
+        speaker = "Not in context"
+        try:
+            speaker = scenario_ctrl.scenario.context.speaker["name"] if "name" in scenario_ctrl.scenario.context.speaker else "No speaker"
+        except:
+            print("No speaker in context")
+        agent = scenario_ctrl.scenario.context.agent
+        location = "No location"
+        try:
+            location = scenario_ctrl.scenario.context.location_id  #### Change this to location name when this implemented
+        except:
+            print("No location id in context")
         meta+='AGENT\t'+agent+'\n'
         meta+='SPEAKER\t'+speaker+'\n'
         meta+='LOCATION\t'+location+'\n'
 
-        people = scenario_ctrl.scenario.context.persons
-        objects = scenario_ctrl.scenario.context.objects
+        people = "Not in context"
+        try:
+            people = scenario_ctrl.scenario.context.persons
+        except:
+            print("No location id in context")
+        objects = "Not in context"
+        try:
+            objects = scenario_ctrl.scenario.context.objects
+        except:
+            print("No location id in context")
+
         meta+='PEOPLE SEEN\t'+str(people)+'\n'
         meta+='OBJECTS SEEN\t'+str(objects)+'\n'
         duration = self.get_duration_in_minutes(scenario_ctrl)
