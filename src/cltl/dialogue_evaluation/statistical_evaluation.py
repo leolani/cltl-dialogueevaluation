@@ -456,9 +456,6 @@ class StatisticalEvaluator(BasicEvaluator):
                 for mention in mentions:
                     annotations = mention.annotations
                     all_annotations.append((timestamp, annotations))
-            #print('ANNOTATIONS:', len(all_annotations))
-            # for a in all_annotations:
-            #     print(a)
             for pair in all_annotations:
                 time_key = pair[0]
                 anno = pair[1]
@@ -466,7 +463,6 @@ class StatisticalEvaluator(BasicEvaluator):
                     type_key = anno[0].type
                     value = anno[0].value
                     if not type_key=='Face' and not type_key==None:
-                       # print('type', type_key)
                         #### create a dict with all values for each annotation type
                         if not type_dict.get(type_key):
                             type_dict[type_key] = [(time_key, value)]
@@ -476,7 +472,6 @@ class StatisticalEvaluator(BasicEvaluator):
 
     def _get_get_value_from_annotation(self, annotation):
         anno = ""
-        #print(annotation)
         if isinstance(annotation, str):
             anno = "faceID:"+annotation
         else:
@@ -484,7 +479,6 @@ class StatisticalEvaluator(BasicEvaluator):
                 # value is the correct python object
                 value_dict = vars(annotation)
                 anno = "label:" + value_dict
-                #print('value_dict', value_dict)
             except:
                 # value is a namedtuple
                 try:
@@ -514,9 +508,6 @@ class StatisticalEvaluator(BasicEvaluator):
                     elif "pos" in value_dict:
                         value = value_dict['pos']
                         type = "pos"
-                    # elif "label" in value_dict:
-                    #     value = value_dict['label']
-                    #     type = "entity"
                     else:
                         print('UNKNOWN annotation', annotation)
                     anno = type+":"+value

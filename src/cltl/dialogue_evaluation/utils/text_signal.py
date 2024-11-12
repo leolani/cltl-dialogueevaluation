@@ -15,6 +15,73 @@ def get_speaker_from_text_signal(textSignal: TextSignal):
             break
     return speaker
 
+def get_sentiment_score_from_text_signal(textSignal: TextSignal):
+    score = 0
+    sentiments = get_sentiment_from_text_signal(textSignal)
+    if sentiments:
+        for sentiment in sentiments:
+            if sentiment[0] == 'negative':
+                score += -1
+            elif sentiment[0] == "positive":
+                score += 1
+    return score
+
+
+def get_dact_feedback_score_from_text_signal(textSignal: TextSignal):
+    score = 0;
+    negative = ['neg_answer', 'complaint', 'abandon', 'apology', 'respond_to_apology', 'non-sense', 'hold']
+    positive = ['pos_answer', 'back-channeling', 'appreciation', 'thanking', 'respond_to_apology']
+    dacts = get_dact_from_text_signal(textSignal)
+    if dacts:
+        for dac in dacts:
+            if dac[0] in negative:
+                score +=-1
+            elif dac[0] in positive:
+                score += 1
+    return score
+
+def get_dact_from_text_signal(textSignal: TextSignal):
+    values = []
+    mentions = textSignal.mentions
+    for mention in mentions:
+        annotations = mention.annotations
+        for annotation in annotations:
+            print(annotation.value)
+            if annotation.type.endswith('DialogueAct'):
+                values.append(annotation.value) #['value'])
+    return values
+
+def get_go_from_text_signal(textSignal: TextSignal):
+    values = []
+    mentions = textSignal.mentions
+    for mention in mentions:
+        annotations = mention.annotations
+        for annotation in annotations:
+            print(annotation.value)
+            if annotation.type and annotation.type.endswith('Emotion') and annotation.value[0]=='GO':
+                values.append(annotation.value) #['value'])
+    return values
+
+
+def get_ekman_from_text_signal(textSignal: TextSignal):
+    values = []
+    mentions = textSignal.mentions
+    for mention in mentions:
+        annotations = mention.annotations
+        for annotation in annotations:
+            if annotation.type.endswith('Emotion') and annotation.value[0]=='EKMAN':
+                values.append(annotation.value)
+    return values
+
+def get_sentiment_from_text_signal(textSignal: TextSignal):
+    values = []
+    mentions = textSignal.mentions
+    for mention in mentions:
+        annotations = mention.annotations
+        for annotation in annotations:
+            if annotation.type.endswith('Emotion') and annotation.value[0]=='SENTIMENT':
+                values.append(annotation.value)
+    return values
 
 def get_utterances_with_context_from_signals(signals: [], max_context=200):
     ids = []
