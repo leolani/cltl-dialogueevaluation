@@ -27,6 +27,8 @@ def get_signal_rows(signals:[Signal]):
         score = 0
         score += text_signal_util.get_sentiment_score_from_text_signal(signal)
         score += text_signal_util.get_dact_feedback_score_from_text_signal(signal)
+        score += text_signal_util.get_ekman_feedback_score_from_text_signal(signal)
+        score += text_signal_util.get_go_feedback_score_from_text_signal(signal)
         label = text_signal_util.make_annotation_label(signal, _THRESHOLD)
         row = {'turn':i, 'utterance': text, 'score': score, "speaker": speaker, "type":signal.modality, "annotation": label}
         data.append(row)
@@ -39,13 +41,14 @@ def create_timeline_image(scenario_path, scenario, signals:[Signal]):
     df = pd.DataFrame(rows)
     sns.set_style("darkgrid", {"grid.color": ".6", "grid.linestyle": ":"})
     print(df.head())
-    ax = sns.lineplot(x='turn', y='score', hue = 'annotation', data=df, style='annotation', palette="deep", sizes=(20, 200), legend="full")
+    ax = sns.lineplot(x='turn', y='score', data=df, style='speaker', palette="deep", sizes=(20, 200), legend="full")
+    #ax = sns.scatterplot(x='turn', y='score', hue = 'speaker', data=df, style='annotation', palette="deep", sizes=(20, 200), legend="full")
 
     for index, row in df.iterrows():
         x = row['turn']
         y = row['score']
         category = row['speaker']+"\n"+str(row['utterance'])
-        category += '\n'+str(row['annotation'])
+        #category += '\n'+str(row['annotation'])
         ax.text(x, y,
                 s=" " + str(category),
                 rotation=70,
@@ -66,11 +69,7 @@ def main():
     emissor_path = '/Users/piek/Desktop/d-Leolani/tutorials/test22/cltl-text-to-ekg-app/app/py-app/storage/emissor'
     emissor_path ="/Users/piek/Desktop/t-MA-Combots-2024/code/ma-communicative-robots/leolani_text_to_ekg/storage/emissor"
     #emissor_path ="/Users/piek/Desktop/t-MA-Combots-2024/code/ma-communicative-robots/emissor_chat/emissor"
-    #scenario = "9e589730-4485-4412-b8b1-701eecf87607"
-    #scenario = "42c97d7d-80ff-4e81-9cae-a3702b6d5380"
-    scenario = "8e2af227-f264-46ca-92f6-03d0838763ad"
-    #scenario = "54807868-2d29-4def-82b3-78d6457b56a6"
-    scenario ="6bc62457-8889-4e34-951a-cec3193a39e0"
+    scenario ="d5a6bc60-c19b-4c08-aee5-b4dd1c65c64d"
     scenario_path = os.path.join(emissor_path, scenario)
     print(scenario_path)
     scenario_storage = ScenarioStorage(emissor_path)
