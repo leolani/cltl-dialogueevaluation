@@ -9,7 +9,7 @@ from cltl.dialogue_evaluation.statistical_evaluation import StatisticalEvaluator
 from emissor.representation.scenario import Modality
 import cltl.dialogue_evaluation.utils.text_signal as text_signal_util
 
-
+_THRESHOLD = 0.2
 # Mock data for a conversation
 data = {
     'Turn': [1, 2, 3, 4, 5, 6],
@@ -18,64 +18,34 @@ data = {
     'Emotion': ['Happy', 'Curious', 'Neutral', 'Satisfied', 'Hopeful', 'Affirmative']
 }
 
-def get_signal_anotation(signals:[Signal]):
+def get_signal_rows(signals:[Signal]):
     data = []
     for i, signal in enumerate(signals):
+        print(i, signal)
         speaker = text_signal_util.get_speaker_from_text_signal(signal)
         text = ''.join(signal.seq)
         score = 0
         score += text_signal_util.get_sentiment_score_from_text_signal(signal)
         score += text_signal_util.get_dact_feedback_score_from_text_signal(signal)
-        label = make_label(signal)
-        row = {'turn':i, 'utterance': text, 'score': score, "speaker": speaker, "type":signal.modality, "label": label}
+        label = text_signal_util.make_annotation_label(signal, _THRESHOLD)
+        row = {'turn':i, 'utterance': text, 'score': score, "speaker": speaker, "type":signal.modality, "annotation": label}
         data.append(row)
     return data
-
-def make_label (signal):
-    label = ""
-    dacts = text_signal_util.get_dact_from_text_signal(signal)
-    gos = text_signal_util.get_go_from_text_signal(signal)
-    ekmans = text_signal_util.get_ekman_from_text_signal(signal)
-    sentiments = text_signal_util.get_sentiment_from_text_signal(signal)
-    print("Before getting label")
-    print(dacts)
-    print(gos)
-    print(ekmans)
-    print(sentiments)
-    if dacts:
-        label += dacts[0][0]
-    if sentiments:
-        label += sentiments[0][0]
-    if gos:
-        label += gos[0][0]
-    if ekmans:
-        label += ekmans[0][0]
-    # JSON(value='love', type='GO', confidence=0.890785276889801)
-    # JSON(value='joy', type='EKMAN', confidence=0.9762245354068)
-    # JSON(value='positive', type='SENTIMENT', confidence=0.9762245354068)
-    # JSON(value='complaint', type='MIDAS', confidence=0.2305116355419159)
-    return label
 
 
 def create_timeline_image(scenario_path, scenario, signals:[Signal]):
    # earliest, latest, period, activity_in_period = get_activity_in_period(story_of_life, current_date=current_date)
-    rows = get_signal_anotation(signals)
+    rows = get_signal_rows(signals)
     df = pd.DataFrame(rows)
     sns.set_style("darkgrid", {"grid.color": ".6", "grid.linestyle": ":"})
     print(df.head())
- #   ax = sns.scatterplot(x='time', y='sentiment', hue='label', data=df, size="certainty", style='label', palette="deep", sizes=(20, 200), legend="full")
-    ax = sns.lineplot(x='turn', y='score', hue = 'label', data=df, palette="deep", legend="full")
+    ax = sns.lineplot(x='turn', y='score', hue = 'annotation', data=df, style='annotation', palette="deep", sizes=(20, 200), legend="full")
 
     for index, row in df.iterrows():
         x = row['turn']
         y = row['score']
         category = row['speaker']+"\n"+str(row['utterance'])
-        category += '\n'+str(row['label'])
-        #category + str(row['ekman'])
-        # actors = row['actors']
-        # polarity = row['polarity']
-        # emotion = row['emotion']
-
+        category += '\n'+str(row['annotation'])
         ax.text(x, y,
                 s=" " + str(category),
                 rotation=70,
