@@ -7,7 +7,7 @@ import seaborn as sns
 import os
 from emissor.persistence import ScenarioStorage
 from emissor.representation.scenario import Modality
-
+import cltl.dialogue_evaluation.utils.plot_interaction as plot
 import cltl.dialogue_evaluation.utils.text_signal as text_util
 #import cltl.dialogue_evaluation.utils.image_signal as image_util
 from emissor.representation.scenario import Signal
@@ -286,12 +286,16 @@ class StatisticalEvaluator(BasicEvaluator):
         scenario_ctrl = scenario_storage.load_scenario(scenario_id)
         meta+='SCENARIO_FOLDER\t'+ scenario_folder+"\n"
         meta+='SCENARIO_ID\t'+ scenario_id+"\n"
-        speaker = "Not in context"
+        speaker = "No speaker"
         try:
             speaker = scenario_ctrl.scenario.context.speaker["name"] if "name" in scenario_ctrl.scenario.context.speaker else "No speaker"
         except:
             print("No speaker in context")
-        agent = scenario_ctrl.scenario.context.agent
+        agent = "No agent"
+        try:
+            agent = scenario_ctrl.scenario.context.agent["name"] if "name" in scenario_ctrl.scenario.context.agent else "No agent"
+        except:
+            print("No speaker in context")
         location = "No location"
         try:
             location = scenario_ctrl.scenario.context.location_id  #### Change this to location name when this implemented
@@ -320,6 +324,10 @@ class StatisticalEvaluator(BasicEvaluator):
         #### Text signals statistics
         meta+="\nText signals\n"
         text_signals = scenario_ctrl.get_signals(Modality.TEXT)
+        text_signals = scenario_ctrl.get_signals(Modality.TEXT)
+        plot.create_timeline_image(scenario_path=scenario_folder, scenario=scenario_id, speaker=speaker, agent=agent,
+                              signals=text_signals)
+
         ids, turns, speakers = text_util.get_utterances_with_context_from_signals(text_signals)
         meta+='NR. TURNS\t'+ str(len(turns))+"\n"
         average_turn_length, average_tokens_per_turn, average_token_length = self.get_utterance_stats(turns)

@@ -45,11 +45,11 @@ def get_signal_rows(signals:[Signal], human, agent, annotations:[]):
 
 def create_timeline_image(scenario_path, scenario, speaker:str, agent:str, signals:[Signal]):
    # earliest, latest, period, activity_in_period = get_activity_in_period(story_of_life, current_date=current_date)
-    plt.rcParams['figure.figsize'] = [20, 5]
 
     rows = get_signal_rows(signals, speaker, agent, _ANNOTATIONS)
+    plt.rcParams['figure.figsize'] = [len(rows), 5]
     df = pd.DataFrame(rows)
-    print(df.head())
+    #print(df.head())
     sns.set_style("darkgrid", {"grid.color": ".6", "grid.linestyle": ":"})
     ax = sns.lineplot(x='turn', y='score', data=df, hue='speaker', style='speaker', markers=True, palette="bright", legend="brief")
     #palette = "flare/bright/deep/muted/colorblind/dark"
@@ -65,12 +65,11 @@ def create_timeline_image(scenario_path, scenario, speaker:str, agent:str, signa
                 linespacing=1.5)
 
     ax.tick_params(axis='x', rotation=70)
-    # Show the plot
-    #plt.figure().set_figwidth(10)
+    # Save the plot
     plt.legend(loc='lower right')
     path =  os.path.join(scenario_path, scenario+"_plot.png")
     plt.savefig(path, dpi=600)
-    plt.show()
+ #   plt.show()
 
 
 

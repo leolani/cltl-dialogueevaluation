@@ -3,11 +3,9 @@ import os
 
 def main():
     evaluator = StatisticalEvaluator()
-    emissor_path = '/Users/piek/Desktop/t-MA-Combots-2024/code/ma-communicative-robots/emissor_chat/emissor'
-    scenario = "261c370e-eaea-479f-ac41-cbfd7de227ac"
-
-    #emissor_path ="/Users/piek/Desktop/t-MA-Combots-2024/code/ma-communicative-robots/leolani_text_to_ekg/storage/emissor"
-    #scenario = "9e589730-4485-4412-b8b1-701eecf87607"
+    emissor_path = '../examples/data/emissor'
+    scenario = "2fe112e2-31cf-4aef-9011-d237135e53fb"
+    scenario = "3cf7c0b8-f69d-45e8-b804-cb6aca3a044d"
     scenario_path = os.path.join(emissor_path, scenario)
     has_scenario, has_text, has_image, has_rdf = evaluator.check_scenario_data(scenario_path, scenario)
     check_message = "Scenario folder:" + emissor_path + "\n"
@@ -23,8 +21,6 @@ def main():
     else:
         evaluator.analyse_interaction(emissor_path, scenario)
 
-    # stats_dict, columns = evaluator.get_overview_statistics(emissor_path)
-    # evaluator.save_overview_statistics(emissor_path, stats_dict, columns)
 
 
 if __name__ == '__main__':
