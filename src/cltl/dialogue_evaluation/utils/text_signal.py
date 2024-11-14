@@ -1,16 +1,12 @@
 from emissor.representation.scenario import TextSignal
 
 
-def make_annotation_label (signal, threshold):
+def make_annotation_label (signal, threshold, annotations:[]):
     label = ""
     dacts = get_dact_from_text_signal(signal)
     gos = get_go_from_text_signal(signal)
     ekmans = get_ekman_from_text_signal(signal)
     sentiments = get_sentiment_from_text_signal(signal)
-    print('dacts',dacts)
-    print('gos', gos)
-    print('ekmans', ekmans)
-    print('sentiments', sentiments)
     # JSON(value='love', type='GO', confidence=0.890785276889801)
     # JSON(value='joy', type='EKMAN', confidence=0.9762245354068)
     # JSON(value='positive', type='SENTIMENT', confidence=0.9762245354068)
@@ -21,27 +17,27 @@ def make_annotation_label (signal, threshold):
             dac_label = dac.value
             type = dac.type
             if conf > threshold:
-                label += type+":"+dac_label
-    if sentiments:
+                label += dac_label
+    if sentiments and "sentiment" in annotations:
         for sentiment in sentiments:
             conf = sentiment.confidence
             sentiment_label = sentiment.value
             if conf > threshold:
                 label += ";"+sentiment_label
-    if gos:
+    if gos and "go" in annotations:
         for go in gos:
             conf = go.confidence
             go_label = go.value
             type = go.type
             if conf > threshold:
-                label += ";"+type+":"+go_label
-    if ekmans:
+                label += ";"+go_label
+    if ekmans and "ekman" in annotations:
         for ekman in ekmans:
             conf = ekman.confidence
             ekman_label = ekman.value
             type = ekman.type
             if conf > threshold:
-                label += ";"+type+":"+ekman_label
+                label += ";"+ekman_label
     return label
 
 
