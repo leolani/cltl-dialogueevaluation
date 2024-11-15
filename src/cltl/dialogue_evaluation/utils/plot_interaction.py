@@ -19,9 +19,9 @@ data = {
 
 def get_signal_rows(signals:[Signal], human, agent, annotations:[]):
     data = []
-    row = {'turn': 0, 'utterance': "", 'score': 3, "speaker": agent, "type": "",
-           "annotation": ""}
-    data.append(row)
+    # row = {'turn': 0, 'utterance': "", 'score': 3, "speaker": agent, "type": "",
+    #        "annotation": ""}
+    # data.append(row)
     for i, signal in enumerate(signals):
         speaker = text_signal_util.get_speaker_from_text_signal(signal)
         if speaker=='SPEAKER':
@@ -67,9 +67,10 @@ def create_timeline_image(scenario_path, scenario, speaker:str, agent:str, signa
     ax.tick_params(axis='x', rotation=70)
     # Save the plot
     plt.legend(loc='lower right')
+    plt.ylim(-3,3)
     path =  os.path.join(scenario_path, scenario+"_plot.png")
     plt.savefig(path, dpi=600)
- #   plt.show()
+   # plt.show()
 
 
 
