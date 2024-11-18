@@ -51,7 +51,7 @@ def create_timeline_image(scenario_path, scenario, speaker:str, agent:str, signa
     df = pd.DataFrame(rows)
     #print(df.head())
     sns.set_style("darkgrid", {"grid.color": ".6", "grid.linestyle": ":"})
-    ax = sns.lineplot(x='turn', y='score', data=df, hue='speaker', style='speaker', markers=True, palette="bright", legend="brief")
+    ax = sns.lineplot(x='turn', y='score', data=df, hue='speaker', style='annotation', markers=True, palette="bright", legend="brief")
     #palette = "flare/bright/deep/muted/colorblind/dark"
     for index, row in df.iterrows():
         x = row['turn']
@@ -70,7 +70,7 @@ def create_timeline_image(scenario_path, scenario, speaker:str, agent:str, signa
     plt.ylim(-3,3)
     path =  os.path.join(scenario_path, scenario+"_plot.png")
     plt.savefig(path, dpi=600)
-   # plt.show()
+    plt.show()
 
 
 

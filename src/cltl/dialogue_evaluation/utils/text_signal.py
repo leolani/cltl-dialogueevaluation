@@ -95,7 +95,7 @@ def get_ekman_feedback_score_from_text_signal(textSignal: TextSignal):
 
 def get_dact_feedback_score_from_text_signal(textSignal: TextSignal):
     score = 0;
-    negative = ['neg_answer', 'complaint', 'abandon', 'apology', 'respond_to_apology', 'non-sense', 'hold']
+    negative = ['neg_answer', 'complaint', 'abandon', 'apology','non-sense', 'hold']
     positive = ['pos_answer', 'back-channeling', 'appreciation', 'thanking', 'respond_to_apology']
     dacts = get_dact_from_text_signal(textSignal)
     if dacts:
