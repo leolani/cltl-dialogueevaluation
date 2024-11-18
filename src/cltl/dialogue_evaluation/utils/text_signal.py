@@ -2,11 +2,12 @@ from emissor.representation.scenario import TextSignal
 
 
 def make_annotation_label (signal, threshold, annotations:[]):
-    label = ""
     dacts = get_dact_from_text_signal(signal)
     gos = get_go_from_text_signal(signal)
     ekmans = get_ekman_from_text_signal(signal)
     sentiments = get_sentiment_from_text_signal(signal)
+    likelihood = get_likelihood_from_text_signal(signal)
+    label = "llh:"+str(round(likelihood, 2))
     # JSON(value='love', type='GO', confidence=0.890785276889801)
     # JSON(value='joy', type='EKMAN', confidence=0.9762245354068)
     # JSON(value='positive', type='SENTIMENT', confidence=0.9762245354068)
@@ -17,7 +18,7 @@ def make_annotation_label (signal, threshold, annotations:[]):
             dac_label = dac.value
             type = dac.type
             if conf > threshold:
-                label += dac_label
+                label += ";"+dac_label
     if sentiments and "sentiment" in annotations:
         for sentiment in sentiments:
             conf = sentiment.confidence
@@ -149,6 +150,19 @@ def get_sentiment_from_text_signal(textSignal: TextSignal):
                 if annotation.type.endswith('Emotion') and annotation.value.type=='SENTIMENT':
                     values.append(annotation.value)
     return values
+
+def get_likelihood_from_text_signal(textSignal: TextSignal):
+    threshold = 0.3
+    score = 0
+    mentions = textSignal.mentions
+    for mention in mentions:
+        annotations = mention.annotations
+        for annotation in annotations:
+            if annotation.value:
+                if annotation.type.endswith('Likelihood'):
+                    score = float(annotation.value)
+    score = score-threshold
+    return score
 
 def get_utterances_with_context_from_signals(signals: [], max_context=200):
     ids = []

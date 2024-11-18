@@ -8,7 +8,7 @@ from emissor.representation.scenario import Modality
 import cltl.dialogue_evaluation.utils.text_signal as text_signal_util
 
 _THRESHOLD = 0.6
-_ANNOTATIONS =["go", "sentiment"] #["sentiment", "ekman"]
+_ANNOTATIONS =["go", "sentiment", "llh"] #["sentiment", "ekman"]
 # Mock data for a conversation
 data = {
     'Turn': [1, 2, 3, 4, 5, 6],
@@ -26,7 +26,7 @@ def get_signal_rows(signals:[Signal], human, agent, annotations:[]):
         speaker = text_signal_util.get_speaker_from_text_signal(signal)
         if speaker=='SPEAKER':
             speaker = human
-        else:
+        elif speaker=='AGENT':
             speaker = agent
         text = ''.join(signal.seq)
         score = 0
@@ -37,21 +37,24 @@ def get_signal_rows(signals:[Signal], human, agent, annotations:[]):
             score += text_signal_util.get_ekman_feedback_score_from_text_signal(signal)
         if "go" in annotations:
             score += text_signal_util.get_go_feedback_score_from_text_signal(signal)
+        if "llh" in annotations:
+            score += text_signal_util.get_likelihood_from_text_signal(signal)
         label = text_signal_util.make_annotation_label(signal, _THRESHOLD, _ANNOTATIONS)
         row = {'turn':i+1, 'utterance': text, 'score': score, "speaker": speaker, "type":signal.modality, "annotation": label}
         data.append(row)
     return data
 
 
-def create_timeline_image(scenario_path, scenario, speaker:str, agent:str, signals:[Signal]):
+def create_timeline_image(scenario_path, scenario, speaker:str, agent:str, signals:[Signal], annotations=_ANNOTATIONS):
    # earliest, latest, period, activity_in_period = get_activity_in_period(story_of_life, current_date=current_date)
 
-    rows = get_signal_rows(signals, speaker, agent, _ANNOTATIONS)
+    rows = get_signal_rows(signals, speaker, agent, annotations)
     plt.rcParams['figure.figsize'] = [len(rows), 5]
     df = pd.DataFrame(rows)
     #print(df.head())
     sns.set_style("darkgrid", {"grid.color": ".6", "grid.linestyle": ":"})
-    ax = sns.lineplot(x='turn', y='score', data=df, hue='speaker', style='annotation', markers=True, palette="bright", legend="brief")
+ #   ax = sns.lineplot(x='turn', y='score', data=df, hue='speaker', style='annotation', markers=True, palette="bright", legend="brief")
+    ax = sns.lineplot(x='turn', y='score', data=df, hue='speaker', style='speaker', markers=True, palette="bright", legend="brief")
     #palette = "flare/bright/deep/muted/colorblind/dark"
     for index, row in df.iterrows():
         x = row['turn']
@@ -77,7 +80,12 @@ def create_timeline_image(scenario_path, scenario, speaker:str, agent:str, signa
 def main():
     emissor_path = '/Users/piek/Desktop/d-Leolani/tutorials/test22/cltl-text-to-ekg-app/app/py-app/storage/emissor'
     emissor_path ="/Users/piek/Desktop/t-MA-Combots-2024/code/ma-communicative-robots/leolani_text_to_ekg/storage/emissor"
+    emissor_path = "/Users/piek/Desktop/t-MA-Combots-2024/code/ma-communicative-robots/emissor_chat/emissor"
+    #emissor_path = "/Users/piek/Desktop/t-MA-Combots-2024/code/ma-communicative-robots/leolani_text_to_ekg/storage/emissor"
     scenario ="d5a6bc60-c19b-4c08-aee5-b4dd1c65c64d"
+    scenario ="a5efdf54-b5c6-42db-8981-d3a61b594aca"
+    #scenario ="8e7a8eb9-64ae-4ff8-baf0-ca04b4f48c14"
+
     scenario_path = os.path.join(emissor_path, scenario)
     print(scenario_path)
     scenario_storage = ScenarioStorage(emissor_path)
