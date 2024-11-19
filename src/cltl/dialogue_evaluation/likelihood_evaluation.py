@@ -1,4 +1,8 @@
 import os
+import argparse
+import sys
+import cltl.dialogue_evaluation.utils.scenario_check as check
+from pathlib import Path
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
@@ -153,3 +157,40 @@ class LikelihoodEvaluator(BasicEvaluator):
         g.figure.savefig(plot_file, dpi=300, transparent=True, bbox_inches='tight')
         plt.close()
         print(f"\tSaved to file: {plot_file}")
+
+
+
+
+def main(emissor_path:str, scenario:str,  model_path, max_context=300, len_top_tokens=20):
+    scenario_path = os.path.join(emissor_path, scenario)
+    has_scenario, has_text, has_image, has_rdf = check.check_scenario_data(scenario_path, scenario)
+    check_message = "Scenario folder:" + emissor_path + "\n"
+    check_message += "\tScenario JSON:" + str(has_scenario) + "\n"
+    check_message += "\tText JSON:" + str(has_text) + "\n"
+    check_message += "\tImage JSON:" + str(has_image) + "\n"
+    check_message += "\tRDF :" + str(has_rdf) + "\n"
+    print(check_message)
+    if not has_scenario:
+        print("No scenario JSON found. Skipping:", scenario_path)
+    elif not has_text:
+        print("No text JSON found. Skipping:", scenario_path)
+    else:
+        evaluator = LikelihoodEvaluator(model_path, max_context, len_top_tokens)
+        evaluator.evaluate_conversation(emissor_path, scenario)
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Statistical evaluation emissor scenario')
+    parser.add_argument('--emissor-path', type=str, required=False, help="Path to the emissor folder", default='')
+    parser.add_argument('--scenario', type=str, required=False, help="Identifier of the scenario", default='')
+    parser.add_argument('--model_path', type=str, required=False, help="Path to the model or huggingface URL", default="google-bert/bert-base-multilingual-cased")
+    parser.add_argument('--context', type=int, required=False, help="Maximum character length of the context" , default=300)
+    parser.add_argument('--top_results', type=int, required=False, help="Maximum number of MASKED results considered" , default=20)
+
+    args, _ = parser.parse_known_args()
+    print('Input arguments', sys.argv)
+    main(emissor_path=args.emissor_path,
+         scenario=args.scenario,
+         model_path=args.model_path,
+         max_context=args.context,
+         len_top_tokens=args.top_results)
+

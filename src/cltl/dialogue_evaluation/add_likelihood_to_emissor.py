@@ -77,7 +77,7 @@ class LikelihoodAnnotator (SignalProcessor):
 
         return mention
 
-def main(emissor_path:str, scenario:str, model_path="google-bert/bert-base-multilingual-cased", model_name="mBERT", context_threshold=300, top_results=20):
+def main(emissor_path:str, scenario:str, model_path="google-bert/bert-base-multilingual-cased", model_name="mBERT", max_context=300, len_top_tokens=20):
     scenario_path = os.path.join(emissor_path, scenario)
     has_scenario, has_text, has_image, has_rdf = check.check_scenario_data(scenario_path, scenario)
     check_message = "Scenario folder:" + emissor_path + "\n"
@@ -91,13 +91,13 @@ def main(emissor_path:str, scenario:str, model_path="google-bert/bert-base-multi
     elif not has_text:
         print("No text JSON found. Skipping:", scenario_path)
     else:
-        annotator = LikelihoodAnnotator(model=model_path, model_name=model_name, max_content=context_threshold, top_results=top_results)
+        annotator = LikelihoodAnnotator(model=model_path, model_name=model_name, max_content=max_context, top_results=len_top_tokens)
         scenario_path = os.path.join(emissor_path, scenario)
         print(scenario_path)
         print("model_path", model_path)
         print("model_name", model_name)
-        print("context_threshold", context_threshold)
-        print("top_results", top_results)
+        print("context_threshold", max_context)
+        print("top_results", len_top_tokens)
         scenario_storage = ScenarioStorage(emissor_path)
         scenario_ctrl = scenario_storage.load_scenario(scenario)
         signals = scenario_ctrl.get_signals(Modality.TEXT)
@@ -121,5 +121,5 @@ if __name__ == '__main__':
          scenario=args.scenario,
          model_path=args.model_path,
          model_name = args.model_name,
-         context_threshold=args.context,
-         top_results=args.top_results)
+         max_context=args.context,
+         len_top_tokens=args.top_results)
