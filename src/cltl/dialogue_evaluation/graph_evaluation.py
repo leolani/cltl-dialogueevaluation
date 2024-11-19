@@ -1,6 +1,9 @@
+import os
 from pathlib import Path
 
+import matplotlib.pyplot as plt
 import pandas as pd
+import seaborn as sns
 from rdflib import ConjunctiveGraph
 from rdflib.extras.external_graph_libs import rdflib_to_networkx_multidigraph
 
@@ -8,7 +11,7 @@ from cltl.dialogue_evaluation.api import BasicEvaluator
 from cltl.dialogue_evaluation.metrics.brain_measures import *
 from cltl.dialogue_evaluation.metrics.graph_measures import *
 from cltl.dialogue_evaluation.metrics.ontology_measures import *
-from cltl.dialogue_evaluation.utils.map_rdf_files import map_emissor_scenarios
+from cltl.dialogue_evaluation.utils.map_rdf_files import map_scenarios
 
 
 class GraphEvaluator(BasicEvaluator):
@@ -20,16 +23,19 @@ class GraphEvaluator(BasicEvaluator):
         super(GraphEvaluator, self).__init__()
         self._log.debug(f"Graph Evaluator ready")
 
-    def evaluate_conversation(self, scenario_folder, rdf_folder):
+    def evaluate_conversation(self, scenario_folder, rdf_folder, metrics_to_plot=None):
+        print(f'----------SCENARIO:{scenario_folder.stem}, EVALUATION:graph metrics---------')
+
         # Read mapping of rdf log file to turn
-        map_emissor_scenarios(scenario_folder, rdf_folder)
+        if not os.path.exists(scenario_folder / f'turn_to_trig_file.json'):
+            map_scenarios(scenario_folder, rdf_folder)
         full_df = pd.read_json(scenario_folder / f'turn_to_trig_file.json')
 
         # Recreate conversation and score graph
         rdf_count = 0
         total_turns = len(full_df)
         for idx, row in full_df.iterrows():
-            print(f"Processing turn {row['Turn']}/{total_turns}")
+            print(f"Processing turn {row['Turn']}/{total_turns - 1}")
 
             # If first row and no graph
             if idx == 0 and not row['rdf_file']:
@@ -46,11 +52,10 @@ class GraphEvaluator(BasicEvaluator):
                     print(f"\tFound RDF, cumulative: {rdf_count}")
 
                     # clear brain (for computational purposes)
-                    print(f"\tClear brain")
                     brain_as_graph = ConjunctiveGraph()
 
                     # Add new
-                    print(f"\tAdding triples to brains")
+                    print(f"\tAdding triples")
                     brain_as_graph.parse(rdf_folder / file, format='trig')
                     brain_as_netx = rdflib_to_networkx_multidigraph(brain_as_graph)
 
@@ -65,6 +70,9 @@ class GraphEvaluator(BasicEvaluator):
         evaluation_folder = Path(scenario_folder / 'evaluation/')
         evaluation_folder.mkdir(parents=True, exist_ok=True)
         self._save(full_df, evaluation_folder)
+
+        if metrics_to_plot:
+            self.plot_metrics_progression(metrics_to_plot, [full_df], evaluation_folder)
 
     @staticmethod
     def _calculate_metrics(brain_as_graph, brain_as_netx, df, idx):
@@ -81,8 +89,7 @@ class GraphEvaluator(BasicEvaluator):
             if get_count_nodes(brain_as_netx) > 0 else 0
         df.loc[idx, 'GROUP A - Number of components'] = get_number_components(brain_as_netx)
         df.loc[idx, 'GROUP A - Number of strong components'] = get_assortativity(brain_as_netx)
-        df.loc[idx, 'GROUP A - Shortest path'] = get_shortest_path(brain_as_netx) \
-            if get_count_nodes(brain_as_netx) > 0 else 0
+        # df.loc[idx, 'GROUP A - Shortest path'] = get_shortest_path(brain_as_netx)
         df.loc[idx, 'GROUP A - Centrality entropy'] = get_entropy_centr(brain_as_netx)
         df.loc[idx, 'GROUP A - Closeness entropy'] = get_entropy_clos(brain_as_netx)
         df.loc[idx, 'GROUP A - Sparseness'] = get_sparseness(brain_as_netx) if get_count_nodes(brain_as_netx) > 0 else 0
@@ -116,7 +123,7 @@ class GraphEvaluator(BasicEvaluator):
         # df.loc[idx, 'GROUP B - Total aBox axioms']  = get_number_aBox_axioms(brain_as_graph)
         # df.loc[idx, 'GROUP B - Total tBox axioms']  = get_number_tBox_axioms(brain_as_graph)
         #####
-        print(f"\tCalculating brain metrics")
+        print(f"\tCalculating interaction metrics")
         df.loc[idx, 'GROUP C - Total triples'] = get_number_triples(brain_as_graph)  # good
         df.loc[idx, 'GROUP C - Total world instances'] = get_number_grasp_instances(brain_as_graph)
         df.loc[idx, 'GROUP C - Total claims'] = get_number_statements(brain_as_graph)
@@ -190,6 +197,41 @@ class GraphEvaluator(BasicEvaluator):
 
     @staticmethod
     def _save(df, evaluation_folder):
-
         df = df.drop(columns=['Speaker', 'Response', 'rdf_file'])
         df.to_csv(evaluation_folder / 'graph_evaluation.csv', index=False)
+        print(f"\n\tSaved to file: {evaluation_folder / 'graph_evaluation.csv'}")
+
+    def plot_metrics_progression(self, metrics, convo_dfs, evaluation_folder):
+        # Plot metrics progression per conversation
+        for metric in metrics:
+            metric_df = pd.DataFrame()
+
+            # Iterate conversations
+            for idx, convo_df in enumerate(convo_dfs):
+                conversation_id = f'Conversation {idx}'
+                convo_df = convo_df.set_index('Turn')
+
+                # Add into a dataframe
+                if len(metric_df) == 0:
+                    metric_df[conversation_id] = convo_df[metric]
+                else:
+                    metric_df = pd.concat([metric_df, convo_df[metric]], axis=1)
+                    metric_df.rename(columns={metric: conversation_id}, inplace=True)
+
+            # Cutoff and plot
+            self.plot_progression(metric_df, metric, evaluation_folder)
+
+    @staticmethod
+    def plot_progression(df_to_plot, xlabel, evaluation_folder):
+        df_to_plot = df_to_plot.reset_index().melt('Turn', var_name='cols', value_name=xlabel)
+
+        g = sns.relplot(x="Turn", y=xlabel, hue='cols', data=df_to_plot, kind='line')
+
+        ax = plt.gca()
+        plt.xlim(0)
+        plt.xticks(ax.get_xticks()[::5], rotation=45)
+
+        plot_file = evaluation_folder / f"{xlabel}.png"
+        g.figure.savefig(plot_file, dpi=300, transparent=True, bbox_inches='tight')
+        plt.close()
+        print(f"\tSaved to file: {plot_file}")

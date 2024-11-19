@@ -1,0 +1,59 @@
+SCENARIO_FOLDER	../examples/data/emissor/2fe112e2-31cf-4aef-9011-d237135e53fb
+SCENARIO_ID	2fe112e2-31cf-4aef-9011-d237135e53fb
+AGENT	Leolani
+SPEAKER	Piek
+LOCATION	08ab687f-bc11-4c3b-883c-39e1a2aab973
+PEOPLE SEEN	[]
+OBJECTS SEEN	[]
+DURATION IN MINUTES	4.689166666666667
+
+Text signals
+NR. TURNS	67
+Average turn length	41.88059701492537
+Average nr. tokens per turn	8.865671641791044
+Average token length	3.8367003367003365
+SPEAKER SET	{'SPEAKER', 'LEOLANI'}
+TOTAL ANNOTATIONS	211
+
+ConversationalAgent
+faceID:SPEAKER	21
+faceID:LEOLANI	46
+VectorIdentity
+faceID:piek	1
+python-type:cltl.dialogue_act_classification.api.DialogueAct
+MIDAS:open_question_factual	2
+MIDAS:statement	20
+MIDAS:comment	6
+MIDAS:command	5
+MIDAS:opinion	15
+MIDAS:other_answers	4
+MIDAS:pos_answer	1
+MIDAS:yes_no_question	3
+Token
+pos:PROPN	9
+pos:AUX	7
+pos:PRON	11
+pos:NOUN	16
+pos:VERB	8
+pos:ADP	1
+pos:DET	3
+pos:ADV	1
+NamedEntity
+ORG:Anja	1
+PERSON:Marc	1
+ORG:Niqee	2
+PERSON:Sam	1
+PERSON:Selene	1
+PERSON:Jaap	1
+python-type:cltl.emotion_extraction.api.Emotion
+GO:neutral	14
+Entity
+SPEAKER:I	4
+OBJECT:book	2
+OBJECT:cats	1
+OBJECT:dogs	2
+OBJECT:Persons	1
+
+Image signals
+TOTAL ANNOTATIONS	0
+

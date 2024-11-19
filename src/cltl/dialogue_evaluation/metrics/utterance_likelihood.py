@@ -35,7 +35,7 @@ class USR_MLM:
         else:
             self.__model_name = path
 
-        self.__tokenizer = AutoTokenizer.from_pretrained(self.__model_name)
+        self.__tokenizer = AutoTokenizer.from_pretrained(self.__model_name, local_files_only=True)
         self.__model = pipeline("fill-mask", model=self.__model_name)
         self.__model.top_k = top_results  ### we check against the top results
 

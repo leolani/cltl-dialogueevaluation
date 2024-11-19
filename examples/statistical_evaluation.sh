@@ -1,0 +1,1 @@
+python statistical_evaluation_of_emissor_scenario.py --emissor-path './data/emissor' --scenario '3cf7c0b8-f69d-45e8-b804-cb6aca3a044d'
