@@ -9,7 +9,7 @@ from emissor.persistence import ScenarioStorage
 from emissor.representation.scenario import Modality
 import cltl.dialogue_evaluation.utils.plot_interaction as plot
 import cltl.dialogue_evaluation.utils.text_signal as text_util
-#import cltl.dialogue_evaluation.1.utils.image_signal as image_util
+#import cltl.dialogue_evaluation.utils.image_signal as image_util
 from emissor.representation.scenario import Signal
 
 from cltl.dialogue_evaluation.api import BasicEvaluator
