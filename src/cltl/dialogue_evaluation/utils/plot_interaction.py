@@ -2,26 +2,21 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
 import os
+import argparse
+import sys
 from emissor.representation.scenario import Signal
 from emissor.persistence import ScenarioStorage
 from emissor.representation.scenario import Modality
 import cltl.dialogue_evaluation.utils.text_signal as text_signal_util
+import cltl.dialogue_evaluation.utils.scenario_check as check
 
-_THRESHOLD = 0.6
-_ANNOTATIONS =["go", "sentiment", "llh"] #["sentiment", "ekman"]
-# Mock data for a conversation
-data = {
-    'Turn': [1, 2, 3, 4, 5, 6],
-    'Speaker': ['A', 'B', 'A', 'B', 'A', 'B'],
-    'Dialogue Act': ['Greeting', 'Question', 'Answer', 'Statement', 'Request', 'Confirmation'],
-    'Emotion': ['Happy', 'Curious', 'Neutral', 'Satisfied', 'Hopeful', 'Affirmative']
-}
+_LLH_THRESHOLD = 0.3
+_SENTIMENT_THRESHOLD = 0.6
+_ANNOTATIONS =["go", "sentiment"] #["ekman"]
 
-def get_signal_rows(signals:[Signal], human, agent, annotations:[]):
+
+def get_signal_rows(signals:[Signal], human, agent):
     data = []
-    # row = {'turn': 0, 'utterance': "", 'score': 3, "speaker": agent, "type": "",
-    #        "annotation": ""}
-    # data.append(row)
     for i, signal in enumerate(signals):
         speaker = text_signal_util.get_speaker_from_text_signal(signal)
         if speaker=='SPEAKER':
@@ -31,24 +26,22 @@ def get_signal_rows(signals:[Signal], human, agent, annotations:[]):
         text = ''.join(signal.seq)
         score = 0
         score += text_signal_util.get_dact_feedback_score_from_text_signal(signal)
-        if "sentiment" in annotations:
+        if "sentiment" in _ANNOTATIONS:
             score += text_signal_util.get_sentiment_score_from_text_signal(signal)
-        if "ekman" in annotations:
+        if "ekman" in _ANNOTATIONS:
             score += text_signal_util.get_ekman_feedback_score_from_text_signal(signal)
-        if "go" in annotations:
+        if "go" in _ANNOTATIONS:
             score += text_signal_util.get_go_feedback_score_from_text_signal(signal)
-        if "llh" in annotations:
-            score += text_signal_util.get_likelihood_from_text_signal(signal)
-        label = text_signal_util.make_annotation_label(signal, _THRESHOLD, _ANNOTATIONS)
+        if "llh" in _ANNOTATIONS:
+            score += text_signal_util.get_likelihood_from_text_signal(signal, _LLH_THRESHOLD)
+        label = text_signal_util.make_annotation_label(signal, _SENTIMENT_THRESHOLD, _ANNOTATIONS)
         row = {'turn':i+1, 'utterance': text, 'score': score, "speaker": speaker, "type":signal.modality, "annotation": label}
         data.append(row)
     return data
 
 
-def create_timeline_image(scenario_path, scenario, speaker:str, agent:str, signals:[Signal], annotations=_ANNOTATIONS):
-   # earliest, latest, period, activity_in_period = get_activity_in_period(story_of_life, current_date=current_date)
-
-    rows = get_signal_rows(signals, speaker, agent, annotations)
+def create_timeline_image(scenario_path, scenario, speaker:str, agent:str, signals:[Signal]):
+    rows = get_signal_rows(signals, speaker, agent)
     plt.rcParams['figure.figsize'] = [len(rows), 5]
     df = pd.DataFrame(rows)
     #print(df.head())
@@ -76,24 +69,53 @@ def create_timeline_image(scenario_path, scenario, speaker:str, agent:str, signa
     plt.show()
 
 
-
-def main():
-    emissor_path = '/Users/piek/Desktop/d-Leolani/tutorials/test22/cltl-text-to-ekg-app/app/py-app/storage/emissor'
-    emissor_path ="/Users/piek/Desktop/t-MA-Combots-2024/code/ma-communicative-robots/leolani_text_to_ekg/storage/emissor"
-    emissor_path = "/Users/piek/Desktop/t-MA-Combots-2024/code/ma-communicative-robots/emissor_chat/emissor"
-    #emissor_path = "/Users/piek/Desktop/t-MA-Combots-2024/code/ma-communicative-robots/leolani_text_to_ekg/storage/emissor"
-    scenario ="d5a6bc60-c19b-4c08-aee5-b4dd1c65c64d"
-    scenario ="a5efdf54-b5c6-42db-8981-d3a61b594aca"
-    #scenario ="8e7a8eb9-64ae-4ff8-baf0-ca04b4f48c14"
-
+def main(emissor_path:str, scenario:str, annotations:[], sentiment_threshold=0, llh_threshold=0):
     scenario_path = os.path.join(emissor_path, scenario)
-    print(scenario_path)
-    scenario_storage = ScenarioStorage(emissor_path)
-    scenario_ctrl = scenario_storage.load_scenario(scenario)
-    speaker = scenario_ctrl.scenario.context.speaker["name"]
-    agent = scenario_ctrl.scenario.context.agent["name"]
-    text_signals = scenario_ctrl.get_signals(Modality.TEXT)
-    create_timeline_image(scenario_path=scenario_path, scenario=scenario, speaker=speaker, agent=agent, signals=text_signals)
+    has_scenario, has_text, has_image, has_rdf = check.check_scenario_data(scenario_path, scenario)
+    check_message = "Scenario folder:" + emissor_path + "\n"
+    check_message += "\tScenario JSON:" + str(has_scenario) + "\n"
+    check_message += "\tText JSON:" + str(has_text) + "\n"
+    check_message += "\tImage JSON:" + str(has_image) + "\n"
+    check_message += "\tRDF :" + str(has_rdf) + "\n"
+    print(check_message)
+    if not has_scenario:
+        print("No scenario JSON found. Skipping:", scenario_path)
+    elif not has_text:
+        print("No text JSON found. Skipping:", scenario_path)
+    else:
+        if annotations:
+            _ANNOTATIONS = annotations
+        if sentiment_threshold>0:
+            _SENTIMENT_THRESHOLD=sentiment_threshold
+        if llh_threshold>0:
+            _LLH_THRESHOLD=llh_threshold
+        scenario_path = os.path.join(emissor_path, scenario)
+        print(scenario_path)
+        print("_ANNOTATIONS", _ANNOTATIONS)
+        print("_SENTIMENT_THRESHOLD", _SENTIMENT_THRESHOLD)
+        print("_LLH_THRESHOLD", _LLH_THRESHOLD)
+        scenario_storage = ScenarioStorage(emissor_path)
+        scenario_ctrl = scenario_storage.load_scenario(scenario)
+        speaker = scenario_ctrl.scenario.context.speaker["name"]
+        agent = scenario_ctrl.scenario.context.agent["name"]
+        text_signals = scenario_ctrl.get_signals(Modality.TEXT)
+        create_timeline_image(scenario_path=scenario_path, scenario=scenario, speaker=speaker, agent=agent,
+                              signals=text_signals)
+
+
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description='Statistical evaluation emissor scenario')
+    parser.add_argument('--emissor-path', type=str, required=False, help="Path to the emissor folder", default='')
+    parser.add_argument('--scenario', type=str, required=False, help="Identifier of the scenario", default='')
+    parser.add_argument('--sentiment_threshold', type=float, required=False, help="Threshold for dialogue_act, sentiment and emotion scores", default=0.6)
+    parser.add_argument('--llh_threshold', type=float, required=False, help="Threshold below which likelihood becomes negative", default=0.3)
+    parser.add_argument('--annotations', type=str, required=False, help="Annotations to be considered for scoring: 'go, sentiment, ekman, llh'" , default='go,sentiment,llh')
+    args, _ = parser.parse_known_args()
+    print('Input arguments', sys.argv)
+
+    main(emissor_path=args.emissor_path,
+         scenario=args.scenario,
+         annotations=args.annotations.split(","),
+         llh_threshold=args.llh_threshold,
+         sentiment_threshold=args.sentiment_threshold)

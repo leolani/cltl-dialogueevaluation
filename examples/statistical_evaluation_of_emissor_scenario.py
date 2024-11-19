@@ -1,4 +1,5 @@
 from cltl.dialogue_evaluation.statistical_evaluation import StatisticalEvaluator
+import cltl.dialogue_evaluation.utils.scenario_check as check
 import os
 import argparse
 import sys
@@ -6,7 +7,7 @@ import sys
 def main(emissor_path:str, scenario:str):
     evaluator = StatisticalEvaluator()
     scenario_path = os.path.join(emissor_path, scenario)
-    has_scenario, has_text, has_image, has_rdf = evaluator.check_scenario_data(scenario_path, scenario)
+    has_scenario, has_text, has_image, has_rdf = check.check_scenario_data(scenario_path, scenario)
     check_message = "Scenario folder:" + emissor_path + "\n"
     check_message += "\tScenario JSON:" + str(has_scenario) + "\n"
     check_message += "\tText JSON:" + str(has_text) + "\n"

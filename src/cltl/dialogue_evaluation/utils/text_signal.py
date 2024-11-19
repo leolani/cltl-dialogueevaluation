@@ -151,8 +151,7 @@ def get_sentiment_from_text_signal(textSignal: TextSignal):
                     values.append(annotation.value)
     return values
 
-def get_likelihood_from_text_signal(textSignal: TextSignal):
-    threshold = 0.3
+def get_likelihood_from_text_signal(textSignal: TextSignal, threshold=0.3):
     score = 0
     mentions = textSignal.mentions
     for mention in mentions:

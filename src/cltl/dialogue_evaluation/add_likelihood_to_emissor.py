@@ -1,4 +1,8 @@
 import logging
+
+import os
+import argparse
+import sys
 from typing import Iterable
 import uuid
 from dataclasses import dataclass
@@ -73,20 +77,28 @@ class LikelihoodAnnotator (SignalProcessor):
 
         return mention
 
-
-if __name__ == "__main__":
-
-    model_path = "/Users/piek/Desktop/d-Leolani/resources/models/usr-topicalchat-roberta_ft"
-    model_path = "google-bert/bert-base-multilingual-cased"
-    annotator = LikelihoodAnnotator(model=model_path, model_name="USR", max_content=300, top_results=20)
-    scenario_folder = "/Users/piek/Desktop/d-Leolani/tutorials/test10/leolani-text-to-ekg/app/py-app/storage/emissor"
-    scenario_folder = "/Users/piek/Desktop/t-MA-Combots-2024/code/ma-communicative-robots/emissor_chat/emissor"
-    scenario_folder = "/Users/piek/Desktop/t-MA-Combots-2024/code/ma-communicative-robots/leolani_text_to_ekg/storage/emissor"
-    scenario_storage = ScenarioStorage(scenario_folder)
-    scenarios = list(scenario_storage.list_scenarios())
-    print("Processing scenarios: ", scenarios)
-    for scenario in scenarios:
-        print('Processing scenario', scenario)
+def main(emissor_path:str, scenario:str, model_path="google-bert/bert-base-multilingual-cased", model_name="mBERT", context_threshold=300, top_results=20):
+    scenario_path = os.path.join(emissor_path, scenario)
+    has_scenario, has_text, has_image, has_rdf = check.check_scenario_data(scenario_path, scenario)
+    check_message = "Scenario folder:" + emissor_path + "\n"
+    check_message += "\tScenario JSON:" + str(has_scenario) + "\n"
+    check_message += "\tText JSON:" + str(has_text) + "\n"
+    check_message += "\tImage JSON:" + str(has_image) + "\n"
+    check_message += "\tRDF :" + str(has_rdf) + "\n"
+    print(check_message)
+    if not has_scenario:
+        print("No scenario JSON found. Skipping:", scenario_path)
+    elif not has_text:
+        print("No text JSON found. Skipping:", scenario_path)
+    else:
+        annotator = LikelihoodAnnotator(model=model_path, model_name=model_name, max_content=context_threshold, top_results=top_results)
+        scenario_path = os.path.join(emissor_path, scenario)
+        print(scenario_path)
+        print("model_path", model_path)
+        print("model_name", model_name)
+        print("context_threshold", context_threshold)
+        print("top_results", top_results)
+        scenario_storage = ScenarioStorage(emissor_path)
         scenario_ctrl = scenario_storage.load_scenario(scenario)
         signals = scenario_ctrl.get_signals(Modality.TEXT)
         for signal in signals:
@@ -94,3 +106,20 @@ if __name__ == "__main__":
         #### Save the modified scenario to emissor
         scenario_storage.save_scenario(scenario_ctrl)
 
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Statistical evaluation emissor scenario')
+    parser.add_argument('--emissor-path', type=str, required=False, help="Path to the emissor folder", default='')
+    parser.add_argument('--scenario', type=str, required=False, help="Identifier of the scenario", default='')
+    parser.add_argument('--model_path', type=str, required=False, help="Path to the model or huggingface URL", default="google-bert/bert-base-multilingual-cased")
+    parser.add_argument('--model_name', type=str, required=False, help="Model name for annotation in emissor", default="mBERT")
+    parser.add_argument('--context', type=int, required=False, help="Maximum character length of the context" , default=300)
+    parser.add_argument('--top_results', type=int, required=False, help="Maximum number of MASKED results considered" , default=20)
+    args, _ = parser.parse_known_args()
+    print('Input arguments', sys.argv)
+
+    main(emissor_path=args.emissor_path,
+         scenario=args.scenario,
+         model_path=args.model_path,
+         model_name = args.model_name,
+         context_threshold=args.context,
+         top_results=args.top_results)
