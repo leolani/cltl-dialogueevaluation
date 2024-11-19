@@ -10,12 +10,13 @@ from emissor.representation.scenario import Modality
 import cltl.dialogue_evaluation.utils.text_signal as text_signal_util
 import cltl.dialogue_evaluation.utils.scenario_check as check
 
-_LLH_THRESHOLD = 0.3
-_SENTIMENT_THRESHOLD = 0.6
-_ANNOTATIONS =["go", "sentiment"] #["ekman"]
+class PlotSettings():
+    _LLH_THRESHOLD = 0
+    _SENTIMENT_THRESHOLD = 0
+    _ANNOTATIONS =[]
 
 
-def get_signal_rows(signals:[Signal], human, agent):
+def get_signal_rows(signals:[Signal], human, agent, settings: PlotSettings):
     data = []
     for i, signal in enumerate(signals):
         speaker = text_signal_util.get_speaker_from_text_signal(signal)
@@ -26,22 +27,23 @@ def get_signal_rows(signals:[Signal], human, agent):
         text = ''.join(signal.seq)
         score = 0
         score += text_signal_util.get_dact_feedback_score_from_text_signal(signal)
-        if "sentiment" in _ANNOTATIONS:
+        if "sentiment" in settings._ANNOTATIONS:
             score += text_signal_util.get_sentiment_score_from_text_signal(signal)
-        if "ekman" in _ANNOTATIONS:
+        if "ekman" in settings._ANNOTATIONS:
             score += text_signal_util.get_ekman_feedback_score_from_text_signal(signal)
-        if "go" in _ANNOTATIONS:
+        if "go" in settings._ANNOTATIONS:
             score += text_signal_util.get_go_feedback_score_from_text_signal(signal)
-        if "llh" in _ANNOTATIONS:
-            score += text_signal_util.get_likelihood_from_text_signal(signal, _LLH_THRESHOLD)
-        label = text_signal_util.make_annotation_label(signal, _SENTIMENT_THRESHOLD, _ANNOTATIONS)
+        if "llh" in settings._ANNOTATIONS:
+            score += text_signal_util.get_likelihood_from_text_signal(signal, settings._LLH_THRESHOLD)
+
+        label = text_signal_util.make_annotation_label(signal, settings._SENTIMENT_THRESHOLD, settings._ANNOTATIONS)
         row = {'turn':i+1, 'utterance': text, 'score': score, "speaker": speaker, "type":signal.modality, "annotation": label}
         data.append(row)
     return data
 
 
-def create_timeline_image(scenario_path, scenario, speaker:str, agent:str, signals:[Signal]):
-    rows = get_signal_rows(signals, speaker, agent)
+def create_timeline_image(scenario_path, scenario, speaker:str, agent:str, signals:[Signal], settings: PlotSettings):
+    rows = get_signal_rows(signals, speaker, agent, settings)
     plt.rcParams['figure.figsize'] = [len(rows), 5]
     df = pd.DataFrame(rows)
     #print(df.head())
@@ -57,13 +59,13 @@ def create_timeline_image(scenario_path, scenario, speaker:str, agent:str, signa
         ax.text(x, y,
                 s=" " + str(category),
                 rotation=70,
-                horizontalalignment='left', size='x-small', color='black', verticalalignment='bottom',
+                horizontalalignment='left', size='small', color='black', verticalalignment='bottom',
                 linespacing=1.5)
 
     ax.tick_params(axis='x', rotation=70)
     # Save the plot
     plt.legend(loc='lower right')
-    plt.ylim(-3,3)
+    plt.ylim(-5,5)
     path =  os.path.join(scenario_path, scenario+"_plot.png")
     plt.savefig(path, dpi=600)
     plt.show()
@@ -83,24 +85,25 @@ def main(emissor_path:str, scenario:str, annotations:[], sentiment_threshold=0, 
     elif not has_text:
         print("No text JSON found. Skipping:", scenario_path)
     else:
+        settings = PlotSettings()
         if annotations:
-            _ANNOTATIONS = annotations
+            settings._ANNOTATIONS = annotations
         if sentiment_threshold>0:
-            _SENTIMENT_THRESHOLD=sentiment_threshold
+            settings._SENTIMENT_THRESHOLD=sentiment_threshold
         if llh_threshold>0:
-            _LLH_THRESHOLD=llh_threshold
+            settings._LLH_THRESHOLD=llh_threshold
         scenario_path = os.path.join(emissor_path, scenario)
         print(scenario_path)
-        print("_ANNOTATIONS", _ANNOTATIONS)
-        print("_SENTIMENT_THRESHOLD", _SENTIMENT_THRESHOLD)
-        print("_LLH_THRESHOLD", _LLH_THRESHOLD)
+        print("_ANNOTATIONS", settings._ANNOTATIONS)
+        print("_SENTIMENT_THRESHOLD", settings._SENTIMENT_THRESHOLD)
+        print("_LLH_THRESHOLD", settings._LLH_THRESHOLD)
         scenario_storage = ScenarioStorage(emissor_path)
         scenario_ctrl = scenario_storage.load_scenario(scenario)
         speaker = scenario_ctrl.scenario.context.speaker["name"]
         agent = scenario_ctrl.scenario.context.agent["name"]
         text_signals = scenario_ctrl.get_signals(Modality.TEXT)
         create_timeline_image(scenario_path=scenario_path, scenario=scenario, speaker=speaker, agent=agent,
-                              signals=text_signals)
+                              signals=text_signals, settings=settings)
 
 
 
@@ -116,6 +119,6 @@ if __name__ == '__main__':
 
     main(emissor_path=args.emissor_path,
          scenario=args.scenario,
-         annotations=args.annotations.split(","),
+         annotations=args.annotations,
          llh_threshold=args.llh_threshold,
          sentiment_threshold=args.sentiment_threshold)
