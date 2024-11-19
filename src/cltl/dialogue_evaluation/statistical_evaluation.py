@@ -4,10 +4,12 @@ from collections import Counter
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+import cltl.dialogue_evaluation.utils.scenario_check as check
 import os
+import argparse
+import sys
 from emissor.persistence import ScenarioStorage
 from emissor.representation.scenario import Modality
-import cltl.dialogue_evaluation.utils.plot_interaction as plot
 import cltl.dialogue_evaluation.utils.text_signal as text_util
 #import cltl.dialogue_evaluation.utils.image_signal as image_util
 from emissor.representation.scenario import Signal
@@ -466,34 +468,34 @@ class StatisticalEvaluator(BasicEvaluator):
                 # value is a namedtuple
                 try:
                     value_dict = annotation._asdict()
-                    type = ""
-                    value = ""
+                    atype = ""
+                    avalue = ""
                     if "value" in value_dict:
-                        value = value_dict['value']
+                        avalue = value_dict['value']
                         if "type" in value_dict:
-                            type= value_dict['type']
+                            atype= value_dict['type']
                     elif "label" in value_dict:
-                        value = value_dict['label']
+                        avalue = value_dict['label']
                         if "type" in value_dict:
-                            type = value_dict['type']
+                            atype = value_dict['type']
                         elif "text" in value_dict:
-                            type = value_dict['label']
-                            value = value_dict['text']
+                            atype = value_dict['label']
+                            avalue = value_dict['text']
                         else:
-                            type = "label"
+                            atype = "label"
                     elif "type" in value_dict:
                         if "text" in value_dict:
-                            type= value_dict['type']
-                            value= value_dict['text']
+                            atype= value_dict['type']
+                            avalue= value_dict['text']
                         else:
-                            value = value_dict['type']
-                            type = "label"
+                            avalue = value_dict['type']
+                            atype = "label"
                     elif "pos" in value_dict:
-                        value = value_dict['pos']
-                        type = "pos"
+                        avalue = value_dict['pos']
+                        atype = "pos"
                     else:
                         print('UNKNOWN annotation', annotation)
-                    anno = type+":"+value
+                    anno = atype+":"+avalue
                 except:
                     if annotation:
                         print('UNKNOWN annotation type', type(annotation), annotation)
@@ -530,17 +532,40 @@ class StatisticalEvaluator(BasicEvaluator):
         plt.xlim(0)
         plt.xticks(ax.get_xticks()[::5], rotation=45)
 
-        plot_file = evaluation_folder / f"{xlabel}.png"
+        plot_file = os.path.join(evaluation_folder, f"{xlabel}.png")
         g.figure.savefig(plot_file, dpi=300, transparent=True, bbox_inches='tight')
         plt.close()
         print(f"\tSaved to file: {plot_file}")
 
     def _save(self, df, evaluation_folder, scenario_id):
         file_name =  scenario_id+"_statistical_analysis.csv"
-        df.to_csv(evaluation_folder / file_name, index=False)
+        file = os.path.join(evaluation_folder, file_name)
+        df.to_csv(file, sep=";", index=False)
 
 
-#Annotation(type='python-type:cltl.emotion_extraction.api.Emotion', value=JSON(type='GO', confidence=0.7935183048248291, value='anger'),
-#Annotation(type='python-type:cltl.dialogue_act_classification.api.DialogueAct', value=JSON(type='MIDAS', confidence=3.6899490356445312, value='opinion'),
-#Annotation(type='ConversationalAgent', value='SPEAKER', source='LEOLANI', timestamp=1665746858876)
-#Annotation(type='python-type:cltl.emotion_extraction.api.Emotion', value=JSON(type='SENTIMENT', confidence=0.9314287331653759, value='negative'), source='python-source:cltl.emotion_extraction.utterance_go_emotion_extractor', timestamp=1665746860001)
+def main(emissor_path:str, scenario:str):
+    evaluator = StatisticalEvaluator()
+    scenario_path = os.path.join(emissor_path, scenario)
+    has_scenario, has_text, has_image, has_rdf = check.check_scenario_data(scenario_path, scenario)
+    check_message = "Scenario folder:" + emissor_path + "\n"
+    check_message += "\tScenario JSON:" + str(has_scenario) + "\n"
+    check_message += "\tText JSON:" + str(has_text) + "\n"
+    check_message += "\tImage JSON:" + str(has_image) + "\n"
+    check_message += "\tRDF :" + str(has_rdf) + "\n"
+    print(check_message)
+    if not has_scenario:
+        print("No scenario JSON found. Skipping:", scenario_path)
+    elif not has_text:
+        print("No text JSON found. Skipping:", scenario_path)
+    else:
+        evaluator.analyse_interaction(emissor_path, scenario)
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Statistical evaluation emissor scenario')
+    parser.add_argument('--emissor-path', type=str, required=False, help="Path to the emissor folder", default='')
+    parser.add_argument('--scenario', type=str, required=False, help="Identifier of the scenario", default='')
+    args, _ = parser.parse_known_args()
+    print('Input arguments', sys.argv)
+
+    main(args.emissor_path, args.scenario)
+

@@ -1,4 +1,7 @@
 import os
+import argparse
+import sys
+import cltl.dialogue_evaluation.utils.scenario_check as check
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -24,12 +27,13 @@ class GraphEvaluator(BasicEvaluator):
         self._log.debug(f"Graph Evaluator ready")
 
     def evaluate_conversation(self, scenario_folder, rdf_folder, metrics_to_plot=None):
-        print(f'----------SCENARIO:{scenario_folder.stem}, EVALUATION:graph metrics---------')
+        print(f'----------SCENARIO:{scenario_folder}, EVALUATION:graph metrics---------')
 
         # Read mapping of rdf log file to turn
-        if not os.path.exists(scenario_folder / f'turn_to_trig_file.json'):
+        file = os.path.join(scenario_folder, 'turn_to_trig_file.json')
+        if not os.path.exists(file):
             map_scenarios(scenario_folder, rdf_folder)
-        full_df = pd.read_json(scenario_folder / f'turn_to_trig_file.json')
+        full_df = pd.read_json(file)
 
         # Recreate conversation and score graph
         rdf_count = 0
@@ -56,7 +60,8 @@ class GraphEvaluator(BasicEvaluator):
 
                     # Add new
                     print(f"\tAdding triples")
-                    brain_as_graph.parse(rdf_folder / file, format='trig')
+                    filepath = os.path.join(rdf_folder, file)
+                    brain_as_graph.parse(filepath, format='trig')
                     brain_as_netx = rdflib_to_networkx_multidigraph(brain_as_graph)
 
                     # Calculate metrics (only when needed! otherwise copy row)
@@ -67,8 +72,9 @@ class GraphEvaluator(BasicEvaluator):
                 full_df = self._copy_metrics(full_df, idx)
 
         # Save
-        evaluation_folder = Path(scenario_folder / 'evaluation/')
-        evaluation_folder.mkdir(parents=True, exist_ok=True)
+        evaluation_folder = os.path.join(scenario_folder, 'evaluation')
+        if not os.path.exists(evaluation_folder):
+            os.mkdir(evaluation_folder)
         self._save(full_df, evaluation_folder)
 
         if metrics_to_plot:
@@ -198,8 +204,9 @@ class GraphEvaluator(BasicEvaluator):
     @staticmethod
     def _save(df, evaluation_folder):
         df = df.drop(columns=['Speaker', 'Response', 'rdf_file'])
-        df.to_csv(evaluation_folder / 'graph_evaluation.csv', index=False)
-        print(f"\n\tSaved to file: {evaluation_folder / 'graph_evaluation.csv'}")
+        file = os.path.join(evaluation_folder, 'graph_evaluation.csv')
+        df.to_csv(file, sep=";", index=False)
+        print(f"\n\tSaved to file: {file}")
 
     def plot_metrics_progression(self, metrics, convo_dfs, evaluation_folder):
         # Plot metrics progression per conversation
@@ -231,7 +238,39 @@ class GraphEvaluator(BasicEvaluator):
         plt.xlim(0)
         plt.xticks(ax.get_xticks()[::5], rotation=45)
 
-        plot_file = evaluation_folder / f"{xlabel}.png"
+        plot_file = os.path.join(evaluation_folder, f"{xlabel}.png")
         g.figure.savefig(plot_file, dpi=300, transparent=True, bbox_inches='tight')
         plt.close()
         print(f"\tSaved to file: {plot_file}")
+
+
+
+def main(emissor_path:str, scenario:str):
+    evaluator = GraphEvaluator()
+    scenario_path = os.path.join(emissor_path, scenario)
+    has_scenario, has_text, has_image, has_rdf = check.check_scenario_data(scenario_path, scenario)
+    check_message = "Scenario folder:" + emissor_path + "\n"
+    check_message += "\tScenario JSON:" + str(has_scenario) + "\n"
+    check_message += "\tText JSON:" + str(has_text) + "\n"
+    check_message += "\tImage JSON:" + str(has_image) + "\n"
+    check_message += "\tRDF :" + str(has_rdf) + "\n"
+    print(check_message)
+    if not has_scenario:
+        print("No scenario JSON found. Skipping:", scenario_path)
+    elif not has_text:
+        print("No text JSON found. Skipping:", scenario_path)
+    else:
+        evaluator = GraphEvaluator()
+        scenario_path = os.path.join(emissor_path, scenario)
+        rdf_path = os.path.join(scenario_path, "rdf")
+        evaluator.evaluate_conversation(scenario_path, rdf_folder=rdf_path)
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Statistical evaluation emissor scenario')
+    parser.add_argument('--emissor-path', type=str, required=False, help="Path to the emissor folder", default='')
+    parser.add_argument('--scenario', type=str, required=False, help="Identifier of the scenario", default='')
+    args, _ = parser.parse_known_args()
+    print('Input arguments', sys.argv)
+
+    main(args.emissor_path, args.scenario)
+

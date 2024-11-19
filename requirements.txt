@@ -16,3 +16,4 @@ openpyxl==3.1.2
 seaborn
 emissor
 cltl.combot
+scipy

@@ -1,5 +1,7 @@
-from pathlib import Path
-
+import os
+import argparse
+import sys
+import cltl.dialogue_evaluation.utils.scenario_check as check
 import pandas as pd
 from emissor.persistence import ScenarioStorage
 from emissor.representation.scenario import Modality
@@ -35,8 +37,9 @@ class ManualEvaluator(BasicEvaluator):
         df = self._calculate_metrics(turns, speaker_turns)
 
         # Save
-        evaluation_folder = Path(scenario_folder + '/' + scenario_id + '/evaluation/')
-        evaluation_folder.mkdir(parents=True, exist_ok=True)
+        evaluation_folder = os.path.join(scenario_folder, scenario_id, 'evaluation')
+        if not os.path.exists(evaluation_folder):
+            os.mkdir(evaluation_folder)
         self._save(df, evaluation_folder, scenario_id)
         self._create_dialogue_summary_file(evaluation_folder, scenario_id)
         #
@@ -53,9 +56,12 @@ class ManualEvaluator(BasicEvaluator):
             target = turn[1]
             cue = turn[2]
             speaker = turn[3]
-            rows.append({"Turn": index, "Speaker": speaker, "Cue": cue, "Response": target, "Reference Response": "", "Context": context,
+            rows.append({"Turn": index, "Speaker": speaker, "Response": target, "Reference Response": "",
                          "Overall Human Rating": '', "Interesting": '', "Engaging": '', "Specific": '', "Relevant": '',
                          "Correct": '', "Semantically Appropriate": '', "Understandable": '', "Fluent": ''})
+            # rows.append({"Turn": index, "Speaker": speaker, "Cue": cue, "Response": target, "Reference Response": "", "Context": context,
+            #              "Overall Human Rating": '', "Interesting": '', "Engaging": '', "Specific": '', "Relevant": '',
+            #              "Correct": '', "Semantically Appropriate": '', "Understandable": '', "Fluent": ''})
 
             if speaker:
                 speaker_turns[speaker].append(index)
@@ -64,48 +70,15 @@ class ManualEvaluator(BasicEvaluator):
 
     def _save(self, df, evaluation_folder, scenario_id):
         file_name =  scenario_id+"_manual_evaluation.csv"
-        df.to_csv(evaluation_folder / file_name, index=False)
+        file = os.path.join(evaluation_folder, file_name)
+        df.to_csv(file, sep=";", index=False)
 
     def _create_dialogue_summary_file(self, evaluation_folder, scenario_id):
         file_name =  scenario_id+"_dialogue_summary.txt"
+        file = os.path.join(evaluation_folder, file_name)
        # Create an empty file for the dialogue summary
-        with open(evaluation_folder / file_name, 'w') as fp:
+        with open(file, 'w') as fp:
             pass
-
-    # def plot_metrics_progression(self, metrics, convo_dfs, evaluation_folder):
-    #     # Plot metrics progression per conversation
-    #     for metric in metrics:
-    #         metric_df = pd.DataFrame()
-    #
-    #         # Iterate conversations
-    #         for idx, convo_df in enumerate(convo_dfs):
-    #             conversation_id = f'Conversation {idx}'
-    #             convo_df = convo_df.set_index('Turn')
-    #
-    #             # Add into a dataframe
-    #             if len(metric_df) == 0:
-    #                 metric_df[conversation_id] = convo_df[metric]
-    #             else:
-    #                 metric_df = pd.concat([metric_df, convo_df[metric]], axis=1)
-    #                 metric_df.rename(columns={metric: conversation_id}, inplace=True)
-    #
-    #         # Cutoff and plot
-    #         self.plot_progression(metric_df, metric, evaluation_folder)
-    #
-    # @staticmethod
-    # def plot_progression(df_to_plot, xlabel, evaluation_folder):
-    #     df_to_plot = df_to_plot.reset_index().melt('Turn', var_name='cols', value_name=xlabel)
-    #
-    #     g = sns.relplot(x="Turn", y=xlabel, hue='cols', data=df_to_plot, kind='line')
-    #
-    #     ax = plt.gca()
-    #     plt.xlim(0)
-    #     plt.xticks(ax.get_xticks()[::5], rotation="045")
-    #
-    #     plot_file = evaluation_folder / f"{xlabel}.png"
-    #     print(plot_file)
-    #
-    #     g.figure.savefig(plot_file, dpi=300)
 
     def get_score(self, value):
         score = 0
@@ -252,3 +225,65 @@ class ManualEvaluator(BasicEvaluator):
         file_path = scenario_folder + "/" + "manual_evaluation_overview.csv"
         print("Saving overview to:", file_path)
         dfall.to_csv(file_path)
+
+
+
+
+    def server_submission(self, submission_path):
+          for scenario in os.listdir(submission_path):
+              scenario_path = os.path.join(submission_path, scenario)
+              if os.path.isdir(scenario_path):
+                  has_scenario, has_text, has_image, has_rdf = check.check_scenario_data(scenario_path, scenario)
+                  check_message = "Scenario folder:" + scenario_path + "\n"
+                  check_message += "\tScenario JSON:" + str(has_scenario) + "\n"
+                  check_message += "\tText JSON:" + str(has_text) + "\n"
+                  check_message += "\tImage JSON:" + str(has_image) + "\n"
+                  check_message += "\tRDF :" + str(has_rdf) + "\n"
+                  print(check_message)
+                  if not has_scenario:
+                      print("No scenario JSON file found. Aborting.")
+                  elif not has_text:
+                      print("No text JSON file found. Aborting.")
+                  else:
+                        self.evaluate_conversation(submission_path, scenario)
+
+#
+# if __name__ == "__main__":
+#     submission_path = '/Users/piek/Desktop/t-MA-Combots-2023/assignments/interactions/emissor-offline'
+#     submission_path = '/Users/piek/Desktop/t-MA-Combots-2023/assignments/interactions/emissor-online'
+#
+#     submission_path = '/Users/piek/Desktop/t-MA-Combots-2023/server/emissor/Yannis'
+#     submission_path = '/Users/piek/Desktop/t-MA-Combots-2023/assignments/emissor'
+#
+#     for persona in os.listdir(submission_path):
+#         persona_folder = os.path.join(submission_path, persona)
+#         if os.path.isdir(persona_folder):
+#             server_submission(persona_folder)
+
+def main(emissor_path:str, scenario:str):
+    scenario_path = os.path.join(emissor_path, scenario)
+    has_scenario, has_text, has_image, has_rdf = check.check_scenario_data(scenario_path, scenario)
+    check_message = "Scenario folder:" + emissor_path + "\n"
+    check_message += "\tScenario JSON:" + str(has_scenario) + "\n"
+    check_message += "\tText JSON:" + str(has_text) + "\n"
+    check_message += "\tImage JSON:" + str(has_image) + "\n"
+    check_message += "\tRDF :" + str(has_rdf) + "\n"
+    print(check_message)
+    if not has_scenario:
+        print("No scenario JSON found. Skipping:", scenario_path)
+    elif not has_text:
+        print("No text JSON found. Skipping:", scenario_path)
+    else:
+        evaluator = ManualEvaluator()
+        evaluator.evaluate_conversation(emissor_path, scenario)
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Statistical evaluation emissor scenario')
+    parser.add_argument('--emissor-path', type=str, required=False, help="Path to the emissor folder", default='')
+    parser.add_argument('--scenario', type=str, required=False, help="Identifier of the scenario", default='')
+    args, _ = parser.parse_known_args()
+    print('Input arguments', sys.argv)
+
+    main(emissor_path=args.emissor_path,
+         scenario=args.scenario)

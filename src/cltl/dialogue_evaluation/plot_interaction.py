@@ -15,7 +15,6 @@ class PlotSettings():
     _SENTIMENT_THRESHOLD = 0
     _ANNOTATIONS =[]
 
-
 def get_signal_rows(signals:[Signal], human, agent, settings: PlotSettings):
     data = []
     for i, signal in enumerate(signals):
