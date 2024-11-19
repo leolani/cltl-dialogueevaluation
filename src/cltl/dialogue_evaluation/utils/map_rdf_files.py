@@ -8,14 +8,17 @@ import numpy as np
 
 def load_scenario(scenario_folder, rdf_folder):
     # Read rdf files, ordered temporaly
-    files = sorted([path for path in rdf_folder.glob('*.trig')])
-
+    print(rdf_folder)
+    #files = [f for f in os.listdir(rdf_folder) if f.endswith(".trig")]
+    files = [f for f in Path(rdf_folder).iterdir() if f.suffix == ".trig"]
+   # files = sorted([path for path in rdf_folder.glob('*.trig')])
     # Read only trig files
-    if not os.path.exists(scenario_folder / f'text.json'):
+    text_json = os.path.join(scenario_folder, 'text.json')
+    if not os.path.exists(text_json):
         return [], files
 
     # Read from EMISSOR
-    with open(scenario_folder / 'text.json', 'r') as j:
+    with open(text_json, 'r') as j:
         data = json.loads(j.read())
     return data, files
 
@@ -38,7 +41,7 @@ def get_speaker(data, files):
                 if ann['type'] == 'VectorIdentity':
                     # Establish speaker identity
                     return ann['value']
-
+    print('speaker', speaker)
     return speaker
 
 
@@ -61,6 +64,7 @@ def search_id_in_log(utt_id, rdf_file, files):
     files_to_remove = []
 
     for f in files:
+        print('file is', f)
         txt = Path(f).read_text()
         if utt_id in txt:
             # Found it!
@@ -152,7 +156,7 @@ def map_scenarios(scenario_folder, rdf_folder):
     if len(files) == 1:
         utterances[0]["rdf_file"].append(files[0].stem + '.trig')
         files.remove(files[0])
-
-    with open(scenario_folder / 'turn_to_trig_file.json', 'w') as f:
+    file = os.path.join(scenario_folder,'turn_to_trig_file.json')
+    with open(file, 'w') as f:
         js = json.dumps(utterances)
         f.write(js)
