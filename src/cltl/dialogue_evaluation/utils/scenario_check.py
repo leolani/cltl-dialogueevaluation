@@ -9,7 +9,7 @@ def check_scenario_data(scenario_folder, scenario):
         print("Cannot locate the scenario folder:", scenario_folder)
     else:
         for f in os.listdir(scenario_folder):
-            print(f)
+            #print(f)
             if f==scenario+'.json':
                 HAS_SCENARIO=True
             if (scenario+'.json').endswith(f):
