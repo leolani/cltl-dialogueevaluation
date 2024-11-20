@@ -14,7 +14,7 @@ from cltl.dialogue_evaluation.metrics.utterance_likelihood import MLM
 
 
 class LikelihoodEvaluator(BasicEvaluator):
-    def __init__(self, model_path_mlm, max_context=300, len_top_tokens=20):
+    def __init__(self, model, model_name, max_context=300, len_top_tokens=20):
         """Creates an evaluator that will use USR Masked Language Model scoring to approximate the quality of a conversation, across turns.
 
         We use the Roberta model that was pretrained with the TopicalChat data by the USR team
@@ -34,9 +34,10 @@ class LikelihoodEvaluator(BasicEvaluator):
         returns: None
         """
         super(LikelihoodEvaluator, self).__init__()
-        self.model_path_mlm = model_path_mlm
+        self.model_path_mlm = model
         self.max_context = max_context
         self.len_top_tokens = len_top_tokens
+        self.model_name= model_name
 
         # Create MLM
         self.model_mlm = MLM(path=self.model_path_mlm, top_results=self.len_top_tokens)
@@ -112,12 +113,12 @@ class LikelihoodEvaluator(BasicEvaluator):
         return pd.DataFrame(overall_rows)
 
     def _save(self, df, avg_df, evaluation_folder):
-        filename = "likelihood_evaluation" + "_context" + str(self.max_context) + ".csv"
+        filename = "likelihood_evaluation_" + self.model_name + "_context" + str(self.max_context) + ".csv"
         path = os.path.join(evaluation_folder, filename)
         df.to_csv(path, index=False)
         print(f"\n\tSaved to file: {path}")
 
-        filename = "likelihood_evaluation" + "_context" + str(self.max_context) + "_overall.csv"
+        filename = "likelihood_evaluation_" + self.model_name + "_context" + str(self.max_context) + "_overall.csv"
         path = os.path.join(evaluation_folder, filename)
         avg_df.to_csv(path, index=False)
         print(f"\n\tSaved to file: {path}")
@@ -152,7 +153,7 @@ class LikelihoodEvaluator(BasicEvaluator):
         plt.xlim(0)
         plt.xticks(ax.get_xticks()[::5], rotation=45)
 
-        plot_file = evaluation_folder / f"{xlabel}.png"
+        plot_file = os.path.join(evaluation_folder, f"{xlabel}.png")
         g.figure.savefig(plot_file, dpi=300, transparent=True, bbox_inches='tight')
         plt.close()
         print(f"\tSaved to file: {plot_file}")
@@ -160,7 +161,7 @@ class LikelihoodEvaluator(BasicEvaluator):
 
 
 
-def main(emissor_path:str, scenario:str,  model, max_context=300, len_top_tokens=20):
+def main(emissor_path:str, scenario:str,  model, model_name, max_context=300, len_top_tokens=20):
     scenario_path = os.path.join(emissor_path, scenario)
     has_scenario, has_text, has_image, has_rdf = check.check_scenario_data(scenario_path, scenario)
     check_message = "Scenario folder:" + emissor_path + "\n"
@@ -174,7 +175,7 @@ def main(emissor_path:str, scenario:str,  model, max_context=300, len_top_tokens
     elif not has_text:
         print("No text JSON found. Skipping:", scenario_path)
     else:
-        evaluator = LikelihoodEvaluator(model, max_context, len_top_tokens)
+        evaluator = LikelihoodEvaluator(model=model, model_name=model_name, max_context=max_context, len_top_tokens=len_top_tokens)
         evaluator.evaluate_conversation(emissor_path, scenario)
 
 if __name__ == '__main__':
@@ -182,6 +183,7 @@ if __name__ == '__main__':
     parser.add_argument('--emissor-path', type=str, required=False, help="Path to the emissor folder", default='')
     parser.add_argument('--scenario', type=str, required=False, help="Identifier of the scenario", default='')
     parser.add_argument('--model', type=str, required=False, help="Path to the model or huggingface URL", default="google-bert/bert-base-multilingual-cased")
+    parser.add_argument('--model_name', type=str, required=False, help="Name of the modelL", default="mBert")
     parser.add_argument('--context', type=int, required=False, help="Maximum character length of the context" , default=300)
     parser.add_argument('--top_results', type=int, required=False, help="Maximum number of MASKED results considered" , default=20)
 
@@ -190,6 +192,7 @@ if __name__ == '__main__':
     main(emissor_path=args.emissor_path,
          scenario=args.scenario,
          model=args.model,
+         model_name=args.model_name,
          max_context=args.context,
          len_top_tokens=args.top_results)
 

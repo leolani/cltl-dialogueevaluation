@@ -65,7 +65,11 @@ def create_timeline_image(scenario_path, scenario, speaker:str, agent:str, signa
     # Save the plot
     plt.legend(loc='lower right')
     plt.ylim(-5,5)
-    path =  os.path.join(scenario_path, scenario+"_plot.png")
+
+    evaluation_folder = os.path.join(scenario_path, "evaluation")
+    if not os.path.exists(evaluation_folder):
+        os.mkdir(evaluation_folder)
+    path =  os.path.join(evaluation_folder, scenario+"_plot.png")
     plt.savefig(path, dpi=600)
     plt.show()
 

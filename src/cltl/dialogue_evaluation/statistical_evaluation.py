@@ -37,7 +37,7 @@ class StatisticalEvaluator(BasicEvaluator):
             timedValues = type_dict_text.get(annoType)
             valueList = []
             for value in timedValues:
-                valueList.append(self._get_get_value_from_annotation(value[1]))
+                valueList.append(self._get_get_value_from_annotation(annoType, value[1]))
             type_counts[annoType]=Counter(valueList)
 
         return type_counts, type_dict_text, nr_annotations
@@ -253,6 +253,39 @@ class StatisticalEvaluator(BasicEvaluator):
             print("Saving overview to:", file_path)
             dfall.to_csv(file_path)
 
+    def get_meta_data (self, scenario_ctrl):
+        speaker = "No speaker"
+        agent = "No agent"
+        location = "No location"
+        people = "Not in context"
+        objects = "Not in context"
+        try:
+            speaker = scenario_ctrl.scenario.context.speaker["name"] if "name" in scenario_ctrl.scenario.context.speaker else "No speaker"
+        except:
+            print("No speaker in context")
+        try:
+            agent = scenario_ctrl.scenario.context.agent["name"] if "name" in scenario_ctrl.scenario.context.agent else "No agent"
+        except:
+            print("No speaker in context")
+        try:
+            location = scenario_ctrl.scenario.context.location_id  #### Change this to location name when this implemented
+        except:
+            print("No location id in context")
+
+        try:
+            people = scenario_ctrl.scenario.context.persons
+        except:
+            print("No location id in context")
+        try:
+            objects = scenario_ctrl.scenario.context.objects
+        except:
+            print("No location id in context")
+
+        return speaker, agent, location, people, objects
+
+        duration = self.get_duration_in_minutes(scenario_ctrl)
+
+        meta+='DURATION IN MINUTES\t'+str(duration)+"\n"
 
     def analyse_interaction(self, emissor_folder, scenario_id, metrics_to_plot=None):
         scenario_folder = os.path.join(emissor_folder, scenario_id)
@@ -267,36 +300,11 @@ class StatisticalEvaluator(BasicEvaluator):
         scenario_ctrl = scenario_storage.load_scenario(scenario_id)
         meta+='SCENARIO_FOLDER\t'+ scenario_folder+"\n"
         meta+='SCENARIO_ID\t'+ scenario_id+"\n"
-        speaker = "No speaker"
-        try:
-            speaker = scenario_ctrl.scenario.context.speaker["name"] if "name" in scenario_ctrl.scenario.context.speaker else "No speaker"
-        except:
-            print("No speaker in context")
-        agent = "No agent"
-        try:
-            agent = scenario_ctrl.scenario.context.agent["name"] if "name" in scenario_ctrl.scenario.context.agent else "No agent"
-        except:
-            print("No speaker in context")
-        location = "No location"
-        try:
-            location = scenario_ctrl.scenario.context.location_id  #### Change this to location name when this implemented
-        except:
-            print("No location id in context")
+        speaker, agent, location, people, objects = self.get_meta_data(scenario_ctrl)
+
         meta+='AGENT\t'+agent+'\n'
         meta+='SPEAKER\t'+speaker+'\n'
         meta+='LOCATION\t'+location+'\n'
-
-        people = "Not in context"
-        try:
-            people = scenario_ctrl.scenario.context.persons
-        except:
-            print("No location id in context")
-        objects = "Not in context"
-        try:
-            objects = scenario_ctrl.scenario.context.objects
-        except:
-            print("No location id in context")
-
         meta+='PEOPLE SEEN\t'+str(people)+'\n'
         meta+='OBJECTS SEEN\t'+str(objects)+'\n'
         duration = self.get_duration_in_minutes(scenario_ctrl)
@@ -306,7 +314,7 @@ class StatisticalEvaluator(BasicEvaluator):
         meta+="\nText signals\n"
         text_signals = scenario_ctrl.get_signals(Modality.TEXT)
         ids, turns, speakers = text_util.get_utterances_with_context_from_signals(text_signals)
-        meta+='NR. TURNS\t'+ str(len(turns))+"\n"
+        meta+='Nr. of signals\t'+ str(len(turns))+"\n"
         average_turn_length, average_tokens_per_turn, average_token_length = self.get_utterance_stats(turns)
         meta+='Average turn length\t' + str(average_turn_length)+'\n'
         meta+='Average nr. tokens per turn\t' + str(average_tokens_per_turn)+'\n'
@@ -340,6 +348,8 @@ class StatisticalEvaluator(BasicEvaluator):
         print(meta)
 
         ## Save the meta data
+        if not os.path.exists(evaluation_folder):
+            os.mkdir(evaluation_folder)
         file_name = scenario_id + "_meta_data.csv"
         file_path = os.path.join(evaluation_folder, file_name)
         with open(file_path, 'w') as f:
@@ -355,7 +365,7 @@ class StatisticalEvaluator(BasicEvaluator):
         #self._save(df, evaluation_folder, scenario_id)
 
 
-    def analyse_interaction_json(self, emissor_folder, scenario_id, metrics_to_plot=None):
+    def analyse_interaction_json(self, emissor_folder, scenario_id):
         scenario_folder = os.path.join(emissor_folder, scenario_id)
         # Save
         evaluation_folder = os.path.join(scenario_folder, 'evaluation')
@@ -363,21 +373,15 @@ class StatisticalEvaluator(BasicEvaluator):
             os.mkdir(evaluation_folder)
         meta = {}
         ### Create the scenario folder, the json files and a scenarioStorage and scenario in memory
-        print("scenario_folder", scenario_folder)
         scenario_storage = ScenarioStorage(emissor_folder)
         scenario_ctrl = scenario_storage.load_scenario(scenario_id)
         t = {}
         #t['SCENARIO_FOLDER'] = scenario_folder
         t['Scenario_id']= scenario_id
-        speaker = scenario_ctrl.scenario.context.speaker["name"]
-        agent = scenario_ctrl.scenario.context.agent["name"]
-        location = scenario_ctrl.scenario.context.location_id  #### Change this to location name when this implemented
+        speaker, agent, location, people, objects = self.get_meta_data(scenario_ctrl)
         t['Agent']=agent
         t['Speaker']=speaker
         t['Location']=location
-
-        people = scenario_ctrl.scenario.context.persons
-        objects = scenario_ctrl.scenario.context.objects
         t['People_seen '] = str(people)
         t['Objects_seen']= str(objects)
         duration = self.get_duration_in_minutes(scenario_ctrl)
@@ -388,7 +392,7 @@ class StatisticalEvaluator(BasicEvaluator):
         text_signals = scenario_ctrl.get_signals(Modality.TEXT)
         ids, utterances, speakers = text_util.get_utterances_with_context_from_signals(text_signals)
         t = {}
-        t['Nr.utterances'] = str(len(utterances))
+        t['Nr. of signals'] = str(len(utterances))
         average_utt_length, average_tokens_per_utt, average_token_length = self.get_utterance_stats(utterances)
         t['Average_utterance_length'] = str(average_utt_length)
         t['Average_tokens_per_utterance'] = str(average_tokens_per_utt)
@@ -397,7 +401,7 @@ class StatisticalEvaluator(BasicEvaluator):
         text_type_counts, text_type_timelines, nr_annotations = self.get_statistics_from_signals(text_signals)
        # rows.extend(self.get_statistics_from_image_annotation(scenario_ctrl, scenario_id))
 
-        t['Nr.annotations']=  str(nr_annotations)
+        t['Nr. of annotations']=  str(nr_annotations)
         items = {}
         for key in text_type_counts.keys():
             counts = text_type_counts.get(key)
@@ -407,12 +411,11 @@ class StatisticalEvaluator(BasicEvaluator):
         t['Text_annotations']=items
         meta["Text"]=t
 
-
         t={}
         image_signals = scenario_ctrl.get_signals(Modality.IMAGE)
-        t["Nr.images"]=str (len(image_signals))
+        t["Nr. of images"]=str (len(image_signals))
         text_type_counts, text_type_timelines, nr_annotations = self.get_statistics_from_signals(image_signals)
-        t[ 'Nr.annotations']=  str(nr_annotations)
+        t[ 'Nr. of annotations']=  str(nr_annotations)
         items = {}
         for key in text_type_counts.keys():
             counts = text_type_counts.get(key)
@@ -421,12 +424,16 @@ class StatisticalEvaluator(BasicEvaluator):
         t['Image_annotations'] = items
         meta["Image"]=t
 
-            # testing
-        print(meta)
+        # testing
+        #print(meta)
 
         ## Save the meta data
+
+        if not os.path.exists(evaluation_folder):
+            os.mkdir(evaluation_folder)
         file_name = scenario_id + "_meta_data.json"
         file_path = os.path.join(evaluation_folder, file_name)
+        print('Saving the meta data in', file_path)
         with open(file_path, 'w') as f:
             json_object = json.dumps(meta, indent=4)
             f.write(json_object)
@@ -455,10 +462,12 @@ class StatisticalEvaluator(BasicEvaluator):
                             type_dict[type_key].append((time_key, value))
             return type_dict, len(all_annotations)
 
-    def _get_get_value_from_annotation(self, annotation):
+    def _get_get_value_from_annotation(self, annoType, annotation):
         anno = ""
         if isinstance(annotation, str):
-            anno = "faceID:"+annotation
+            anno = annoType+":"+annotation
+        elif isinstance(annotation, float):
+            anno = annoType+":"+str(round(annotation, 2))
         else:
             try:
                 # value is the correct python object
@@ -558,7 +567,7 @@ def main(emissor_path:str, scenario:str):
     elif not has_text:
         print("No text JSON found. Skipping:", scenario_path)
     else:
-        evaluator.analyse_interaction(emissor_path, scenario)
+        evaluator.analyse_interaction_json(emissor_path, scenario)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Statistical evaluation emissor scenario')
