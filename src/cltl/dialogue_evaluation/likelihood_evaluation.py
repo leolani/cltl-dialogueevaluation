@@ -2,7 +2,6 @@ import os
 import argparse
 import sys
 import cltl.dialogue_evaluation.utils.scenario_check as check
-from pathlib import Path
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
