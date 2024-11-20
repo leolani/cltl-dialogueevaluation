@@ -6,7 +6,7 @@ import sys
 from typing import Iterable
 import uuid
 from dataclasses import dataclass
-from cltl.dialogue_evaluation.metrics.utterance_likelihood import USR_MLM
+from cltl.dialogue_evaluation.metrics.utterance_likelihood import MLM
 
 from cltl.combot.event.emissor import AnnotationEvent
 from cltl.combot.infra.time_util import timestamp_now
@@ -50,7 +50,7 @@ class LikelihoodAnnotator (SignalProcessor):
         params
         returns: None
         """
-        self._classifier = USR_MLM(path=model, top_results=top_results)
+        self._classifier = MLM(path=model, top_results=top_results)
             #LikelihoodEvaluator(model=model, max_context=max_content, len_top_tokens=top_tokens)
         self._model_name = model_name
         self._max_context = max_content

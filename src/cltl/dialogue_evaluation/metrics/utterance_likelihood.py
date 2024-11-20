@@ -3,11 +3,11 @@ import re
 from transformers import pipeline, AutoTokenizer
 
 
-## USR Masked Language Model scoring
+## Masked Language Model scoring
 
 # We use the the Roberta model that was pretrained with the TopicalChat data by the USR team
 # as a model for gettting the averaged token likelihood of the target sentence.
-# The function *sentence_likelihood* also returns the most likley sentence according to the model
+# The function *sentence_likelihood* also returns the most likeley sentence according to the model
 
 
 # and the averaged score for the mostly likely tokens.
@@ -21,7 +21,7 @@ from transformers import pipeline, AutoTokenizer
 # The more results, the more likely the target gets a score, albeit a very low score.
 
 
-class USR_MLM:
+class MLM:
     def __init__(self, path=None, top_results=20):
         """ Load pretrained RoBERTa model for masked Langauge model based likelihood.
 
@@ -31,7 +31,7 @@ class USR_MLM:
             returns: None
         """
         if path is None:
-            self.__model_name = 'adamlin/usr-topicalchat-roberta_ft'
+            self.__model_name = 'google-bert/bert-base-multilingual-cased'
         else:
             self.__model_name = path
 
@@ -91,7 +91,7 @@ if __name__ == "__main__":
     # model_path = 'adamlin/usr-topicalchat-roberta_ft'
     # model_path = 'xlm-roberta-base'
     model_path = 'roberta-base'
-    model_mlm = USR_MLM(model_path, top_results)
+    model_mlm = MLM(model_path, top_results)
     for context, target in turns:
         llh, best_sentence, max_score = model_mlm.sentence_likelihood(context, target)
         print(target)
