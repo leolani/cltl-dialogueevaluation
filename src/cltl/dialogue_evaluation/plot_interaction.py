@@ -41,7 +41,7 @@ def get_signal_rows(signals:[Signal], human, agent, settings: PlotSettings):
     return data
 
 
-def create_timeline_image(scenario_path, scenario, speaker:str, agent:str, signals:[Signal], settings: PlotSettings):
+def create_timeline_image(emissor_path, scenario, speaker:str, agent:str, signals:[Signal], settings: PlotSettings):
     rows = get_signal_rows(signals, speaker, agent, settings)
     plt.rcParams['figure.figsize'] = [len(rows), 5]
     df = pd.DataFrame(rows)
@@ -66,7 +66,7 @@ def create_timeline_image(scenario_path, scenario, speaker:str, agent:str, signa
     plt.legend(loc='lower right')
     plt.ylim(-5,5)
 
-    evaluation_folder = os.path.join(scenario_path, "evaluation")
+    evaluation_folder = os.path.join(emissor_path, scenario, "evaluation")
     if not os.path.exists(evaluation_folder):
         os.mkdir(evaluation_folder)
     path =  os.path.join(evaluation_folder, scenario+"_plot.png")
@@ -105,7 +105,7 @@ def main(emissor_path:str, scenario:str, annotations:[], sentiment_threshold=0, 
         speaker = scenario_ctrl.scenario.context.speaker["name"]
         agent = scenario_ctrl.scenario.context.agent["name"]
         text_signals = scenario_ctrl.get_signals(Modality.TEXT)
-        create_timeline_image(scenario_path=scenario_path, scenario=scenario, speaker=speaker, agent=agent,
+        create_timeline_image(emissor_path=emissor_path, scenario=scenario, speaker=speaker, agent=agent,
                               signals=text_signals, settings=settings)
 
 
