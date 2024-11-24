@@ -14,30 +14,33 @@ class PlotSettings():
     _LLH_THRESHOLD = 0
     _SENTIMENT_THRESHOLD = 0
     _ANNOTATIONS =[]
+    _START = 0
+    _END = -1
 
 def get_signal_rows(signals:[Signal], human, agent, settings: PlotSettings):
     data = []
     for i, signal in enumerate(signals):
-        speaker = text_signal_util.get_speaker_from_text_signal(signal)
-        if speaker=='SPEAKER':
-            speaker = human
-        elif speaker=='AGENT':
-            speaker = agent
-        text = ''.join(signal.seq)
-        score = 0
-        score += text_signal_util.get_dact_feedback_score_from_text_signal(signal)
-        if "sentiment" in settings._ANNOTATIONS:
-            score += text_signal_util.get_sentiment_score_from_text_signal(signal)
-        if "ekman" in settings._ANNOTATIONS:
-            score += text_signal_util.get_ekman_feedback_score_from_text_signal(signal)
-        if "go" in settings._ANNOTATIONS:
-            score += text_signal_util.get_go_feedback_score_from_text_signal(signal)
-        if "llh" in settings._ANNOTATIONS:
-            score += text_signal_util.get_likelihood_from_text_signal(signal, settings._LLH_THRESHOLD)
+        if i>= settings._START and (i<= settings._END or settings._END==-1):
+            speaker = text_signal_util.get_speaker_from_text_signal(signal)
+            if speaker=='SPEAKER':
+                speaker = human
+            elif speaker=='AGENT':
+                speaker = agent
+            text = ''.join(signal.seq)
+            score = 0
+            score += text_signal_util.get_dact_feedback_score_from_text_signal(signal)
+            if "sentiment" in settings._ANNOTATIONS:
+                score += text_signal_util.get_sentiment_score_from_text_signal(signal)
+            if "ekman" in settings._ANNOTATIONS:
+                score += text_signal_util.get_ekman_feedback_score_from_text_signal(signal)
+            if "go" in settings._ANNOTATIONS:
+                score += text_signal_util.get_go_feedback_score_from_text_signal(signal)
+            if "llh" in settings._ANNOTATIONS:
+                score += text_signal_util.get_likelihood_from_text_signal(signal, settings._LLH_THRESHOLD)
 
-        label = text_signal_util.make_annotation_label(signal, settings._SENTIMENT_THRESHOLD, settings._ANNOTATIONS)
-        row = {'turn':i+1, 'utterance': text, 'score': score, "speaker": speaker, "type":signal.modality, "annotation": label}
-        data.append(row)
+            label = text_signal_util.make_annotation_label(signal, settings._SENTIMENT_THRESHOLD, settings._ANNOTATIONS)
+            row = {'turn':i+1, 'utterance': text, 'score': score, "speaker": speaker, "type":signal.modality, "annotation": label}
+            data.append(row)
     return data
 
 
@@ -74,7 +77,7 @@ def create_timeline_image(emissor_path, scenario, speaker:str, agent:str, signal
     plt.show()
 
 
-def main(emissor_path:str, scenario:str, annotations:[], sentiment_threshold=0, llh_threshold=0):
+def main(emissor_path:str, scenario:str, annotations:[], sentiment_threshold=0, llh_threshold=0, start=0, end=-1):
     scenario_path = os.path.join(emissor_path, scenario)
     has_scenario, has_text, has_image, has_rdf = check.check_scenario_data(scenario_path, scenario)
     check_message = "Scenario folder:" + emissor_path + "\n"
@@ -95,6 +98,10 @@ def main(emissor_path:str, scenario:str, annotations:[], sentiment_threshold=0, 
             settings._SENTIMENT_THRESHOLD=sentiment_threshold
         if llh_threshold>0:
             settings._LLH_THRESHOLD=llh_threshold
+        if start >0:
+            settings._START=start
+        if end >-1:
+            settings._END=end
         scenario_path = os.path.join(emissor_path, scenario)
         print(scenario_path)
         print("_ANNOTATIONS", settings._ANNOTATIONS)
@@ -117,6 +124,8 @@ if __name__ == '__main__':
     parser.add_argument('--sentiment_threshold', type=float, required=False, help="Threshold for dialogue_act, sentiment and emotion scores", default=0.6)
     parser.add_argument('--llh_threshold', type=float, required=False, help="Threshold below which likelihood becomes negative", default=0.3)
     parser.add_argument('--annotations', type=str, required=False, help="Annotations to be considered for scoring: 'go, sentiment, ekman, llh'" , default='go,sentiment,llh')
+    parser.add_argument('--start', type=int, required=False, help="Starting signal for plotting" , default=0)
+    parser.add_argument('--end', type=int, required=False, help="End signal for plotting, -1 means until the last signal" , default=-1)
     args, _ = parser.parse_known_args()
     print('Input arguments', sys.argv)
 
@@ -124,4 +133,6 @@ if __name__ == '__main__':
          scenario=args.scenario,
          annotations=args.annotations,
          llh_threshold=args.llh_threshold,
-         sentiment_threshold=args.sentiment_threshold)
+         sentiment_threshold=args.sentiment_threshold,
+         start=args.start,
+         end=args.end)
