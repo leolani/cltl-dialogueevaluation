@@ -183,6 +183,7 @@ def get_utterances_with_context_from_signals(signals: [], max_context=200):
             target = ''.join(signal.seq)
         if len(context) > max_context:
             context = context[len(context) - max_context:]
+        target = target.replace("\n", ' ')
         quadruple = (context, target, cue, speaker)
         quadruples.append(quadruple)
     return ids, quadruples, speakers
@@ -190,5 +191,5 @@ def get_utterances_with_context_from_signals(signals: [], max_context=200):
 def get_texts_from_utterances(utterances=[]):
     texts = []
     for utt in utterances:
-        texts.append(utt[1])
+        texts.append(utt[1].replace("\n", ' '))
     return texts

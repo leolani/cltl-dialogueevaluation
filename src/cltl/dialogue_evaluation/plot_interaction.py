@@ -44,8 +44,13 @@ def get_signal_rows(signals:[Signal], human, agent, settings: PlotSettings):
     return data
 
 
-def create_timeline_image(emissor_path, scenario, speaker:str, agent:str, signals:[Signal], settings: PlotSettings):
-    rows = get_signal_rows(signals, speaker, agent, settings)
+def create_timeline_image(emissor_path, scenario, settings: PlotSettings):
+    scenario_storage = ScenarioStorage(emissor_path)
+    scenario_ctrl = scenario_storage.load_scenario(scenario)
+    speaker = scenario_ctrl.scenario.context.speaker["name"]
+    agent = scenario_ctrl.scenario.context.agent["name"]
+    text_signals = scenario_ctrl.get_signals(Modality.TEXT)
+    rows = get_signal_rows(text_signals, speaker, agent, settings)
     plt.rcParams['figure.figsize'] = [len(rows), 5]
     df = pd.DataFrame(rows)
     #print(df.head())
@@ -107,13 +112,7 @@ def main(emissor_path:str, scenario:str, annotations:[], sentiment_threshold=0, 
         print("_ANNOTATIONS", settings._ANNOTATIONS)
         print("_SENTIMENT_THRESHOLD", settings._SENTIMENT_THRESHOLD)
         print("_LLH_THRESHOLD", settings._LLH_THRESHOLD)
-        scenario_storage = ScenarioStorage(emissor_path)
-        scenario_ctrl = scenario_storage.load_scenario(scenario)
-        speaker = scenario_ctrl.scenario.context.speaker["name"]
-        agent = scenario_ctrl.scenario.context.agent["name"]
-        text_signals = scenario_ctrl.get_signals(Modality.TEXT)
-        create_timeline_image(emissor_path=emissor_path, scenario=scenario, speaker=speaker, agent=agent,
-                              signals=text_signals, settings=settings)
+        create_timeline_image(emissor_path=emissor_path, scenario=scenario, settings=settings)
 
 
 
