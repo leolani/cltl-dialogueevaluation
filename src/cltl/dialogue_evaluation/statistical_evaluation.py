@@ -27,6 +27,21 @@ class StatisticalEvaluator(BasicEvaluator):
 
         self._log.debug(f"Statistical Evaluator ready")
 
+    def get_statistics_from_signals_org(self, signals):
+
+        # TODO: fix next line, it's broken
+        type_counts = {}
+        type_dict_text, nr_annotations = self._get_annotation_dict(signals)
+
+        for annoType in type_dict_text.keys():
+            timedValues = type_dict_text.get(annoType)
+            valueList = []
+            for value in timedValues:
+                valueList.append(self._get_get_value_from_annotation(annoType, value[1]))
+            type_counts[annoType]=Counter(valueList)
+
+        return type_counts, type_dict_text, nr_annotations
+
     def get_statistics_from_signals(self, signals):
 
         # TODO: fix next line, it's broken
@@ -472,11 +487,14 @@ class StatisticalEvaluator(BasicEvaluator):
             try:
                 # value is the correct python object
                 value_dict = vars(annotation)
-                anno = "label:" + value_dict
+               # anno = "label:" + value_dict
+                anno = annoType+":" + value_dict
             except:
                 # value is a namedtuple
+                #print(annotation)
                 try:
                     value_dict = annotation._asdict()
+                    print(value_dict)
                     atype = ""
                     avalue = ""
                     if "value" in value_dict:
@@ -504,11 +522,16 @@ class StatisticalEvaluator(BasicEvaluator):
                         atype = "pos"
                     else:
                         print('UNKNOWN annotation', annotation)
+                        #
                     anno = atype+":"+avalue
                 except:
                     if annotation:
+                        atype = annotation.type
+                        value = annotation.value
+                        anno = atype+":"+value
                         print('UNKNOWN annotation type', type(annotation), annotation)
-
+                        #UNKNOWN annotation type <class 'cltl.emotion_extraction.api.Emotion'> Emotion(type=<EmotionType.GO: 1>, value='fear', confidence=0.5706803202629089)
+                        #UNKNOWN annotation type <class 'cltl.nlp.api.Token'> Token(text='What', pos=<POS.PRON: 11>, segment=(54, 58))
         return anno
 
     def plot_metrics_progression(self, metrics, convo_dfs, evaluation_folder):
@@ -552,22 +575,35 @@ class StatisticalEvaluator(BasicEvaluator):
         df.to_csv(file, sep=";", index=False)
 
 
+
+    def process_all_scenarios(self, emissor:str, scenarios:[]):
+        for scenario in scenarios:
+            if not scenario.startswith("."):
+                scenario_path = os.path.join(emissor, scenario)
+                has_scenario, has_text, has_image, has_rdf = check.check_scenario_data(scenario_path, scenario)
+                check_message = "Scenario:" + scenario + "\n"
+                check_message += "\tScenario JSON:" + str(has_scenario) + "\n"
+                check_message += "\tText JSON:" + str(has_text) + "\n"
+                check_message += "\tImage JSON:" + str(has_image) + "\n"
+                check_message += "\tRDF :" + str(has_rdf) + "\n"
+                print(check_message)
+                if not has_scenario:
+                    print("No scenario JSON found. Skipping:", scenario_path)
+                elif not has_text:
+                    print("No text JSON found. Skipping:", scenario_path)
+                else:
+                    self.analyse_interaction_json(emissor, scenario)
+
 def main(emissor_path:str, scenario:str):
     evaluator = StatisticalEvaluator()
-    scenario_path = os.path.join(emissor_path, scenario)
-    has_scenario, has_text, has_image, has_rdf = check.check_scenario_data(scenario_path, scenario)
-    check_message = "Scenario folder:" + emissor_path + "\n"
-    check_message += "\tScenario JSON:" + str(has_scenario) + "\n"
-    check_message += "\tText JSON:" + str(has_text) + "\n"
-    check_message += "\tImage JSON:" + str(has_image) + "\n"
-    check_message += "\tRDF :" + str(has_rdf) + "\n"
-    print(check_message)
-    if not has_scenario:
-        print("No scenario JSON found. Skipping:", scenario_path)
-    elif not has_text:
-        print("No text JSON found. Skipping:", scenario_path)
+    folders = []
+    if not scenario:
+        folders = os.listdir(emissor_path)
     else:
-        evaluator.analyse_interaction_json(emissor_path, scenario)
+        folders=[scenario]
+        #folders = os.listdir(emissor_path)
+
+    evaluator.process_all_scenarios(emissor_path, folders)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Statistical evaluation emissor scenario')
