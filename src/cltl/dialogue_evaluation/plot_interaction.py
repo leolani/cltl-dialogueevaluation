@@ -47,8 +47,16 @@ def get_signal_rows(signals:[Signal], human, agent, settings: PlotSettings):
 def create_timeline_image(emissor_path, scenario, settings: PlotSettings):
     scenario_storage = ScenarioStorage(emissor_path)
     scenario_ctrl = scenario_storage.load_scenario(scenario)
-    speaker = scenario_ctrl.scenario.context.speaker["name"]
-    agent = scenario_ctrl.scenario.context.agent["name"]
+    speaker = "No speaker"
+    agent = "No agent"
+    try:
+        speaker = scenario_ctrl.scenario.context.speaker["name"] if "name" in scenario_ctrl.scenario.context.speaker else "No speaker"
+    except:
+        print("No speaker name in context")
+    try:
+        agent = scenario_ctrl.scenario.context.agent["name"] if "name" in scenario_ctrl.scenario.context.agent else "No agent"
+    except:
+        print("No agent name in context")
     text_signals = scenario_ctrl.get_signals(Modality.TEXT)
     rows = get_signal_rows(text_signals, speaker, agent, settings)
     plt.rcParams['figure.figsize'] = [len(rows), 5]
