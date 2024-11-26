@@ -81,8 +81,7 @@ class LikelihoodEvaluator(BasicEvaluator):
             target = turn[1]
             cue = turn[2]
             speaker = turn[3]
-
-            print(f"\tCalculating likelihood scores")
+         #   print(f"\tCalculating likelihood scores")
             llh, best_sentence, max_score = model_mlm.sentence_likelihood(context, target)
             rows.append({"Turn": index, "Speaker": speaker, "Cue": cue, "Response": target, "Context": context,
                          "MLM response": best_sentence, "System llh": llh, "MLM llh": max_score})
@@ -160,23 +159,39 @@ class LikelihoodEvaluator(BasicEvaluator):
 
 
 
+    def process_all_scenarios(self, emissor:str, scenarios:[]):
+        for scenario in scenarios:
+            if not scenario.startswith("."):
+                scenario_path = os.path.join(emissor, scenario)
+                has_scenario, has_text, has_image, has_rdf = check.check_scenario_data(scenario_path, scenario)
+                check_message = "Scenario:" + scenario + "\n"
+                check_message += "\tScenario JSON:" + str(has_scenario) + "\n"
+                check_message += "\tText JSON:" + str(has_text) + "\n"
+                check_message += "\tImage JSON:" + str(has_image) + "\n"
+                check_message += "\tRDF :" + str(has_rdf) + "\n"
+                print(check_message)
+                if not has_scenario:
+                    print("No scenario JSON found. Skipping:", scenario_path)
+                elif not has_text:
+                    print("No text JSON found. Skipping:", scenario_path)
+                else:
+                    self.evaluate_conversation(emissor, scenario)
 
 def main(emissor_path:str, scenario:str,  model, model_name, max_context=300, len_top_tokens=20):
-    scenario_path = os.path.join(emissor_path, scenario)
-    has_scenario, has_text, has_image, has_rdf = check.check_scenario_data(scenario_path, scenario)
-    check_message = "Scenario folder:" + emissor_path + "\n"
-    check_message += "\tScenario JSON:" + str(has_scenario) + "\n"
-    check_message += "\tText JSON:" + str(has_text) + "\n"
-    check_message += "\tImage JSON:" + str(has_image) + "\n"
-    check_message += "\tRDF :" + str(has_rdf) + "\n"
-    print(check_message)
-    if not has_scenario:
-        print("No scenario JSON found. Skipping:", scenario_path)
-    elif not has_text:
-        print("No text JSON found. Skipping:", scenario_path)
+    model = "/Users/piek/Desktop/t-MA-Combots-2024/code/ma-communicative-robots/leolani_text_to_ekg/resources/usr-topicalchat-roberta_ft"
+    model_name = "USR"
+    emissor_path = "/Users/piek/Desktop/t-MA-Combots-2024/assignments/assignment-1/leolani_local/emissor"
+    scenario=""
+    evaluator = LikelihoodEvaluator(model=model, model_name=model_name, max_context=max_context,
+                                    len_top_tokens=len_top_tokens)
+
+    folders = []
+    if not scenario:
+        folders = os.listdir(emissor_path)
     else:
-        evaluator = LikelihoodEvaluator(model=model, model_name=model_name, max_context=max_context, len_top_tokens=len_top_tokens)
-        evaluator.evaluate_conversation(emissor_path, scenario)
+        folders = [scenario]
+
+    evaluator.process_all_scenarios(emissor_path, folders)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Statistical evaluation emissor scenario')

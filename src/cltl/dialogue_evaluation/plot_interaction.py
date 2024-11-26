@@ -19,6 +19,7 @@ class PlotSettings():
 
 def get_signal_rows(signals:[Signal], human, agent, settings: PlotSettings):
     data = []
+    print('Nr of signals', len(signals))
     for i, signal in enumerate(signals):
         if i>= settings._START and (i<= settings._END or settings._END==-1):
             speaker = text_signal_util.get_speaker_from_text_signal(signal)
@@ -85,44 +86,65 @@ def create_timeline_image(emissor_path, scenario, settings: PlotSettings):
     evaluation_folder = os.path.join(emissor_path, scenario, "evaluation")
     if not os.path.exists(evaluation_folder):
         os.mkdir(evaluation_folder)
-    path =  os.path.join(evaluation_folder, scenario+"_plot.png")
+    name= scenario
+    if settings._START>0:
+        name += "_S"+ str(settings._START)
+    if settings._END>-1:
+        name += "_E"+str(settings._END)
+    path =  os.path.join(evaluation_folder, name+"_plot.png")
     plt.savefig(path, dpi=600)
     plt.show()
 
 
+
+def process_all_scenarios(emissor:str, scenarios:[], settings):
+        for scenario in scenarios:
+            if not scenario.startswith("."):
+                scenario_path = os.path.join(emissor, scenario)
+                has_scenario, has_text, has_image, has_rdf = check.check_scenario_data(scenario_path, scenario)
+                check_message = "Scenario:" + scenario + "\n"
+                check_message += "\tScenario JSON:" + str(has_scenario) + "\n"
+                check_message += "\tText JSON:" + str(has_text) + "\n"
+                check_message += "\tImage JSON:" + str(has_image) + "\n"
+                check_message += "\tRDF :" + str(has_rdf) + "\n"
+                print(check_message)
+                if not has_scenario:
+                    print("No scenario JSON found. Skipping:", scenario_path)
+                elif not has_text:
+                    print("No text JSON found. Skipping:", scenario_path)
+                else:
+                    create_timeline_image(emissor_path=emissor, scenario=scenario, settings=settings)
+
 def main(emissor_path:str, scenario:str, annotations:[], sentiment_threshold=0, llh_threshold=0, start=0, end=-1):
+    settings = PlotSettings()
+    if annotations:
+        settings._ANNOTATIONS = annotations
+    if sentiment_threshold > 0:
+        settings._SENTIMENT_THRESHOLD = sentiment_threshold
+    if llh_threshold > 0:
+        settings._LLH_THRESHOLD = llh_threshold
+    if start > 0:
+        settings._START = start
+    if end > -1:
+        settings._END = end
+
     scenario_path = os.path.join(emissor_path, scenario)
-    has_scenario, has_text, has_image, has_rdf = check.check_scenario_data(scenario_path, scenario)
-    check_message = "Scenario folder:" + emissor_path + "\n"
-    check_message += "\tScenario JSON:" + str(has_scenario) + "\n"
-    check_message += "\tText JSON:" + str(has_text) + "\n"
-    check_message += "\tImage JSON:" + str(has_image) + "\n"
-    check_message += "\tRDF :" + str(has_rdf) + "\n"
-    print(check_message)
-    if not has_scenario:
-        print("No scenario JSON found. Skipping:", scenario_path)
-    elif not has_text:
-        print("No text JSON found. Skipping:", scenario_path)
+    print(scenario_path)
+    print("_ANNOTATIONS", settings._ANNOTATIONS)
+    print("_SENTIMENT_THRESHOLD", settings._SENTIMENT_THRESHOLD)
+    print("_LLH_THRESHOLD", settings._LLH_THRESHOLD)
+
+    settings._START = 0
+    settings._END = 50
+    emissor_path = "/Users/piek/Desktop/t-MA-Combots-2024/assignments/assignment-1/leolani_local/emissor"
+    scenario="d5197e01-f2e7-412b-a403-5a8cd7403526"
+
+    folders = []
+    if not scenario:
+        folders = os.listdir(emissor_path)
     else:
-        settings = PlotSettings()
-        if annotations:
-            settings._ANNOTATIONS = annotations
-        if sentiment_threshold>0:
-            settings._SENTIMENT_THRESHOLD=sentiment_threshold
-        if llh_threshold>0:
-            settings._LLH_THRESHOLD=llh_threshold
-        if start >0:
-            settings._START=start
-        if end >-1:
-            settings._END=end
-        scenario_path = os.path.join(emissor_path, scenario)
-        print(scenario_path)
-        print("_ANNOTATIONS", settings._ANNOTATIONS)
-        print("_SENTIMENT_THRESHOLD", settings._SENTIMENT_THRESHOLD)
-        print("_LLH_THRESHOLD", settings._LLH_THRESHOLD)
-        create_timeline_image(emissor_path=emissor_path, scenario=scenario, settings=settings)
-
-
+        folders = [scenario]
+    process_all_scenarios(emissor_path, folders, settings)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Statistical evaluation emissor scenario')

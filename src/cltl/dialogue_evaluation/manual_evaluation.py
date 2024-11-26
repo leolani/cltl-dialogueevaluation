@@ -247,36 +247,36 @@ class ManualEvaluator(BasicEvaluator):
                   else:
                         self.evaluate_conversation(submission_path, scenario)
 
-#
-# if __name__ == "__main__":
-#     submission_path = '/Users/piek/Desktop/t-MA-Combots-2023/assignments/interactions/emissor-offline'
-#     submission_path = '/Users/piek/Desktop/t-MA-Combots-2023/assignments/interactions/emissor-online'
-#
-#     submission_path = '/Users/piek/Desktop/t-MA-Combots-2023/server/emissor/Yannis'
-#     submission_path = '/Users/piek/Desktop/t-MA-Combots-2023/assignments/emissor'
-#
-#     for persona in os.listdir(submission_path):
-#         persona_folder = os.path.join(submission_path, persona)
-#         if os.path.isdir(persona_folder):
-#             server_submission(persona_folder)
+
+    def process_all_scenarios(self, emissor:str, scenarios:[]):
+        for scenario in scenarios:
+            if not scenario.startswith("."):
+                scenario_path = os.path.join(emissor, scenario)
+                has_scenario, has_text, has_image, has_rdf = check.check_scenario_data(scenario_path, scenario)
+                check_message = "Scenario:" + scenario + "\n"
+                check_message += "\tScenario JSON:" + str(has_scenario) + "\n"
+                check_message += "\tText JSON:" + str(has_text) + "\n"
+                check_message += "\tImage JSON:" + str(has_image) + "\n"
+                check_message += "\tRDF :" + str(has_rdf) + "\n"
+                print(check_message)
+                if not has_scenario:
+                    print("No scenario JSON found. Skipping:", scenario_path)
+                elif not has_text:
+                    print("No text JSON found. Skipping:", scenario_path)
+                else:
+                    self.evaluate_conversation(emissor, scenario)
 
 def main(emissor_path:str, scenario:str):
-    scenario_path = os.path.join(emissor_path, scenario)
-    has_scenario, has_text, has_image, has_rdf = check.check_scenario_data(scenario_path, scenario)
-    check_message = "Scenario folder:" + emissor_path + "\n"
-    check_message += "\tScenario JSON:" + str(has_scenario) + "\n"
-    check_message += "\tText JSON:" + str(has_text) + "\n"
-    check_message += "\tImage JSON:" + str(has_image) + "\n"
-    check_message += "\tRDF :" + str(has_rdf) + "\n"
-    print(check_message)
-    if not has_scenario:
-        print("No scenario JSON found. Skipping:", scenario_path)
-    elif not has_text:
-        print("No text JSON found. Skipping:", scenario_path)
-    else:
-        evaluator = ManualEvaluator()
-        evaluator.evaluate_conversation(emissor_path, scenario)
+    evaluator = ManualEvaluator()
 
+   # emissor_path = "/Users/piek/Desktop/t-MA-Combots-2024/assignments/assignment-1/leolani_local/emissor"
+   # scenario=""
+    folders = []
+    if not scenario:
+        folders = os.listdir(emissor_path)
+    else:
+        folders = [scenario]
+    evaluator.process_all_scenarios(emissor_path, folders)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Statistical evaluation emissor scenario')

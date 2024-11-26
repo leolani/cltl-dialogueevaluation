@@ -160,7 +160,8 @@ def get_likelihood_from_text_signal(textSignal: TextSignal, threshold=0.3):
             if annotation.value:
                 if annotation.type.endswith('Likelihood'):
                     score = float(annotation.value)
-    score = 10*(score-threshold)
+    if score>0:
+        score = 10*(score-threshold)
     return score
 
 def get_utterances_with_context_from_signals(signals: [], max_context=200):

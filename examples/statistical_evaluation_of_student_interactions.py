@@ -54,10 +54,5 @@ def aggregate_results(submission_path):
 
 
 if __name__ == "__main__":
-    submission_path = '/Users/piek/Desktop/t-MA-Combots-2023/assignments/interactions/submissions-1'
-    submission_path = '/Users/piek/Desktop/t-MA-Combots-2023/server/emissor'
-    submission_path='/Users/piek/Desktop/t-MA-Combots-2023/assignments/interaction-robot/emissor'
-
-    #submission_path = '/Users/piek/Desktop/t-MA-Combots-2023/assignments/interactions/emissor-online'
-    #server_submission(submission_path)
+    submission_path="/Users/piek/Desktop/t-MA-Combots-2024/assignments/assignment-1/emissor"
     aggregate_results(submission_path)

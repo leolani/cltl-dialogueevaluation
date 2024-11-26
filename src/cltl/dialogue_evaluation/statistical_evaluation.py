@@ -17,6 +17,11 @@ from emissor.representation.scenario import Signal
 from cltl.dialogue_evaluation.api import BasicEvaluator
 
 
+_ANNOTATION_SOURCE = ["python-source:cltl.dialogue_act_classification.midas_classifier", "MIDAS",
+                       "python-source:cltl.emotion_extraction.utterance_go_emotion_extractor", "GO",
+                      "NLP",
+                       "USR"]
+
 class StatisticalEvaluator(BasicEvaluator):
     def __init__(self):
         """Creates an evaluator that will calculate basic statistics for evaluation
@@ -207,15 +212,16 @@ class StatisticalEvaluator(BasicEvaluator):
                     else:
                         scenario_dict[key] = [(scenario, value)]
             stat_dict[anno_type] = scenario_dict
-            try:
-                if speaker:
-                    basename = os.path.basename(scenario_dir)
-                    scenario_dir_new = os.path.join(folder,speaker+"_"+basename)
-                    if not os.path.exists(scenario_dir_new):
-                        os.mkdir(scenario_dir_new)
-                    os.rename(scenario_dir, scenario_dir_new)
-            except:
-                print(scenario_dir_new)
+            ##### for renaming the scenario folder but this breaks other code
+            # try:
+            #     if speaker:
+            #         basename = os.path.basename(scenario_dir)
+            #         scenario_dir_new = os.path.join(folder,speaker+"_"+basename)
+            #         if not os.path.exists(scenario_dir_new):
+            #             os.mkdir(scenario_dir_new)
+            #         os.rename(scenario_dir, scenario_dir_new)
+            # except:
+            #     print(scenario_dir_new)
         return stat_dict, columns
 
     def save_overview_globally(self, folder, stat_dict, columns):
@@ -232,7 +238,7 @@ class StatisticalEvaluator(BasicEvaluator):
                     scenario = value[0]
                     count = value[1]
                     row.update({scenario: count})
-                dfall = dfall.append(row, ignore_index=True)
+                dfall = dfall._append(row, ignore_index=True)
             ##dfall.to_csv(os.path.join(folder, key + ".csv"))
         dfall.to_csv(os.path.join(folder, "overview" + ".csv"))
             # print(dfall.info())
@@ -494,7 +500,7 @@ class StatisticalEvaluator(BasicEvaluator):
                 #print(annotation)
                 try:
                     value_dict = annotation._asdict()
-                    print(value_dict)
+                    #print(value_dict)
                     atype = ""
                     avalue = ""
                     if "value" in value_dict:
@@ -574,7 +580,22 @@ class StatisticalEvaluator(BasicEvaluator):
         file = os.path.join(evaluation_folder, file_name)
         df.to_csv(file, sep=";", index=False)
 
-
+    def remove_annotations(self, emissor:str, scenario:str, annotation_source: [str]):
+        scenario_storage = ScenarioStorage(emissor)
+        scenario_ctrl = scenario_storage.load_scenario(scenario)
+        signals = scenario_ctrl.get_signals(Modality.TEXT)
+        for signal in signals:
+            keep_mentions = []
+            for mention in signal.mentions:
+                clear = False
+                for annotation in mention.annotations:
+                    if annotation.source and annotation.source in annotation_source:
+                        clear = True
+                        break
+                if not clear:
+                    keep_mentions.append(mention)
+            signal.mentions = keep_mentions
+        scenario_storage.save_scenario(scenario_ctrl)
 
     def process_all_scenarios(self, emissor:str, scenarios:[]):
         for scenario in scenarios:
@@ -596,12 +617,15 @@ class StatisticalEvaluator(BasicEvaluator):
 
 def main(emissor_path:str, scenario:str):
     evaluator = StatisticalEvaluator()
+
+    emissor_path = "/Users/piek/Desktop/t-MA-Combots-2024/assignments/assignment-1/leolani_local/emissor"
+    scenario=""
+
     folders = []
     if not scenario:
         folders = os.listdir(emissor_path)
     else:
         folders=[scenario]
-        #folders = os.listdir(emissor_path)
 
     evaluator.process_all_scenarios(emissor_path, folders)
 
@@ -612,5 +636,6 @@ if __name__ == '__main__':
     args, _ = parser.parse_known_args()
     print('Input arguments', sys.argv)
 
-    main(args.emissor_path, args.scenario)
+    main("/Users/piek/Desktop/t-MA-Combots-2024/assignments/assignment-1/leolani_text_to_ekg_wild/emissor", "")
+    #main(args.emissor_path, args.scenario)
 
