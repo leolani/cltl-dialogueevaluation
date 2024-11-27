@@ -54,5 +54,8 @@ def aggregate_results(submission_path):
 
 
 if __name__ == "__main__":
-    submission_path="/Users/piek/Desktop/t-MA-Combots-2024/assignments/assignment-1/emissor"
+    submission_path="/Users/piek/Desktop/t-MA-Combots-2024/assignments/assignment-1/"
+   # submission_path="/Users/piek/Desktop/t-MA-Combots-2024/assignments/assignment-1/leolani_local/emissor"
+   # submission_path="/Users/piek/Desktop/t-MA-Combots-2024/assignments/assignment-1/leolani_text_to_ekg_restrained/emissor"
+   # submission_path="/Users/piek/Desktop/t-MA-Combots-2024/assignments/assignment-1/leolani_text_to_ekg_wild/emissor"
     aggregate_results(submission_path)

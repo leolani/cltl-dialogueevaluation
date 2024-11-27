@@ -93,7 +93,7 @@ def create_timeline_image(emissor_path, scenario, settings: PlotSettings):
         name += "_E"+str(settings._END)
     path =  os.path.join(evaluation_folder, name+"_plot.png")
     plt.savefig(path, dpi=600)
-    plt.show()
+  #  plt.show()
 
 
 
@@ -134,10 +134,11 @@ def main(emissor_path:str, scenario:str, annotations:[], sentiment_threshold=0, 
     print("_SENTIMENT_THRESHOLD", settings._SENTIMENT_THRESHOLD)
     print("_LLH_THRESHOLD", settings._LLH_THRESHOLD)
 
-    settings._START = 0
-    settings._END = 50
-    emissor_path = "/Users/piek/Desktop/t-MA-Combots-2024/assignments/assignment-1/leolani_local/emissor"
+    settings._START = 50
+    settings._END = -1
+    emissor_path = "/Users/piek/Desktop/t-MA-Combots-2024/assignments/assignment-1/leolani_local/emissor-test"
     scenario="d5197e01-f2e7-412b-a403-5a8cd7403526"
+    #scenario="fe1ebb3a-26c6-4620-b699-1e70c54f91fc"
 
     folders = []
     if not scenario:

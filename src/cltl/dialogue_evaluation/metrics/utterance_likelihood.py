@@ -35,13 +35,16 @@ class MLM:
         else:
             self.__model_name = path
 
+        print('Extracting the likelihood score using', self.__model_name)
+
         self.__tokenizer = AutoTokenizer.from_pretrained(self.__model_name, local_files_only=True)
         self.__model = pipeline("fill-mask", model=self.__model_name)
         self.__model.top_k = top_results  ### we check against the top results
 
     def mask_target_sentence(self, context, target):
         masked_targets = []
-        target_tokens = re.split(' ', target)
+        ## We limit the length of the target as too long utterance break the token limit
+        target_tokens = re.split(' ', target[:500])
         for index, token in enumerate(target_tokens):
             sequence = context + " "
             for token in target_tokens[:index]:

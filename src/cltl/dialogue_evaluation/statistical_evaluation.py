@@ -148,9 +148,16 @@ class StatisticalEvaluator(BasicEvaluator):
     def get_overview_statistics_any_depth(self, folder):
         stat_dict = {}
         columns = ["Label"]
-
-        for f in glob.glob(folder+"/**/*_meta_data.json", recursive=True):
+        meta_files = glob.glob(folder+"/**/*_meta_data.json", recursive=True)
+        scenario_ids = []
+        for f in meta_files:
             scenario_dir = os.path.dirname(os.path.dirname(f))
+            scenario_id = os.path.basename(scenario_dir)
+            if not scenario_id in scenario_ids:
+                scenario_ids.append(scenario_id)
+            else:
+                print('Duplicate', scenario_dir)
+        for f in meta_files:
             speaker = None
             file = open(f, 'r')
             print(file.name)
@@ -233,15 +240,15 @@ class StatisticalEvaluator(BasicEvaluator):
             sorted_keys.sort()
             for anno in sorted_keys:
                 values = anno_dict.get(anno)
+                if anno in dfall.columns:
+                    anno = anno+"_a"
                 row = {'Label': anno}
                 for value in values:
                     scenario = value[0]
                     count = value[1]
                     row.update({scenario: count})
                 dfall = dfall._append(row, ignore_index=True)
-            ##dfall.to_csv(os.path.join(folder, key + ".csv"))
         dfall.to_csv(os.path.join(folder, "overview" + ".csv"))
-            # print(dfall.info())
 
     def save_overview_statistics(self, scenario_folder, stat_dict, columns):
         utterance_row = {'Label':'Utterances'}

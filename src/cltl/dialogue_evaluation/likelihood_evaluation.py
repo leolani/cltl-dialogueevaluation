@@ -178,12 +178,21 @@ class LikelihoodEvaluator(BasicEvaluator):
                     self.evaluate_conversation(emissor, scenario)
 
 def main(emissor_path:str, scenario:str,  model, model_name, max_context=300, len_top_tokens=20):
-    model = "/Users/piek/Desktop/t-MA-Combots-2024/code/ma-communicative-robots/leolani_text_to_ekg/resources/usr-topicalchat-roberta_ft"
-    model_name = "USR"
-    emissor_path = "/Users/piek/Desktop/t-MA-Combots-2024/assignments/assignment-1/leolani_local/emissor"
-    scenario=""
+   # model = "/Users/piek/Desktop/t-MA-Combots-2024/code/ma-communicative-robots/leolani_text_to_ekg/resources/usr-topicalchat-roberta_ft"
+   # model_name = "USR"
+   # model = "google-bert/bert-base-multilingual-cased"
+   # model_name = "mBERT"
+   # emissor_path = "/Users/piek/Desktop/t-MA-Combots-2024/assignments/assignment-1/leolani_local/emissor"
+   # emissor_path = "/Users/piek/Desktop/t-MA-Combots-2024/assignments/assignment-1/leolani_text_to_ekg_restrained/emissor"
+   # emissor_path = "/Users/piek/Desktop/t-MA-Combots-2024/assignments/assignment-1/leolani_text_to_ekg_wild/emissor"
+   # scenario=""
+   # max_context=200
+   # len_top_tokens=10
     evaluator = LikelihoodEvaluator(model=model, model_name=model_name, max_context=max_context,
                                     len_top_tokens=len_top_tokens)
+
+   # emissor_path = "/Users/piek/Desktop/t-MA-Combots-2024/assignments/emissor-test"
+   # scenario = ""
 
     folders = []
     if not scenario:
