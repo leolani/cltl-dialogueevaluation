@@ -154,4 +154,4 @@ if __name__ == "__main__":
     #         apply_usr_to_conversation_csv(persona_folder, evaluator_mlm, evaluator_ctx, evaluator_uk)
 
     #make_overview_csv(submission_path)
-    make_overview_csv_any_scenario(submission_path, ['mBert', 'USR'])
+    make_overview_csv_any_scenario(submission_path, ['mBert', 'USR', 'RoBERTa'])

@@ -134,11 +134,10 @@ def main(emissor_path:str, scenario:str, annotations:[], sentiment_threshold=0, 
     print("_SENTIMENT_THRESHOLD", settings._SENTIMENT_THRESHOLD)
     print("_LLH_THRESHOLD", settings._LLH_THRESHOLD)
 
-    settings._START = 50
+    settings._START = 0
     settings._END = -1
-    emissor_path = "/Users/piek/Desktop/t-MA-Combots-2024/assignments/assignment-1/leolani_local/emissor-test"
-    scenario="d5197e01-f2e7-412b-a403-5a8cd7403526"
-    #scenario="fe1ebb3a-26c6-4620-b699-1e70c54f91fc"
+    emissor_path = "/Users/piek/Desktop/d-Leolani/leolani-mmai-parent/cltl-leolani-app/py-app/storage/emissor"
+    scenario="5070e2f7-4d8c-47d7-ab36-af96a5943ca2"
 
     folders = []
     if not scenario:
