@@ -99,7 +99,9 @@ def get_multimodal_signal_rows(signals:[Signal], human, agent, settings: PlotSet
                 data.append(row)
             elif signal.modality==Modality.IMAGE:
                 object, face, id = image_signal_util.make_annotation_label(signal)
-                object_type = object[:object.index("-")]
+                object_type = object
+                if "-" in object:
+                    object_type = object[:object.index("-")]
                 if not id == previous_image_id:
                     row = {'turn':i+margin, 'utterance': id, 'score': 0, "speaker": "camera", "type":signal.modality, "annotation": face+";"+object, "rotation": 70}
                 elif not object_type==previous_image_label:
@@ -215,10 +217,13 @@ def main(emissor_path:str, scenario:str, annotations:[], sentiment_threshold=0, 
     print("_SENTIMENT_THRESHOLD", settings._SENTIMENT_THRESHOLD)
     print("_LLH_THRESHOLD", settings._LLH_THRESHOLD)
 
-    settings._START = 0
-    settings._END = -1
-    emissor_path = "/Users/piek/Desktop/d-Leolani/leolani-mmai-parent/cltl-leolani-app/py-app/storage/emissor"
-    scenario="68bdf6e8-88da-4735-8264-37166b7b930f"
+    # DEBUG tests
+    #settings._START = 0
+    #settings._END = -1
+    #emissor_path = "/Users/piek/Desktop/d-Leolani/leolani-mmai-parent/cltl-leolani-app/py-app/storage/emissor"
+    #scenario="68bdf6e8-88da-4735-8264-37166b7b930f"
+    #emissor_path = "/Users/piek/Desktop/t-MA-Combots-2024/code/ma-communicative-robots/interaction_analysis/emissor"
+    #scenario="1abc01f0-b1d0-48f9-aafb-60214eaa4380"
 
     folders = []
     if not scenario:

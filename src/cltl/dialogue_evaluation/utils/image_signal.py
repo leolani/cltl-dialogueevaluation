@@ -42,6 +42,10 @@ def get_object_for_image_signal(imageSignal: ImageSignal):
                 conf = annotation.value.confidence
                 if not object in label:
                     label += object+"-"+str(round(conf, 2))
+            elif annotation.type == 'ObjectType':
+                object = annotation.value
+                if not object in label:
+                    label += object
     return label
 
 def get_identity_for_image_signal(imageSignal: ImageSignal):
@@ -51,6 +55,10 @@ def get_identity_for_image_signal(imageSignal: ImageSignal):
         annotations = mention.annotations
         for annotation in annotations:
             if annotation.type == 'VectorIdentity':
+                id = annotation.value
+                if not id in label:
+                    label = id
+            elif annotation.type == 'ObjectIdentity':
                 id = annotation.value
                 if not id in label:
                     label = id
