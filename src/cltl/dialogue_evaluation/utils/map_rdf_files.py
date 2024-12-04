@@ -29,14 +29,8 @@ def get_speaker(data):
 def process_mentions(ann, utt_id, rdf_file, speaker=None, files=None):
     # Process utterances
     if ann["type"] == "ConversationalAgent":
-        # Logic: signals by leolani do not generate brain_log so they are skipped.
-        if ann['value'] == "LEOLANI":
-            return rdf_file, ann['value']
-        # Map rdf files
-        else:
-            # mentions are not given ids (WHY?) so keep putting the rdf_files in the last speaker signal
-            rdf_file, files = search_id_in_log(utt_id, rdf_file, files)
-            return rdf_file, speaker
+        rdf_file, files = search_id_in_log(utt_id, rdf_file, files)
+        return rdf_file, speaker
     else:
         return rdf_file, speaker
 
@@ -50,16 +44,6 @@ def search_id_in_log(utt_id, rdf_file, files):
             # Found it!
             rdf_file.append(f.stem + '.trig')
             files.remove(f)
-            # Check if the next file has more gasp:Utterance, if not, keep adding the log to this list
-            num_utterances = len(re.findall("a grasp:Utterance", txt))
-            for f_ahead in files:
-                txt_ahead = Path(f_ahead).read_text()
-                num_utterances_ahead = len(re.findall("a grasp:Utterance", txt_ahead))
-                if num_utterances == num_utterances_ahead:
-                    rdf_file.append(f_ahead.stem + '.trig')
-                    files_to_remove.append(f_ahead)
-                else:
-                    break
             break
 
     for f in files_to_remove:

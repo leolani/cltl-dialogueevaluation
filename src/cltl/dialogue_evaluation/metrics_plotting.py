@@ -55,7 +55,7 @@ class Plotter(BasicPlotter):
             for scenario in scenarios_paths:
                 filename = 'graph_evaluation.csv' if metric in GRAPH_METRICS else 'likelihood_evaluation_context300.csv'
 
-                convo_df = pd.read_csv(scenario / 'evaluation' / filename, header=0)
+                convo_df = pd.read_csv(scenario / 'evaluation' / filename, header=0, sep=',')
                 convo_df = convo_df.set_index('Turn')
                 convo_df['Conversation'] = scenario.stem
                 conversation_id = f"{convo_df['Conversation'].values[0]}"
@@ -84,4 +84,4 @@ class Plotter(BasicPlotter):
         # Save
         plot_file = evaluation_folder / f"{xlabel}.png"
         print(plot_file)
-        g.figure.savefig(plot_file, dpi=300)
+        g.figure.savefig(plot_file, dpi=300, bbox_inches='tight')

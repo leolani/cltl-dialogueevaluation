@@ -28,7 +28,7 @@ def get_count_edges(graph: nx.Graph):
 
 
 # Centrality Measures
-def get_avg_degree(graph: nx.Graph):
+def get_avg_degree(graph: nx.Graph): # Counts directionality?
     count = np.mean(list(dict(graph.degree()).values()))
     return count
 
