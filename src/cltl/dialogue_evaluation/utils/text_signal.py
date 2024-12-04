@@ -18,27 +18,31 @@ def make_annotation_label (signal, threshold, annotations:[]):
             dac_label = dac.value
             type = dac.type
             if conf > threshold:
-                label += ";"+dac_label
+                if not dac_label in label:
+                    label += ";"+dac_label
     if sentiments and "sentiment" in annotations:
         for sentiment in sentiments:
             conf = sentiment.confidence
             sentiment_label = sentiment.value
             if conf > threshold:
-                label += ";"+sentiment_label
+                if not sentiment_label in label:
+                    label += ";"+sentiment_label
     if gos and "go" in annotations:
         for go in gos:
             conf = go.confidence
             go_label = go.value
             type = go.type
             if conf > threshold:
-                label += ";"+go_label
+                if not go_label in label:
+                    label += ";"+go_label
     if ekmans and "ekman" in annotations:
         for ekman in ekmans:
             conf = ekman.confidence
             ekman_label = ekman.value
             type = ekman.type
             if conf > threshold:
-                label += ";"+ekman_label
+                if not ekman_label in label:
+                    label += ";"+ekman_label
     return label
 
 
@@ -59,7 +63,7 @@ def get_sentiment_score_from_text_signal(textSignal: TextSignal):
     score = 0
     sentiments = get_sentiment_from_text_signal(textSignal)
     if sentiments:
-        for sentiment in sentiments:
+        for sentiment in set(sentiments):
             if sentiment.value== 'negative':
                 score += -1
             elif sentiment.value == "positive":
@@ -72,7 +76,7 @@ def get_go_feedback_score_from_text_signal(textSignal: TextSignal):
     positive = ['joy', 'amusement','excitement', 'love', 'desire', 'optimism', 'caring', 'pride', 'admiration', 'gratitude', 'belief', 'approval', 'curiosity']
     gos = get_go_from_text_signal(textSignal)
     if gos:
-        for go in gos:
+        for go in set(gos):
             if go.value in negative:
                 score += -1
             elif go.value in [positive]:
@@ -86,7 +90,7 @@ def get_ekman_feedback_score_from_text_signal(textSignal: TextSignal):
 
     ekmans = get_ekman_from_text_signal(textSignal)
     if ekmans:
-        for ekman in ekmans:
+        for ekman in set(ekmans):
             if ekman.value in negative:
                 score += -1
             elif ekman.value in [positive]:
@@ -100,7 +104,7 @@ def get_dact_feedback_score_from_text_signal(textSignal: TextSignal):
     positive = ['pos_answer', 'back-channeling', 'appreciation', 'thanking', 'respond_to_apology']
     dacts = get_dact_from_text_signal(textSignal)
     if dacts:
-        for dac in dacts:
+        for dac in set(dacts):
             if dac.value in negative:
                 score +=-1
             elif dac.value in positive:

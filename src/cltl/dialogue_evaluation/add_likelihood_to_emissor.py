@@ -117,9 +117,17 @@ if __name__ == '__main__':
     args, _ = parser.parse_known_args()
     print('Input arguments', sys.argv)
 
-    main(emissor_path=args.emissor_path,
-         scenario=args.scenario,
+    emissor_path = "/Users/piek/Desktop/d-Leolani/leolani-mmai-parent/cltl-leolani-app/py-app/storage/emissor"
+    scenario="68bdf6e8-88da-4735-8264-37166b7b930f"
+    main(emissor_path=emissor_path,
+         scenario=scenario,
          model_path=args.model_path,
          model_name = args.model_name,
          max_context=args.context,
          len_top_tokens=args.top_results)
+    # main(emissor_path=args.emissor_path,
+    #      scenario=args.scenario,
+    #      model_path=args.model_path,
+    #      model_name = args.model_name,
+    #      max_context=args.context,
+    #      len_top_tokens=args.top_results)
