@@ -1,8 +1,6 @@
 from emissor.representation.scenario import ImageSignal
 
 
-
-
 def make_annotation_label (signal):
     label = ""
     face = get_face_for_image_signal(signal)
@@ -21,7 +19,7 @@ def get_face_for_image_signal(imageSignal: ImageSignal):
     for mention in mentions:
         annotations = mention.annotations
         for annotation in annotations:
-            if annotation.type == 'Face':
+            if annotation.type == 'Face' and annotation.value:
                 age = annotation.value.age
                 gender = annotation.value.gender
                 if not gender in label:
@@ -37,7 +35,7 @@ def get_object_for_image_signal(imageSignal: ImageSignal):
     for mention in mentions:
         annotations = mention.annotations
         for annotation in annotations:
-            if annotation.type == 'python-type:cltl.object_recognition.api.Object':
+            if annotation.type == 'python-type:cltl.object_recognition.api.Object' and annotation.value:
                 object = annotation.value.label
                 conf = annotation.value.confidence
                 if not object in label:
@@ -54,11 +52,11 @@ def get_identity_for_image_signal(imageSignal: ImageSignal):
     for mention in mentions:
         annotations = mention.annotations
         for annotation in annotations:
-            if annotation.type == 'VectorIdentity':
+            if annotation.type == 'VectorIdentity' and annotation.value:
                 id = annotation.value
                 if not id in label:
                     label = id
-            elif annotation.type == 'ObjectIdentity':
+            elif annotation.type == 'ObjectIdentity' and annotation.value:
                 id = annotation.value
                 if not id in label:
                     label = id

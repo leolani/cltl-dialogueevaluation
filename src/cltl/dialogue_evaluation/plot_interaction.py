@@ -24,9 +24,9 @@ def get_signal_rows(signals:[Signal], human, agent, settings: PlotSettings):
     for i, signal in enumerate(signals):
         if i>= settings._START and (i<= settings._END or settings._END==-1):
             speaker = text_signal_util.get_speaker_from_text_signal(signal)
-            if speaker=='SPEAKER':
+            if speaker.lower()=='speaker':
                 speaker = human
-            elif speaker=='AGENT':
+            elif speaker.lower()=='agent':
                 speaker = agent
             text = ''.join(signal.seq)
             score = 0
@@ -78,9 +78,9 @@ def get_multimodal_signal_rows(signals:[Signal], human, agent, settings: PlotSet
         if i>= settings._START and (i<= settings._END or settings._END==-1):
             if signal.modality==Modality.TEXT:
                 speaker = text_signal_util.get_speaker_from_text_signal(signal)
-                if speaker=='SPEAKER':
+                if speaker.lower() == 'speaker':
                     speaker = human
-                elif speaker=='AGENT':
+                elif speaker.lower() == 'agent':
                     speaker = agent
                 text = ''.join(signal.seq)
                 score = 0
@@ -220,8 +220,8 @@ def main(emissor_path:str, scenario:str, annotations:[], sentiment_threshold=0, 
     # DEBUG tests
     #settings._START = 0
     #settings._END = -1
-    #emissor_path = "/Users/piek/Desktop/d-Leolani/leolani-mmai-parent/cltl-leolani-app/py-app/storage/emissor"
-    #scenario="68bdf6e8-88da-4735-8264-37166b7b930f"
+    emissor_path = "/Users/piek/Desktop/d-Leolani/leolani-mmai-parent/cltl-leolani-app/py-app/storage/emissor"
+    scenario="12f5c2a5-5955-40b2-9e11-45572cd26c75"
     #emissor_path = "/Users/piek/Desktop/t-MA-Combots-2024/code/ma-communicative-robots/interaction_analysis/emissor"
     #scenario="1abc01f0-b1d0-48f9-aafb-60214eaa4380"
 

@@ -3,7 +3,6 @@ import logging
 import os
 import argparse
 import sys
-from typing import Iterable
 import uuid
 from dataclasses import dataclass
 from cltl.dialogue_evaluation.metrics.utterance_likelihood import MLM
@@ -12,7 +11,6 @@ from cltl.combot.event.emissor import AnnotationEvent
 from cltl.combot.infra.time_util import timestamp_now
 from emissor.representation.scenario import Mention, TextSignal, Annotation, class_type
 from emissor.persistence import ScenarioStorage
-from cltl.dialogue_evaluation.likelihood_evaluation import LikelihoodEvaluator
 import cltl.dialogue_evaluation.utils.scenario_check as check
 from emissor.persistence.persistence import ScenarioController
 from emissor.processing.api import SignalProcessor
@@ -119,6 +117,8 @@ if __name__ == '__main__':
 
     emissor_path = "/Users/piek/Desktop/d-Leolani/leolani-mmai-parent/cltl-leolani-app/py-app/storage/emissor"
     scenario="68bdf6e8-88da-4735-8264-37166b7b930f"
+    scenario="12f5c2a5-5955-40b2-9e11-45572cd26c75"
+
     main(emissor_path=emissor_path,
          scenario=scenario,
          model_path=args.model_path,
