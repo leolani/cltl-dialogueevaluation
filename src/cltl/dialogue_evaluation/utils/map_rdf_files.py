@@ -1,25 +1,22 @@
 import json
-import os
-import re
 from pathlib import Path
-
+import re
+import os
 import numpy as np
 
 
 def load_scenario(scenario_folder, rdf_folder):
     # Read rdf files, ordered temporaly
-    print(rdf_folder)
-    #files = [f for f in os.listdir(rdf_folder) if f.endswith(".trig")]
-    files = [f for f in Path(rdf_folder).iterdir() if f.suffix == ".trig"]
-   # files = sorted([path for path in rdf_folder.glob('*.trig')])
-    # Read only trig files
+    files = sorted([path for path in rdf_folder.glob('*.trig')])
+
+    # Read from EMISSOR
     text_json = os.path.join(scenario_folder, 'text.json')
     if not os.path.exists(text_json):
         return [], files
 
-    # Read from EMISSOR
     with open(text_json, 'r') as j:
         data = json.loads(j.read())
+
     return data, files
 
 
@@ -40,22 +37,16 @@ def get_speaker(data, files):
             for ann in m['annotations']:
                 if ann['type'] == 'VectorIdentity':
                     # Establish speaker identity
-                    return ann['value']
-    print('speaker', speaker)
+                    speaker = ann['value']
+
     return speaker
 
 
 def process_mentions(ann, utt_id, rdf_file, speaker=None, files=None):
     # Process utterances
     if ann["type"] == "ConversationalAgent":
-        # Logic: signals by leolani do not generate brain_log, so they are skipped.
-        if ann['value'] == "LEOLANI":
-            return rdf_file, ann['value']
-        # Map rdf files
-        else:
-            # mentions are not given ids (WHY?) so keep putting the rdf_files in the last speaker signal
-            rdf_file, files = search_id_in_log(utt_id, rdf_file, files)
-            return rdf_file, speaker
+        rdf_file, files = search_id_in_log(utt_id, rdf_file, files)
+        return rdf_file, speaker
     else:
         return rdf_file, speaker
 
@@ -64,22 +55,11 @@ def search_id_in_log(utt_id, rdf_file, files):
     files_to_remove = []
 
     for f in files:
-        print('file is', f)
         txt = Path(f).read_text()
         if utt_id in txt:
             # Found it!
             rdf_file.append(f.stem + '.trig')
             files.remove(f)
-            # Check if the next file has more gasp:Utterance, if not, keep adding the log to this list
-            num_utterances = len(re.findall("a grasp:Utterance", txt))
-            for f_ahead in files:
-                txt_ahead = Path(f_ahead).read_text()
-                num_utterances_ahead = len(re.findall("a grasp:Utterance", txt_ahead))
-                if num_utterances == num_utterances_ahead:
-                    rdf_file.append(f_ahead.stem + '.trig')
-                    files_to_remove.append(f_ahead)
-                else:
-                    break
             break
 
     for f in files_to_remove:
@@ -156,7 +136,7 @@ def map_scenarios(scenario_folder, rdf_folder):
     if len(files) == 1:
         utterances[0]["rdf_file"].append(files[0].stem + '.trig')
         files.remove(files[0])
-    file = os.path.join(scenario_folder,'turn_to_trig_file.json')
-    with open(file, 'w') as f:
+
+    with open(scenario_folder / 'turn_to_trig_file.json', 'w') as f:
         js = json.dumps(utterances)
         f.write(js)

@@ -26,7 +26,7 @@ setup(
         'rdflib~=6.1.1',
         'networkx~=2.6.3',
         'numpy~=1.21.5',
-        'pandas~=1.3.5',
+        'pandas',
         'scipy~=1.7.3',
         'seaborn~=0.11.2',
         'transformers~=4.19.4',
