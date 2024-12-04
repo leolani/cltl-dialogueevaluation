@@ -35,3 +35,22 @@ class BasicPlotter(object):
 
     def plot_conversations(self, scenarios_paths, metrics):
         raise NotImplementedError()
+
+
+class BasicCorrelator(object):
+
+    def __init__(self):
+        # type: () -> None
+        """
+        Compute correlations between different dialogue evaluations
+
+        Parameters
+        ----------
+        """
+
+        self._log = logger.getChild(self.__class__.__name__)
+        self._log.info("Booted")
+
+    def correlate_metrics(self, scenarios_paths, metrics):
+        raise NotImplementedError()
+

@@ -2,6 +2,7 @@ from pathlib import Path
 
 from cltl.dialogue_evaluation.graph_evaluation import GraphEvaluator
 from cltl.dialogue_evaluation.metrics_plotting import Plotter
+from cltl.dialogue_evaluation.utils.constants import GRAPH_METRICS, LIKELIHOOD_METRICS, HUMAN_METRICS
 
 SCENARIOS_FOLDER = Path("/Users/sbaez/Downloads/interactions-1/all_valid")
 SCENARIOS = sorted([path for path in SCENARIOS_FOLDER.iterdir() if path.is_dir() and path.stem != '.idea'])
@@ -27,3 +28,7 @@ plotter.plot_conversations(SCENARIOS_FOLDER,
                                     'GROUP C - Average perspectives per claim', 'GROUP C - Average mentions per claim',
                                     'GROUP C - Average turns per interaction', 'GROUP C - Average claims per source',
                                     'GROUP C - Average perspectives per source'])
+
+correlator = Correlator()
+correlator.correlate_metrics(SCENARIOS_FOLDER,
+                             metrics=GRAPH_METRICS + LIKELIHOOD_METRICS + HUMAN_METRICS)
