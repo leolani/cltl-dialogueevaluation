@@ -18,7 +18,23 @@ class Correlator(BasicCorrelator):
         super(Correlator, self).__init__()
         self._log.debug(f"Correlator ready")
 
-    def correlate_metrics_single_scenario(self, scenario, metrics):
+    def correlate_metrics_single_scenario(self, scenario, graph_file, llh_file, manual_file,  metrics):
+        # Read data from human annotations, automatic and likelihood
+        convo_df = self.read_evaluation_files(scenario, graph_file, llh_file, manual_file, metrics)
+        # convo_df = convo_df.set_index('Turn')
+        convo_df['Conversation'] = scenario.stem
+        conversation_id = f"{convo_df['Conversation'].values[0]}"
+
+        # Compute correlations
+        corr_df = convo_df.corr(method='pearson', numeric_only=True)
+        # Plot per scenario
+        evaluation_path = os.path.join(scenario, "evaluation")
+        self.plot_correlations(corr_df, None, conversation_id, evaluation_path)
+        csv_file = os.path.join(evaluation_path, conversation_id+"_correlations.csv")
+        corr_df.to_csv(csv_file)
+        return corr_df
+
+    def correlate_metrics_scenario(self, scenario, metrics):
         # Read data from human annotations, automatic and likelihood
         convo_df = self.read_evaluations(scenario, metrics)
         # convo_df = convo_df.set_index('Turn')
@@ -46,7 +62,7 @@ class Correlator(BasicCorrelator):
             else:
                 print('Getting correlations for', scenario)
             # Read data from human annotations, automatic and likelihood
-            corr_df = self.correlate_metrics_single_scenario(scenario, metrics)
+            corr_df = self.correlate_metrics_scenario(scenario, metrics)
             corr_dfs.append(corr_df)
         # Average conversations
         if len(corr_dfs)>1:
@@ -63,6 +79,49 @@ class Correlator(BasicCorrelator):
         evaluations = []
         for file in ['graph_evaluation.csv', 'likelihood_evaluation_USR_context300.csv',
                      f'{scenario.stem}_manual_evaluation.csv']:
+            try:
+                file_path = os.path.join(evaluation_folder, file)
+                df = pd.read_csv(file_path, header=0, index_col='Turn')
+            except:
+                try:
+                    df = pd.read_csv(file_path, header=0, index_col='Turn', sep=';')
+                except:
+                    print(f"Could not load {scenario}")
+                    df = pd.DataFrame()
+                    # continue
+
+            columns_to_keep = [c for c in metrics if c in df.columns]
+            df = df[columns_to_keep]
+            evaluations.append(df)
+
+        # Merge and select
+        full_df = pd.concat(evaluations, axis=1)
+
+        # rename
+        # full_df.rename(columns={'System llh': 'AUTOMATIC - System llh', 'MLM llh': 'AUTOMATIC - MLM llh',
+        #                         'USR DLcontext': 'AUTOMATIC - USR DLcontext', 'USR DLfact': 'AUTOMATIC - USR DLfact'},
+        #                inplace=True)
+        #New columns: Turn	Speaker	Cue	Response	Context	MLM response	System llh	MLM llh
+        full_df.rename(columns={'System llh': 'AUTOMATIC - System llh', 'MLM llh': 'AUTOMATIC - MLM llh'},
+                       inplace=True)
+        full_df.rename(columns={'Overall Human Rating': 'HUMAN - Overall Human Rating',
+                                'Interesting': 'HUMAN - Interesting', 'Engaging': 'HUMAN - Engaging',
+                                'Specific': 'HUMAN - Specific', 'Relevant': 'HUMAN - Relevant',
+                                'Correct': 'HUMAN - Correct',
+                                'Semantically Appropriate': 'HUMAN - Semantically Appropriate',
+                                'Understandable': 'HUMAN - Understandable',
+                                'Fluent': 'HUMAN - Fluent'}, inplace=True)
+
+        return full_df    \
+
+    @staticmethod
+    def read_evaluation_files(scenario, graph, llh, manual, metrics):
+        print(f"Correlations on {scenario.stem}")
+        evaluation_folder = os.path.join(scenario, "evaluation")
+        print('evaluation_folder', evaluation_folder)
+        # Read evaluations
+        evaluations = []
+        for file in [graph, llh, manual]:
             try:
                 file_path = os.path.join(evaluation_folder, file)
                 df = pd.read_csv(file_path, header=0, index_col='Turn')
@@ -127,13 +186,17 @@ def main(emissor_path:str, scenario:str, graph_evalation, llh_evalation, manual_
         metrics += HUMAN_METRICS
     correlator = Correlator()
 
-    emissor_path = Path("../../../examples/data/emissor")
-    scenario = "d5a6bc60-c19b-4c08-aee5-b4dd1c65c64d"
+    # emissor_path = "../../../examples/data/emissor"
+    # scenario = "d5a6bc60-c19b-4c08-aee5-b4dd1c65c64d"
     scenario_path = os.path.join(emissor_path, scenario)
     print(scenario_path)
-
-    correlator.correlate_metrics(emissor_path, scenario,
-                                 metrics=GRAPH_METRICS + LIKELIHOOD_METRICS + HUMAN_METRICS)
+    correlator.correlate_metrics(Path(emissor_path), scenario,
+                                  metrics=GRAPH_METRICS + LIKELIHOOD_METRICS + HUMAN_METRICS)
+    # graph_evalation = "graph_evaluation.csv"
+    # llh_evalation="likelihood_evaluation_USR_context300.csv"
+    # manual_evaluation="d5a6bc60-c19b-4c08-aee5-b4dd1c65c64d_manual_evaluation.csv"
+    #
+    # correlator.correlate_metrics_single_scenario(Path(scenario_path), graph_evalation, llh_evalation, manual_evaluation, metrics=GRAPH_METRICS + LIKELIHOOD_METRICS + HUMAN_METRICS)
 
 
 if __name__ == '__main__':
