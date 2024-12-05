@@ -24,25 +24,28 @@ def make_annotation_label (signal, threshold, annotations:[]):
         for sentiment in sentiments:
             conf = sentiment.confidence
             sentiment_label = sentiment.value
-            if conf > threshold:
-                if not sentiment_label in label:
-                    label += ";"+sentiment_label
+            if not sentiment_label=="neutral":
+                if conf > threshold:
+                    if not sentiment_label in label:
+                        label += ";"+sentiment_label
     if gos and "go" in annotations:
         for go in gos:
             conf = go.confidence
             go_label = go.value
-            type = go.type
-            if conf > threshold:
-                if not go_label in label:
-                    label += ";"+go_label
+            if not go_label=="neutral":
+                type = go.type
+                if conf > threshold:
+                    if not go_label in label:
+                        label += ";"+go_label
     if ekmans and "ekman" in annotations:
         for ekman in ekmans:
             conf = ekman.confidence
             ekman_label = ekman.value
-            type = ekman.type
-            if conf > threshold:
-                if not ekman_label in label:
-                    label += ";"+ekman_label
+            if not ekman_label=="neutral":
+                type = ekman.type
+                if conf > threshold:
+                    if not ekman_label in label:
+                        label += ";"+ekman_label
     return label
 
 

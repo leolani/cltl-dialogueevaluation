@@ -18,6 +18,7 @@ class PlotSettings():
     _START = 0
     _END = -1
 
+## TEXT ONLY
 def get_signal_rows(signals:[Signal], human, agent, settings: PlotSettings):
     data = []
     print('Nr of signals', len(signals))
@@ -73,7 +74,7 @@ def get_multimodal_signal_rows(signals:[Signal], human, agent, settings: PlotSet
     previous_image_label = ""
     previous_image_id = ""
     last_image_turn = 0
-    margin = 1
+    margin = 2
     for i, signal in enumerate(signals):
         if i>= settings._START and (i<= settings._END or settings._END==-1):
             if signal.modality==Modality.TEXT:
@@ -98,16 +99,18 @@ def get_multimodal_signal_rows(signals:[Signal], human, agent, settings: PlotSet
                 row = {'turn':i+margin, 'utterance': text, 'score': score, "speaker": speaker, "type":signal.modality, "annotation": label, "rotation": 70}
                 data.append(row)
             elif signal.modality==Modality.IMAGE:
-                object, face, id = image_signal_util.make_annotation_label(signal)
+                score = 0
+                score += image_signal_util.get_emotic_feedback_score_from_signal(signal)
+                object, face, id, emotion = image_signal_util.make_annotation_label(signal)
                 object_type = object
                 if "-" in object:
                     object_type = object[:object.index("-")]
                 if not id == previous_image_id:
-                    row = {'turn':i+margin, 'utterance': id, 'score': 0, "speaker": "camera", "type":signal.modality, "annotation": face+";"+object, "rotation": 70}
+                    row = {'turn':i+margin, 'utterance': id[:5], 'score': score, "speaker": "camera", "type":signal.modality, "annotation": face+";"+emotion+";"+object, "rotation": 70}
                 elif not object_type==previous_image_label:
-                    row = {'turn':i+margin, 'utterance': id[:5], 'score': 0, "speaker": "camera", "type":signal.modality, "annotation": face+";"+object, "rotation": 70}
-                elif i>last_image_turn:
-                    row = {'turn':i+margin, 'utterance': id[:5], 'score': 0, "speaker": "camera", "type":signal.modality, "annotation": "", "rotation": 70}
+                    row = {'turn':i+margin, 'utterance': id[:5], 'score': score, "speaker": "camera", "type":signal.modality, "annotation": face+";"+emotion+";"+object, "rotation": 70}
+                elif i+margin>last_image_turn:
+                    row = {'turn':i+margin, 'utterance': id[:5], 'score': score, "speaker": "camera", "type":signal.modality, "annotation": emotion, "rotation": 70}
                 previous_image_label = object_type
                 previous_image_id = id
                 last_image_turn = i+margin
@@ -144,8 +147,20 @@ def create_timeline_image(emissor_path, scenario, settings: PlotSettings):
         x = row['turn']
         y = row['score']
         rotation = row['rotation']
-        category = row['speaker']+":"+str(row['utterance'])
-        category += '\n'+str(row['annotation'])
+        category = row['speaker']+":"
+        words = row['utterance'].split(" ")
+        for i, word in enumerate(words):
+            if i==15:
+                category += "..."
+                break
+            if i>0 and i%5==0:
+                category+="\n"
+            category +=word+" "
+        annotations = row['annotation'].split(";")
+        for i, annotation in enumerate(annotations):
+            if i==0 or i%3==0:
+                category+="\n"
+            category += annotation+";"
         signalType = row['type']
         if signalType==Modality.TEXT:
             ax.text(x, y,
@@ -222,8 +237,9 @@ def main(emissor_path:str, scenario:str, annotations:[], sentiment_threshold=0, 
     #settings._END = -1
     emissor_path = "/Users/piek/Desktop/d-Leolani/leolani-mmai-parent/cltl-leolani-app/py-app/storage/emissor"
     scenario="12f5c2a5-5955-40b2-9e11-45572cd26c75"
-    #emissor_path = "/Users/piek/Desktop/t-MA-Combots-2024/code/ma-communicative-robots/interaction_analysis/emissor"
-    #scenario="1abc01f0-b1d0-48f9-aafb-60214eaa4380"
+    scenario="96f97ec5-b25c-4991-af63-5eb4af05e3bf"
+   # emissor_path = "/Users/piek/Desktop/t-MA-Combots-2024/code/ma-communicative-robots/interaction_analysis/emissor"
+   # scenario="1abc01f0-b1d0-48f9-aafb-60214eaa4380"
 
     folders = []
     if not scenario:
@@ -236,7 +252,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Statistical evaluation emissor scenario')
     parser.add_argument('--emissor-path', type=str, required=False, help="Path to the emissor folder", default='')
     parser.add_argument('--scenario', type=str, required=False, help="Identifier of the scenario", default='')
-    parser.add_argument('--sentiment_threshold', type=float, required=False, help="Threshold for dialogue_act, sentiment and emotion scores", default=0.6)
+    parser.add_argument('--sentiment_threshold', type=float, required=False, help="Threshold for dialogue_act, sentiment and emotion scores", default=0.5)
     parser.add_argument('--llh_threshold', type=float, required=False, help="Threshold below which likelihood becomes negative", default=0.3)
     parser.add_argument('--annotations', type=str, required=False, help="Annotations to be considered for scoring: 'go, sentiment, ekman, llh'" , default='go,sentiment,llh')
     parser.add_argument('--start', type=int, required=False, help="Starting signal for plotting" , default=0)
