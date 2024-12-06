@@ -340,7 +340,11 @@ class StatisticalEvaluator(BasicEvaluator):
 
         #### Text signals statistics
         meta+="\nText signals\n"
-        text_signals = scenario_ctrl.get_signals(Modality.TEXT)
+        text_signals = []
+        try:
+            text_signals = scenario_ctrl.get_signals(Modality.TEXT)
+        except:
+            print("Error reading text.json signals")
         ids, turns, speakers = text_util.get_utterances_with_context_from_signals(text_signals)
         meta+='Nr. of signals\t'+ str(len(turns))+"\n"
         average_turn_length, average_tokens_per_turn, average_token_length = self.get_utterance_stats(turns)
@@ -362,7 +366,11 @@ class StatisticalEvaluator(BasicEvaluator):
 
         meta+="\nImage signals\n"
 
-        image_signals = scenario_ctrl.get_signals(Modality.IMAGE)
+        image_signals = []
+        try:
+            image_signals = scenario_ctrl.get_signals(Modality.IMAGE)
+        except:
+            print('Error reading image.json signals')
         text_type_counts, text_type_timelines, nr_annotations = self.get_statistics_from_signals(image_signals)
         meta += 'TOTAL ANNOTATIONS\t' + str(nr_annotations) + "\n"
         meta += "\n"

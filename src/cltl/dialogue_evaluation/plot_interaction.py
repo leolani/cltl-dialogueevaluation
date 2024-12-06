@@ -240,6 +240,7 @@ def main(emissor_path:str, scenario:str, annotations:[], sentiment_threshold=0, 
     scenario="96f97ec5-b25c-4991-af63-5eb4af05e3bf"
     scenario="415d481a-6a12-40ef-8675-cb8b1102bcd8"
     scenario="3598e3a7-ef15-4a3b-9ee2-3d410d5fb69a"
+    scenario="e3e655bc-8c19-4fe6-9481-18c8c6f3d1cb"
    # emissor_path = "/Users/piek/Desktop/t-MA-Combots-2024/code/ma-communicative-robots/interaction_analysis/emissor"
    # scenario="1abc01f0-b1d0-48f9-aafb-60214eaa4380"
 

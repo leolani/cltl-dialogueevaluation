@@ -4,24 +4,37 @@ import os
 import argparse
 import sys
 
-def main(emissor_path:str, scenario:str):
+
+def process_all_scenarios(emissor_path:str, scenarios:[]):
     evaluator = StatisticalEvaluator()
-    scenario_path = os.path.join(emissor_path, scenario)
-    has_scenario, has_text, has_image, has_rdf = check.check_scenario_data(scenario_path, scenario)
-    check_message = "Scenario folder:" + emissor_path + "\n"
-    check_message += "\tScenario JSON:" + str(has_scenario) + "\n"
-    check_message += "\tText JSON:" + str(has_text) + "\n"
-    check_message += "\tImage JSON:" + str(has_image) + "\n"
-    check_message += "\tRDF :" + str(has_rdf) + "\n"
-    print(check_message)
-    if not has_scenario:
-        print("No scenario JSON found. Skipping:", scenario_path)
-    elif not has_text:
-        print("No text JSON found. Skipping:", scenario_path)
+    for scenario in scenarios:
+            if not scenario.startswith("."):
+                scenario_path = os.path.join(emissor_path, scenario)
+                has_scenario, has_text, has_image, has_rdf = check.check_scenario_data(scenario_path, scenario)
+                check_message = "Scenario:" + scenario + "\n"
+                check_message += "\tScenario JSON:" + str(has_scenario) + "\n"
+                check_message += "\tText JSON:" + str(has_text) + "\n"
+                check_message += "\tImage JSON:" + str(has_image) + "\n"
+                check_message += "\tRDF :" + str(has_rdf) + "\n"
+                print(check_message)
+                if not has_scenario:
+                    print("No scenario JSON found. Skipping:", scenario_path)
+                elif not has_text:
+                    print("No text JSON found. Skipping:", scenario_path)
+                else:
+                    evaluator.analyse_interaction(emissor_path, scenario)
+
+def main(emissor_path:str, scenario:str):
+    folders = []
+    if not scenario:
+        folders = os.listdir(emissor_path)
     else:
-        evaluator.analyse_interaction(emissor_path, scenario)
+        folders = [scenario]
 
-
+        ### For testing
+#    emissor_path = "/Users/piek/Desktop/d-Leolani/leolani-mmai-parent/cltl-leolani-app/py-app/storage/emissor"
+#    folders = ["e3e655bc-8c19-4fe6-9481-18c8c6f3d1cb", "c441c977-f46a-4847-b035-93252c2d7367","f85d7821-0b56-4261-ac46-55582d05b7d9", "5f412ab2-1ad5-4bee-889d-976bcf255f94"]
+    process_all_scenarios(emissor_path, folders)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Statistical evaluation emissor scenario')

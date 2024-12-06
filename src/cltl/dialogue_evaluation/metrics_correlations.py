@@ -24,7 +24,6 @@ class Correlator(BasicCorrelator):
         # convo_df = convo_df.set_index('Turn')
         convo_df['Conversation'] = scenario.stem
         conversation_id = f"{convo_df['Conversation'].values[0]}"
-
         # Compute correlations
         corr_df = convo_df.corr(method='pearson', numeric_only=True)
         # Plot per scenario
