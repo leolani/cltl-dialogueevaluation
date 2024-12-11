@@ -75,7 +75,7 @@ def get_sentiment_score_from_text_signal(textSignal: TextSignal):
 
 def get_go_feedback_score_from_text_signal(textSignal: TextSignal):
     score = 0
-    negative = ['remorse', 'nervousness', 'fear', 'sadness', 'embaressement', 'disappointment', 'grief', 'disgust', 'anger', 'annoyance', 'disapproval', 'confusion']
+    negative = ['remorse', 'nervousness', 'fear', 'sadness', 'embarassment', 'disappointment', 'grief', 'disgust', 'anger', 'annoyance', 'disapproval', 'confusion']
     positive = ['joy', 'amusement','excitement', 'love', 'desire', 'optimism', 'caring', 'pride', 'admiration', 'gratitude', 'belief', 'approval', 'curiosity']
     gos = get_go_from_text_signal(textSignal)
     if gos:

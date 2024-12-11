@@ -246,7 +246,6 @@ class GraphEvaluator(BasicEvaluator):
 
 
 def main(emissor_path:str, scenario:str):
-    evaluator = GraphEvaluator()
     scenario_path = os.path.join(emissor_path, scenario)
     has_scenario, has_text, has_image, has_rdf = check.check_scenario_data(scenario_path, scenario)
     check_message = "Scenario folder:" + emissor_path + "\n"

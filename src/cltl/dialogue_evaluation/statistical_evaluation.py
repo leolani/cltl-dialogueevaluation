@@ -148,7 +148,14 @@ class StatisticalEvaluator(BasicEvaluator):
     def get_overview_statistics_any_depth(self, folder):
         stat_dict = {}
         columns = ["Label"]
-        meta_files = glob.glob(folder+"/**/*_meta_data.json", recursive=True)
+        meta_files = []
+        print('folder', folder)
+        # for root, dirs, files in os.walk(folder):
+        #     for f in files:
+        #         if f.endswith("_meta_data.json"):
+        #             meta_files.append(f)
+        meta_files = glob.glob(folder+"/**/evaluation/*_meta_data.json", recursive=True)
+        print('meta_files', meta_files)
         scenario_ids = []
         for f in meta_files:
             scenario_dir = os.path.dirname(os.path.dirname(f))
@@ -425,7 +432,11 @@ class StatisticalEvaluator(BasicEvaluator):
         meta["Scenario"]=t
 
         #### Text signals statistics
-        text_signals = scenario_ctrl.get_signals(Modality.TEXT)
+        text_signals=[]
+        try:
+            text_signals = scenario_ctrl.get_signals(Modality.TEXT)
+        except:
+            print('Error loading text signals from text.json')
         ids, utterances, speakers = text_util.get_utterances_with_context_from_signals(text_signals)
         t = {}
         t['Nr. of signals'] = str(len(utterances))
@@ -448,7 +459,11 @@ class StatisticalEvaluator(BasicEvaluator):
         meta["Text"]=t
 
         t={}
-        image_signals = scenario_ctrl.get_signals(Modality.IMAGE)
+        image_signals =[]
+        try:
+            image_signals = scenario_ctrl.get_signals(Modality.IMAGE)
+        except:
+            print('Error loading image signals from image.json')
         t["Nr. of images"]=str (len(image_signals))
         text_type_counts, text_type_timelines, nr_annotations = self.get_statistics_from_signals(image_signals)
         t[ 'Nr. of annotations']=  str(nr_annotations)
@@ -633,7 +648,7 @@ class StatisticalEvaluator(BasicEvaluator):
 def main(emissor_path:str, scenario:str):
     evaluator = StatisticalEvaluator()
 
-    emissor_path = "/Users/piek/Desktop/t-MA-Combots-2024/assignments/assignment-1/leolani_local/emissor"
+    emissor_path = "/Users/piek/Desktop/d-Leolani/leolani-mmai-parent/cltl-leolani-app/py-app/storage/emissor"
     scenario=""
 
     folders = []

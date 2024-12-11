@@ -51,8 +51,16 @@ def get_multimodal_signals(emissor_path, scenario):
     sorted_signal_list = []
     scenario_storage = ScenarioStorage(emissor_path)
     scenario_ctrl = scenario_storage.load_scenario(scenario)
-    text_signals = scenario_ctrl.get_signals(Modality.TEXT)
-    image_signals =  scenario_ctrl.get_signals(Modality.IMAGE)
+    text_signals = []
+    try:
+        text_signals = scenario_ctrl.get_signals(Modality.TEXT)
+    except:
+        print('Could not extract text signals from text.json')
+    image_signals = []
+    try:
+        image_signals =  scenario_ctrl.get_signals(Modality.IMAGE)
+    except:
+        print('Could not extract image signals from image.json')
     for signal in text_signals+image_signals:
         time = signal.time.start
         if time in signalDict:
@@ -235,20 +243,16 @@ def main(emissor_path:str, scenario:str, annotations:[], sentiment_threshold=0, 
     # DEBUG tests
     #settings._START = 0
     #settings._END = -1
-    emissor_path = "/Users/piek/Desktop/d-Leolani/leolani-mmai-parent/cltl-leolani-app/py-app/storage/emissor"
-    scenario="12f5c2a5-5955-40b2-9e11-45572cd26c75"
-    scenario="96f97ec5-b25c-4991-af63-5eb4af05e3bf"
-    scenario="415d481a-6a12-40ef-8675-cb8b1102bcd8"
-    scenario="3598e3a7-ef15-4a3b-9ee2-3d410d5fb69a"
-    scenario="e3e655bc-8c19-4fe6-9481-18c8c6f3d1cb"
-   # emissor_path = "/Users/piek/Desktop/t-MA-Combots-2024/code/ma-communicative-robots/interaction_analysis/emissor"
-   # scenario="1abc01f0-b1d0-48f9-aafb-60214eaa4380"
 
-    folders = []
-    if not scenario:
-        folders = os.listdir(emissor_path)
-    else:
-        folders = [scenario]
+    # folders = []
+    # if not scenario:
+    #     folders = os.listdir(emissor_path)
+    # else:
+    #     folders = [scenario]
+    ## DEBUG tests
+    emissor_path = "/Users/piek/Desktop/d-Leolani/leolani-mmai-parent/cltl-leolani-app/py-app/storage/emissor"
+    folders = ["e3e655bc-8c19-4fe6-9481-18c8c6f3d1cb", "c441c977-f46a-4847-b035-93252c2d7367","f85d7821-0b56-4261-ac46-55582d05b7d9", "5f412ab2-1ad5-4bee-889d-976bcf255f94"]
+    folders = ["e23d47bd-df88-47d5-a2cd-9e03ce0079ab","77fd0213-bc38-4b38-b780-6bb3647569c0"]
     process_all_scenarios(emissor_path, folders, settings)
 
 if __name__ == '__main__':
