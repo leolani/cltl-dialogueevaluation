@@ -82,7 +82,8 @@ def get_multimodal_signal_rows(signals:[Signal], human, agent, settings: PlotSet
     previous_image_label = ""
     previous_image_id = ""
     last_image_turn = 0
-    margin = 2
+    margin = 6
+    last_signal_type = None
     for i, signal in enumerate(signals):
         if i>= settings._START and (i<= settings._END or settings._END==-1):
             if signal.modality==Modality.TEXT:
@@ -106,23 +107,30 @@ def get_multimodal_signal_rows(signals:[Signal], human, agent, settings: PlotSet
                 label = text_signal_util.make_annotation_label(signal, settings._SENTIMENT_THRESHOLD, settings._ANNOTATIONS)
                 row = {'turn':i+margin, 'utterance': text, 'score': score, "speaker": speaker, "type":signal.modality, "annotation": label, "rotation": 70}
                 data.append(row)
+                last_signal_type = Modality.TEXT
             elif signal.modality==Modality.IMAGE:
                 score = 0
                 score += image_signal_util.get_emotic_feedback_score_from_signal(signal)
                 object, face, id, emotion = image_signal_util.make_annotation_label(signal)
                 object_type = object
+                row = None
                 if "-" in object:
                     object_type = object[:object.index("-")]
-                if not id == previous_image_id:
+                if not id == previous_image_id and last_signal_type==Modality.TEXT:
                     row = {'turn':i+margin, 'utterance': id[:5], 'score': score, "speaker": "camera", "type":signal.modality, "annotation": face+";"+emotion+";"+object, "rotation": 70}
-                elif not object_type==previous_image_label:
+                elif not object_type==previous_image_label and last_signal_type==Modality.TEXT:
                     row = {'turn':i+margin, 'utterance': id[:5], 'score': score, "speaker": "camera", "type":signal.modality, "annotation": face+";"+emotion+";"+object, "rotation": 70}
-                elif i+margin>last_image_turn:
-                    row = {'turn':i+margin, 'utterance': id[:5], 'score': score, "speaker": "camera", "type":signal.modality, "annotation": emotion, "rotation": 70}
+                elif i+margin>last_image_turn and last_signal_type== Modality.TEXT:
+                        print(i+margin, last_image_turn)
+                        print(id)
+                        print(object_type)
+                        row = {'turn':i+margin, 'utterance': id[:5], 'score': score, "speaker": "camera", "type":signal.modality, "annotation": emotion, "rotation": 70}
                 previous_image_label = object_type
                 previous_image_id = id
                 last_image_turn = i+margin
-                data.append(row)
+                last_signal_type = Modality.IMAGE
+                if row:
+                    data.append(row)
     return data
 
 
@@ -158,7 +166,7 @@ def create_timeline_image(emissor_path, scenario, settings: PlotSettings):
         category = row['speaker']+":"
         words = row['utterance'].split(" ")
         for i, word in enumerate(words):
-            if i==15:
+            if i==30:
                 category += "..."
                 break
             if i>0 and i%5==0:
@@ -252,7 +260,8 @@ def main(emissor_path:str, scenario:str, annotations:[], sentiment_threshold=0, 
     ## DEBUG tests
     emissor_path = "/Users/piek/Desktop/d-Leolani/leolani-mmai-parent/cltl-leolani-app/py-app/storage/emissor"
     folders = ["e3e655bc-8c19-4fe6-9481-18c8c6f3d1cb", "c441c977-f46a-4847-b035-93252c2d7367","f85d7821-0b56-4261-ac46-55582d05b7d9", "5f412ab2-1ad5-4bee-889d-976bcf255f94"]
-    folders = ["e23d47bd-df88-47d5-a2cd-9e03ce0079ab","77fd0213-bc38-4b38-b780-6bb3647569c0"]
+    folders = ["1931eacb-b1e7-4bc6-8162-0960ac487b75"]
+    folders = ["985c67f6-ac9c-4903-b3fc-a2f013610190"]
     process_all_scenarios(emissor_path, folders, settings)
 
 if __name__ == '__main__':

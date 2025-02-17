@@ -201,3 +201,11 @@ def get_texts_from_utterances(utterances=[]):
     for utt in utterances:
         texts.append(utt[1].replace("\n", ' '))
     return texts
+
+
+def find_signal(signals:[TextSignal], text:str):
+    for index, s in enumerate(signals):
+        utterance = ''.join(s.seq)
+        if text in utterance:
+            return index
+    return -1
