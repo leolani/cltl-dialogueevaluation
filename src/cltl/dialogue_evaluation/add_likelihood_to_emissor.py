@@ -143,7 +143,7 @@ if __name__ == '__main__':
     args, _ = parser.parse_known_args()
     print('Input arguments', sys.argv)
 
-    emissor_path = "/Users/piek/Desktop/d-Leolani/leolani-health2025.nl/cltl-leolani-app/py-app/storage/emissor"
+    emissor_path = "/Users/piek/Desktop/test/cltl-llm-app/py-app/storage/emissor"
     scenario=""
 
     main(emissor_path=emissor_path,

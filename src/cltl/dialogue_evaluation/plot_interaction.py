@@ -164,7 +164,8 @@ def create_timeline_image(emissor_path, scenario, settings: PlotSettings):
                 x = row['turn']
                 y = row['score']
                 rotation = row['rotation']
-                category = row['speaker']+":"
+                speaker = row['speaker'].upper()
+                category = speaker+":\n"
                 words = row['utterance'].split(" ")
                 for i, word in enumerate(words):
                     if i==30:
@@ -248,7 +249,7 @@ def main(emissor_path:str, scenario:str, annotations:[], sentiment_threshold=0, 
     print("_ANNOTATIONS", settings._ANNOTATIONS)
     print("_SENTIMENT_THRESHOLD", settings._SENTIMENT_THRESHOLD)
     print("_LLH_THRESHOLD", settings._LLH_THRESHOLD)
-    emissor_path = "/Users/piek/Desktop/d-Leolani/leolani-health2025.nl/cltl-leolani-app/py-app/storage/emissor"
+    emissor_path = "/Users/piek/Desktop/test/cltl-llm-app/py-app/storage/emissor"
     folders = []
     if not scenario:
         folders = os.listdir(emissor_path)
@@ -262,7 +263,7 @@ if __name__ == '__main__':
     parser.add_argument('--scenario', type=str, required=False, help="Identifier of the scenario", default='')
     parser.add_argument('--sentiment_threshold', type=float, required=False, help="Threshold for dialogue_act, sentiment and emotion scores", default=0.5)
     parser.add_argument('--llh_threshold', type=float, required=False, help="Threshold below which likelihood becomes negative", default=0.3)
-    parser.add_argument('--annotations', type=str, required=False, help="Annotations to be considered for scoring: 'go, sentiment, ekman, llh'" , default='go,sentiment,llh')
+    parser.add_argument('--annotations', type=str, required=False, help="Annotations to be considered for scoring: 'go, sentiment, ekman, llh'" , default='llh')
     parser.add_argument('--start', type=int, required=False, help="Starting signal for plotting" , default=0)
     parser.add_argument('--end', type=int, required=False, help="End signal for plotting, -1 means until the last signal" , default=-1)
     args, _ = parser.parse_known_args()
