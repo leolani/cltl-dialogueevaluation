@@ -160,36 +160,37 @@ def create_timeline_image(emissor_path, scenario, settings: PlotSettings):
     ax = sns.lineplot(x='turn', y='score', data=df, hue='speaker', style='speaker', markers=True, palette="bright", legend="brief")
     #palette = "flare/bright/deep/muted/colorblind/dark"
     for index, row in df.iterrows():
-        x = row['turn']
-        y = row['score']
-        rotation = row['rotation']
-        category = row['speaker']+":"
-        words = row['utterance'].split(" ")
-        for i, word in enumerate(words):
-            if i==30:
-                category += "..."
-                break
-            if i>0 and i%5==0:
-                category+="\n"
-            category +=word+" "
-        annotations = row['annotation'].split(";")
-        for i, annotation in enumerate(annotations):
-            if i==0 or i%3==0:
-                category+="\n"
-            category += annotation+";"
-        signalType = row['type']
-        if signalType==Modality.TEXT:
-            ax.text(x, y,
-                    s=" " + str(category),
-                    rotation=rotation,
-                    horizontalalignment='left', size='small', color='black', verticalalignment='bottom',
-                    linespacing=1.5)
-        elif signalType==Modality.IMAGE:
-            ax.text(x, y,
-                    s=" " + str(category),
-                    rotation=rotation,
-                    horizontalalignment='right', size='small', color='blue', verticalalignment='top',
-                    linespacing=1.5)
+            if row['speaker']:
+                x = row['turn']
+                y = row['score']
+                rotation = row['rotation']
+                category = row['speaker']+":"
+                words = row['utterance'].split(" ")
+                for i, word in enumerate(words):
+                    if i==30:
+                        category += "..."
+                        break
+                    if i>0 and i%5==0:
+                        category+="\n"
+                    category +=word+" "
+                annotations = row['annotation'].split(";")
+                for i, annotation in enumerate(annotations):
+                    if i==0 or i%3==0:
+                        category+="\n"
+                    category += annotation+";"
+                signalType = row['type']
+                if signalType==Modality.TEXT:
+                    ax.text(x, y,
+                            s=" " + str(category),
+                            rotation=rotation,
+                            horizontalalignment='left', size='small', color='black', verticalalignment='bottom',
+                            linespacing=1.5)
+                elif signalType==Modality.IMAGE:
+                    ax.text(x, y,
+                            s=" " + str(category),
+                            rotation=rotation,
+                            horizontalalignment='right', size='small', color='blue', verticalalignment='top',
+                            linespacing=1.5)
 
     ax.tick_params(axis='x', rotation=70)
     # Save the plot
@@ -212,6 +213,8 @@ def create_timeline_image(emissor_path, scenario, settings: PlotSettings):
 
 
 def process_all_scenarios(emissor:str, scenarios:[], settings):
+        if len(scenarios)==0:
+            scenario = os.listdir(emissor)
         for scenario in scenarios:
             if not scenario.startswith("."):
                 scenario_path = os.path.join(emissor, scenario)
@@ -242,26 +245,15 @@ def main(emissor_path:str, scenario:str, annotations:[], sentiment_threshold=0, 
     if end > -1:
         settings._END = end
 
-    scenario_path = os.path.join(emissor_path, scenario)
-    print(scenario_path)
     print("_ANNOTATIONS", settings._ANNOTATIONS)
     print("_SENTIMENT_THRESHOLD", settings._SENTIMENT_THRESHOLD)
     print("_LLH_THRESHOLD", settings._LLH_THRESHOLD)
-
-    # DEBUG tests
-    #settings._START = 0
-    #settings._END = -1
-
-    # folders = []
-    # if not scenario:
-    #     folders = os.listdir(emissor_path)
-    # else:
-    #     folders = [scenario]
-    ## DEBUG tests
-    emissor_path = "/Users/piek/Desktop/d-Leolani/leolani-mmai-parent/cltl-leolani-app/py-app/storage/emissor"
-    folders = ["e3e655bc-8c19-4fe6-9481-18c8c6f3d1cb", "c441c977-f46a-4847-b035-93252c2d7367","f85d7821-0b56-4261-ac46-55582d05b7d9", "5f412ab2-1ad5-4bee-889d-976bcf255f94"]
-    folders = ["1931eacb-b1e7-4bc6-8162-0960ac487b75"]
-    folders = ["985c67f6-ac9c-4903-b3fc-a2f013610190"]
+    emissor_path = "/Users/piek/Desktop/d-Leolani/leolani-health2025.nl/cltl-leolani-app/py-app/storage/emissor"
+    folders = []
+    if not scenario:
+        folders = os.listdir(emissor_path)
+    else:
+        folders=[scenario]
     process_all_scenarios(emissor_path, folders, settings)
 
 if __name__ == '__main__':
@@ -283,3 +275,14 @@ if __name__ == '__main__':
          sentiment_threshold=args.sentiment_threshold,
          start=args.start,
          end=args.end)
+
+
+    # DEBUG tests
+    #settings._START = 0
+    #settings._END = -1
+
+    ## DEBUG tests
+    # emissor_path = "/Users/piek/Desktop/d-Leolani/leolani-mmai-parent/cltl-leolani-app/py-app/storage/emissor"
+    # emissor_path = "/Users/piek/Desktop/d-Leolani/leolani-health2025.nl/cltl-leolani-app/py-app/storage"
+    # folders = ["e3e655bc-8c19-4fe6-9481-18c8c6f3d1cb", "c441c977-f46a-4847-b035-93252c2d7367","f85d7821-0b56-4261-ac46-55582d05b7d9", "5f412ab2-1ad5-4bee-889d-976bcf255f94"]
+    # folders = ["1931eacb-b1e7-4bc6-8162-0960ac487b75"]

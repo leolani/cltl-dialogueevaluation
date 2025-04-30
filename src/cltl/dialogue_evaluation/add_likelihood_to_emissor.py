@@ -4,12 +4,11 @@ import os
 import argparse
 import sys
 import uuid
+import time
 from dataclasses import dataclass
 from cltl.dialogue_evaluation.metrics.utterance_likelihood import MLM
 
-from cltl.combot.event.emissor import AnnotationEvent
-from cltl.combot.infra.time_util import timestamp_now
-from emissor.representation.scenario import Mention, TextSignal, Annotation, class_type
+from emissor.representation.scenario import Mention, TextSignal, Annotation
 from emissor.persistence import ScenarioStorage
 import cltl.dialogue_evaluation.utils.scenario_check as check
 from emissor.persistence.persistence import ScenarioController
@@ -26,10 +25,10 @@ class Likelihood:
 
 
 @dataclass
-class LikelihoodEvent(AnnotationEvent[Annotation[Likelihood]]):
+class LikelihoodEvent:
     @classmethod
-    def create_text_mention(cls, text_signal: TextSignal, llh: Likelihood , source: str):
-        return cls(class_type(cls), [LikelihoodEvent.to_mention(text_signal, llh, source)])
+    # def create_text_mention(cls, text_signal: TextSignal, llh: Likelihood , source: str):
+    #     return cls(class_type(cls), [LikelihoodEvent.to_mention(text_signal, llh, source)])
 
     @staticmethod
     def to_mention(text_signal: TextSignal, llh: Likelihood, source: str) -> Mention:
@@ -75,34 +74,63 @@ class LikelihoodAnnotator (SignalProcessor):
 
         return mention
 
+    def process_all_scenarios(self, emissor_path:str, scenarios:[]):
+        for scenario in scenarios:
+            if not scenario.startswith("."):
+                scenario_path = os.path.join(emissor_path, scenario)
+                has_scenario, has_text, has_image, has_rdf = check.check_scenario_data(scenario_path, scenario)
+                check_message = "Scenario folder:" + scenario_path + "\n"
+                check_message += "\tScenario JSON:" + str(has_scenario) + "\n"
+                check_message += "\tText JSON:" + str(has_text) + "\n"
+                check_message += "\tImage JSON:" + str(has_image) + "\n"
+                check_message += "\tRDF :" + str(has_rdf) + "\n"
+                print(check_message)
+                if not has_scenario:
+                    print("No scenario JSON found. Skipping:", scenario_path)
+                elif not has_text:
+                    print("No text JSON found. Skipping:", scenario_path)
+                else:
+                    scenario_storage = ScenarioStorage(emissor_path)
+                    scenario_ctrl = scenario_storage.load_scenario(scenario)
+                    signals = scenario_ctrl.get_signals(Modality.TEXT)
+                    for signal in signals:
+                        self.process_signal(scenario=scenario_ctrl, signal=signal)
+                    #### Save the modified scenario to emissor
+                    scenario_storage.save_scenario(scenario_ctrl)
+
+def timestamp_now() -> int:
+    """
+    Return the current timestamp.
+
+    Use this function to obtain the current timestamp in a consistent format
+    across the application.
+
+    Returns
+    -------
+    int
+        The current timestamp in milliseconds
+    """
+    return time.time_ns() // 1_000_000
+
+
+
 def main(emissor_path:str, scenario:str, model_path="google-bert/bert-base-multilingual-cased", model_name="mBERT", max_context=300, len_top_tokens=20):
-    scenario_path = os.path.join(emissor_path, scenario)
-    has_scenario, has_text, has_image, has_rdf = check.check_scenario_data(scenario_path, scenario)
-    check_message = "Scenario folder:" + emissor_path + "\n"
-    check_message += "\tScenario JSON:" + str(has_scenario) + "\n"
-    check_message += "\tText JSON:" + str(has_text) + "\n"
-    check_message += "\tImage JSON:" + str(has_image) + "\n"
-    check_message += "\tRDF :" + str(has_rdf) + "\n"
-    print(check_message)
-    if not has_scenario:
-        print("No scenario JSON found. Skipping:", scenario_path)
-    elif not has_text:
-        print("No text JSON found. Skipping:", scenario_path)
+    annotator = LikelihoodAnnotator(model=model_path, model_name=model_name, max_content=max_context,
+                                    top_results=len_top_tokens)
+
+    print("model_path", model_path)
+    print("model_name", model_name)
+    print("context_threshold", max_context)
+    print("top_results", len_top_tokens)
+
+    scenarios = []
+    if not scenario:
+        scenarios = os.listdir(emissor_path)
     else:
-        annotator = LikelihoodAnnotator(model=model_path, model_name=model_name, max_content=max_context, top_results=len_top_tokens)
-        scenario_path = os.path.join(emissor_path, scenario)
-        print(scenario_path)
-        print("model_path", model_path)
-        print("model_name", model_name)
-        print("context_threshold", max_context)
-        print("top_results", len_top_tokens)
-        scenario_storage = ScenarioStorage(emissor_path)
-        scenario_ctrl = scenario_storage.load_scenario(scenario)
-        signals = scenario_ctrl.get_signals(Modality.TEXT)
-        for signal in signals:
-            annotator.process_signal(scenario=scenario_ctrl, signal=signal)
-        #### Save the modified scenario to emissor
-        scenario_storage.save_scenario(scenario_ctrl)
+        scenarios=[scenario]
+    annotator.process_all_scenarios(emissor_path, scenarios)
+
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Statistical evaluation emissor scenario')
@@ -115,9 +143,8 @@ if __name__ == '__main__':
     args, _ = parser.parse_known_args()
     print('Input arguments', sys.argv)
 
-    emissor_path = "/Users/piek/Desktop/d-Leolani/leolani-mmai-parent/cltl-leolani-app/py-app/storage/emissor"
-    scenario="68bdf6e8-88da-4735-8264-37166b7b930f"
-    scenario="12f5c2a5-5955-40b2-9e11-45572cd26c75"
+    emissor_path = "/Users/piek/Desktop/d-Leolani/leolani-health2025.nl/cltl-leolani-app/py-app/storage/emissor"
+    scenario=""
 
     main(emissor_path=emissor_path,
          scenario=scenario,
