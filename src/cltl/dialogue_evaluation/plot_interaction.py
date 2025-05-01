@@ -82,7 +82,7 @@ def get_multimodal_signal_rows(signals:[Signal], human, agent, settings: PlotSet
     previous_image_label = ""
     previous_image_id = ""
     last_image_turn = 0
-    margin = 6
+    margin = 0
     last_signal_type = None
     for i, signal in enumerate(signals):
         if i>= settings._START and (i<= settings._END or settings._END==-1):
@@ -147,18 +147,17 @@ def create_timeline_image(emissor_path, scenario, settings: PlotSettings):
         agent = scenario_ctrl.scenario.context.agent["name"] if "name" in scenario_ctrl.scenario.context.agent else "No agent"
     except:
         print("No agent name in context")
-   # text_signals = scenario_ctrl.get_signals(Modality.TEXT)
-   # rows = get_signal_rows(text_signals, speaker, agent, settings)
     signals = get_multimodal_signals(emissor_path, scenario)
     rows = get_multimodal_signal_rows(signals, speaker, agent, settings)
 
-    plt.rcParams['figure.figsize'] = [len(rows), 5]
+    plt.rcParams['figure.figsize'] = [2.0*len(rows), 5]
     df = pd.DataFrame(rows)
-    #print(df.head())
-    sns.set_style("darkgrid", {"grid.color": ".6", "grid.linestyle": ":"})
- #   ax = sns.lineplot(x='turn', y='score', data=df, hue='speaker', style='annotation', markers=True, palette="bright", legend="brief")
-    ax = sns.lineplot(x='turn', y='score', data=df, hue='speaker', style='speaker', markers=True, palette="bright", legend="brief")
-    #palette = "flare/bright/deep/muted/colorblind/dark"
+   # sns.set_style("darkgrid", {"grid.color": ".6", "grid.linestyle": ":"})  ## grey background
+    sns.set_style("whitegrid", {"grid.color": ".8", "grid.linestyle": ":", 'axes.grid': True})
+    sns.set_context("talk", font_scale=0.8)
+    ### other themes: paper, talk, poster, notebook (default)
+    ax = sns.lineplot(x='turn', y='score', data=df, hue='speaker', style='speaker', markers=True, palette="pastel", legend="brief")
+    #palette = "pastel, flare/bright/deep/muted/colorblind/dark"
     for index, row in df.iterrows():
             if row['speaker']:
                 x = row['turn']
@@ -167,12 +166,17 @@ def create_timeline_image(emissor_path, scenario, settings: PlotSettings):
                 speaker = row['speaker'].upper()
                 category = speaker+":\n"
                 words = row['utterance'].split(" ")
+                phrase_length = 0
+                utt_length = 0
                 for i, word in enumerate(words):
-                    if i==30:
+                    utt_length+= len(word)
+                    phrase_length+= len(word)
+                    if utt_length==150:
                         category += "..."
                         break
-                    if i>0 and i%10==0:
+                    if phrase_length>25:
                         category+="\n"
+                        phrase_length=0
                     category +=word+" "
                 annotations = row['annotation'].split(";")
                 for i, annotation in enumerate(annotations):
