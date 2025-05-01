@@ -11,7 +11,7 @@ evaluation (likelihood or graph based), and statistical overview.
 
 ### Prerequisites
 
-This repository uses Python >= 3.7
+This repository uses Python >= 3.10
 
 Be sure to run in a virtual python environment (e.g. conda, venv, mkvirtualenv, etc.)
 
