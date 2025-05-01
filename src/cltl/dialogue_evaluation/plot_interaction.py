@@ -253,7 +253,6 @@ def main(emissor_path:str, scenario:str, annotations:[], sentiment_threshold=0, 
     print("_ANNOTATIONS", settings._ANNOTATIONS)
     print("_SENTIMENT_THRESHOLD", settings._SENTIMENT_THRESHOLD)
     print("_LLH_THRESHOLD", settings._LLH_THRESHOLD)
-    emissor_path = "/Users/piek/Desktop/test/cltl-llm-app/py-app/storage/emissor"
     folders = []
     if not scenario:
         folders = os.listdir(emissor_path)
@@ -283,6 +282,7 @@ if __name__ == '__main__':
 
 
     # DEBUG tests
+    # emissor_path = "/Users/piek/Desktop/test/cltl-llm-app/py-app/storage/emissor"
     #settings._START = 0
     #settings._END = -1
 
