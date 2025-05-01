@@ -13,7 +13,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/leolani/cltl-dialogueevaluation",
-    license='MIT',
+    license='MIT License',
     authors={
         "Piek Vossen":{"Piek Vossen", "piekvossen@gmailcom"},
         "Baez Santamaria": ("Selene Baez Santamaria", "s.baezsantamaria@vu.nl"),
