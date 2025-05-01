@@ -213,7 +213,7 @@ def create_timeline_image(emissor_path, scenario, settings: PlotSettings):
     path =  os.path.join(evaluation_folder, name+"_plot.png")
    # plt.savefig(path, dpi=600)
     plt.savefig(path)
-    plt.show()
+   # plt.show()
 
 
 
