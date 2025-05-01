@@ -171,7 +171,7 @@ def create_timeline_image(emissor_path, scenario, settings: PlotSettings):
                     if i==30:
                         category += "..."
                         break
-                    if i>0 and i%5==0:
+                    if i>0 and i%10==0:
                         category+="\n"
                     category +=word+" "
                 annotations = row['annotation'].split(";")
