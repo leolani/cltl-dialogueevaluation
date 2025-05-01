@@ -142,19 +142,19 @@ if __name__ == '__main__':
     parser.add_argument('--top_results', type=int, required=False, help="Maximum number of MASKED results considered" , default=20)
     args, _ = parser.parse_known_args()
     print('Input arguments', sys.argv)
-
-    emissor_path = "/Users/piek/Desktop/test/cltl-llm-app/py-app/storage/emissor"
-    scenario=""
-
-    main(emissor_path=emissor_path,
-         scenario=scenario,
+    main(emissor_path=args.emissor_path,
+         scenario=args.scenario,
          model_path=args.model_path,
          model_name = args.model_name,
          max_context=args.context,
          len_top_tokens=args.top_results)
-    # main(emissor_path=args.emissor_path,
-    #      scenario=args.scenario,
-    #      model_path=args.model_path,
-    #      model_name = args.model_name,
-    #      max_context=args.context,
-    #      len_top_tokens=args.top_results)
+
+# DEBUG
+#     emissor_path = "/Users/piek/Desktop/test/cltl-llm-app/py-app/storage/emissor"
+#     scenario=""
+#     main(emissor_path=emissor_path,
+#          scenario=scenario,
+#          model_path=args.model_path,
+#          model_name = args.model_name,
+#          max_context=args.context,
+#          len_top_tokens=args.top_results)
