@@ -45,7 +45,6 @@ setup(
 #     'tqdm==4.67.1',
 #     'openpyxl==3.1.5',
 #     'cltl.combot==1.1.dev1'
-# ]
-    ,
+# ],
     setup_requires=['flake8']
 )
