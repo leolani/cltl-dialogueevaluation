@@ -31,7 +31,6 @@ click
 datasets
 fqdn
 nltk
-numpy
 pandas
 rouge-score
 tqdm
