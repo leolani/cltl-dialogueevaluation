@@ -44,7 +44,7 @@ class LikelihoodEvaluator(BasicEvaluator):
 
         self._log.debug(f"Likelihood Evaluator ready")
 
-    def evaluate_conversation(self, scenario_folder, scenario_id, metrics_to_plot=None):
+    def _evaluate_conversation(self, scenario_folder, scenario_id, metrics_to_plot=None):
         # Create the scenario folder, the json files and a scenarioStorage and scenario in memory
         scenario_storage = ScenarioStorage(scenario_folder)
         scenario_ctrl = scenario_storage.load_scenario(scenario_id)
@@ -185,6 +185,7 @@ def main(emissor_path:str, scenario:str,  model, model_name, max_context=300, le
   #  emissor_path = "/Users/piek/Desktop/t-MA-Combots-2024/assignments/assignment-1/leolani_local/emissor"
   #  emissor_path = "/Users/piek/Desktop/t-MA-Combots-2024/assignments/assignment-1/leolani_text_to_ekg_restrained/emissor"
     emissor_path = "/Users/piek/Desktop/t-MA-Combots-2024/assignments/assignment-1/leolani_text_to_ekg_wild/emissor"
+    emissor_path = "../../../examples/data/emissor"
     scenario=""
     max_context=200
     len_top_tokens=10
