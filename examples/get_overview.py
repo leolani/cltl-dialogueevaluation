@@ -1,11 +1,10 @@
 from cltl.dialogue_evaluation.statistical_evaluation import StatisticalEvaluator
-import cltl.dialogue_evaluation.utils.scenario_check as check
+import pandas as pd
 import os
-import argparse
-import sys
+import cltl.dialogue_evaluation.utils.scenario_check as check
 
 
-def process_all_scenarios(emissor_path:str, scenarios:[]):
+def check_all_scenarios(emissor_path:str, scenarios:[]):
     evaluator = StatisticalEvaluator()
     for scenario in scenarios:
             if not scenario.startswith("."):
@@ -22,7 +21,7 @@ def process_all_scenarios(emissor_path:str, scenarios:[]):
                 elif not has_text:
                     print("No text JSON found. Skipping:", scenario_path)
                 else:
-                    evaluator.analyse_interaction(emissor_path, scenario)
+                    evaluator.analyse_interaction_json(emissor_path, scenario)
     stats_dict, columns = evaluator.get_overview_statistics_any_depth(emissor_path)
     print(columns)
     if stats_dict:
@@ -30,26 +29,22 @@ def process_all_scenarios(emissor_path:str, scenarios:[]):
     else:
         print("No stats for:", emissor_path)
 
-def main(emissor_path:str, scenario:str):
-    folders = []
-    if os.path.exists(emissor_path):
-        if not scenario:
-            folders = os.listdir(emissor_path)
-        else:
-            folders = [scenario]
+def main():
+    # Example path to EMISSOR data
+    emissor_path = "./data/emissor"
+    emissor_path = "/Users/piek/Desktop/t-MA-Combots-2025/code/ma-communicative-robots/evaluate/data/emissor"
 
-        ### For testing
-    emissor_path = "/Users/piek/Desktop/d-Leolani/leolani-mmai-parent/cltl-leolani-app/py-app/storage/emissor"
-    folders = ["e3e655bc-8c19-4fe6-9481-18c8c6f3d1cb", "c441c977-f46a-4847-b035-93252c2d7367","f85d7821-0b56-4261-ac46-55582d05b7d9", "5f412ab2-1ad5-4bee-889d-976bcf255f94"]
-    process_all_scenarios(emissor_path, folders)
+    # Get list of scenarios from the emissor path
+    try:
+        scenarios = [f for f in os.listdir(emissor_path) if os.path.isdir(os.path.join(emissor_path, f))]
+        print('The scenarios are:', scenarios)
+        # Run the check for all scenarios
+        check_all_scenarios(emissor_path, scenarios)
 
+    except FileNotFoundError:
+        print(f"Error: The path '{emissor_path}' does not exist.")
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Statistical evaluation emissor scenario')
-    parser.add_argument('--emissor-path', type=str, required=False, help="Path to the emissor folder", default='emissor')
-    parser.add_argument('--scenario', type=str, required=False, help="Identifier of the scenario", default='')
-    args, _ = parser.parse_known_args()
-    print('Input arguments', sys.argv)
-
-    main(args.emissor_path, args.scenario)
-
+if __name__ == "__main__":
+    main()

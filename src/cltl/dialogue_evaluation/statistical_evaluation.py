@@ -524,7 +524,10 @@ class StatisticalEvaluator(BasicEvaluator):
                 # value is the correct python object
                 value_dict = vars(annotation)
                # anno = "label:" + value_dict
-                anno = annoType+":" + value_dict
+                if type(value_dict) is str:
+                    anno = annoType+":" + value_dict
+                elif type(value_dict) is dict:
+                    anno = annoType+":" + str(value_dict)
             except:
                 # value is a namedtuple
                 #print(annotation)
