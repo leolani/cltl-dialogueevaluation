@@ -1,5 +1,5 @@
 from cltl.dialogue_evaluation.statistical_evaluation import StatisticalEvaluator
-import pandas as pd
+import argparse
 import os
 import cltl.dialogue_evaluation.utils.scenario_check as check
 
@@ -29,22 +29,36 @@ def check_all_scenarios(emissor_path:str, scenarios:[]):
     else:
         print("No stats for:", emissor_path)
 
-def main():
-    # Example path to EMISSOR data
-    emissor_path = "./data/emissor"
-    emissor_path = "/Users/piek/Desktop/t-MA-Combots-2025/code/ma-communicative-robots/evaluate/data/emissor"
-
+def main(emissor:str):
     # Get list of scenarios from the emissor path
     try:
-        scenarios = [f for f in os.listdir(emissor_path) if os.path.isdir(os.path.join(emissor_path, f))]
+        scenarios = [f for f in os.listdir(emissor) if os.path.isdir(os.path.join(emissor, f))]
         print('The scenarios are:', scenarios)
         # Run the check for all scenarios
-        check_all_scenarios(emissor_path, scenarios)
+        check_all_scenarios(emissor, scenarios)
 
     except FileNotFoundError:
-        print(f"Error: The path '{emissor_path}' does not exist.")
+        print(f"Error: The path '{emissor}' does not exist.")
     except Exception as e:
         print(f"An error occurred: {str(e)}")
 
 if __name__ == "__main__":
-    main()
+
+    # Example path to EMISSOR data
+    # emissor_path = "./data/emissor"
+    # emissor_path = "/Users/piek/Desktop/t-MA-Combots-2025/code/ma-communicative-robots/evaluate/data/emissor"
+
+        default = "./data/emissor"
+        parser = argparse.ArgumentParser(description='Get overview statistics on EMISSOR scenarios')
+        parser.add_argument('--emissor', type=str, required=True, help="Path to the folder with emissor scenarios",
+                            default=default)
+
+        args, _ = parser.parse_known_args()
+        folder = os.path.exists(args.emissor)
+        if not os.path.exists(args.emissor):
+            raise ValueError(
+                "The folder %s does not exists. The --emissor argument should point to a folder that contains the scenarios to annotate",
+                args.emissor)
+
+        print("Arguments: ", args)
+        main(emissor=args.emissor)
