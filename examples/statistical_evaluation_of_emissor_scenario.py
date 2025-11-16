@@ -39,8 +39,8 @@ def main(emissor_path:str, scenario:str):
             folders = [scenario]
 
         ### For testing
-    emissor_path = "/Users/piek/Desktop/d-Leolani/leolani-mmai-parent/cltl-leolani-app/py-app/storage/emissor"
-    folders = ["e3e655bc-8c19-4fe6-9481-18c8c6f3d1cb", "c441c977-f46a-4847-b035-93252c2d7367","f85d7821-0b56-4261-ac46-55582d05b7d9", "5f412ab2-1ad5-4bee-889d-976bcf255f94"]
+   # emissor_path = "/Users/piek/Desktop/d-Leolani/leolani-mmai-parent/cltl-leolani-app/py-app/storage/emissor"
+   # folders = ["e3e655bc-8c19-4fe6-9481-18c8c6f3d1cb", "c441c977-f46a-4847-b035-93252c2d7367","f85d7821-0b56-4261-ac46-55582d05b7d9", "5f412ab2-1ad5-4bee-889d-976bcf255f94"]
     process_all_scenarios(emissor_path, folders)
 
 

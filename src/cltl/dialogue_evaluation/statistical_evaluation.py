@@ -4,6 +4,7 @@ from collections import Counter
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+from datetime import datetime
 import cltl.dialogue_evaluation.utils.scenario_check as check
 import os
 import argparse
@@ -62,20 +63,22 @@ class StatisticalEvaluator(BasicEvaluator):
 
         return type_counts, type_dict_text, nr_annotations
 
-    def get_duration_in_minutes(self, scenario_ctrl):
+    def get_date_duration_in_minutes(self, scenario_ctrl):
         start = 0
         end = 0
         duration = 0
+        date = None
         try:
             start = int(scenario_ctrl.scenario.start)
             end = int(scenario_ctrl.scenario.end)
+            date = datetime.fromtimestamp(start/1000).strftime('%Y-%m-%d')
         except:
             print('Error getting duration')
             print('start', scenario_ctrl.scenario.start)
             print('end', scenario_ctrl.scenario.end)
         if start>0 and end>0:
             duration = (end - start) / 60000
-        return duration
+        return date, duration
 
     def get_utterance_stats(self, utterances):
         total_utt_length = 0
@@ -294,6 +297,7 @@ class StatisticalEvaluator(BasicEvaluator):
         location = "No location"
         people = "Not in context"
         objects = "Not in context"
+
         try:
             speaker = scenario_ctrl.scenario.context.speaker["name"] if "name" in scenario_ctrl.scenario.context.speaker else "No speaker"
         except:
@@ -318,9 +322,9 @@ class StatisticalEvaluator(BasicEvaluator):
 
         return speaker, agent, location, people, objects
 
-        duration = self.get_duration_in_minutes(scenario_ctrl)
-
-        meta+='DURATION IN MINUTES\t'+str(duration)+"\n"
+        # duration = self.get_duration_in_minutes(scenario_ctrl)
+        #
+        # meta+='DURATION IN MINUTES\t'+str(duration)+"\n"
 
     def analyse_interaction(self, emissor_folder, scenario_id, metrics_to_plot=None):
         scenario_folder = os.path.join(emissor_folder, scenario_id)
@@ -342,7 +346,8 @@ class StatisticalEvaluator(BasicEvaluator):
         meta+='LOCATION\t'+location+'\n'
         meta+='PEOPLE SEEN\t'+str(people)+'\n'
         meta+='OBJECTS SEEN\t'+str(objects)+'\n'
-        duration = self.get_duration_in_minutes(scenario_ctrl)
+        date, duration = self.get_date_duration_in_minutes(scenario_ctrl)
+        meta += 'DATE\t' + str(date) + "\n"
         meta+='DURATION IN MINUTES\t'+str(duration)+"\n"
 
         #### Text signals statistics
@@ -427,7 +432,8 @@ class StatisticalEvaluator(BasicEvaluator):
         t['Location']=location
         t['People_seen '] = str(people)
         t['Objects_seen']= str(objects)
-        duration = self.get_duration_in_minutes(scenario_ctrl)
+        date, duration = self.get_date_duration_in_minutes(scenario_ctrl)
+        t['Date']=str(date)
         t['Duration_in_minutes'] = str(duration)
         meta["Scenario"]=t
 
